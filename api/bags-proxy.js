@@ -13,18 +13,16 @@ export default async function handler(req, res) {
     }
 
     const queryString = new URLSearchParams(params).toString();
-    const url = `https://bags.fm/api/${endpoint}?${queryString}`;
+
+    // ✅ CORRECT BASE URL
+    const url = `https://public-api-v2.bags.fm/api/v1/${endpoint}?${queryString}`;
 
     console.log("Calling:", url);
 
-    // ✅ IMPORTANT FIX: use dynamic import for fetch
-    const fetchFn = (...args) =>
-      import("node-fetch").then(({ default: fetch }) => fetch(...args));
-
-    const response = await fetchFn(url, {
+    const response = await fetch(url, {
       headers: {
-        "x-api-key": API_KEY,
-      },
+        "x-api-key": API_KEY
+      }
     });
 
     const text = await response.text();
@@ -32,14 +30,13 @@ export default async function handler(req, res) {
     return res.status(200).send({
       status: response.status,
       url,
-      response: text,
+      response: text
     });
 
   } catch (error) {
-    console.error("🔥 PROXY CRASH:", error);
+    console.error("🔥 PROXY ERROR:", error);
     return res.status(500).json({
-      error: error.message,
-      stack: error.stack,
+      error: error.message
     });
   }
 }
