@@ -1,28 +1,70 @@
+import { BagsSDK } from "@bagsfm/bags-sdk";
+import { Connection, PublicKey } from "@solana/web3.js";
+
+const connection = new Connection(process.env.SOLANA_RPC_URL);
+const sdk = new BagsSDK(process.env.BAGS_API_KEY, connection, "processed");
+
+const BASE_URL = "https://public-api-v2.bags.fm/api/v1/";
+
 export default async function handler(req, res) {
   try {
-    const API_KEY = process.env.BAGS_API_KEY;
+    const { type, mint, endpoint } = req.query;
 
-    if (!API_KEY) {
-      return res.status(401).json({
-        success: false,
-        error: "Missing API key"
+    // =============================
+    // 🔥 SDK ROUTES (HIGH VALUE)
+    // =============================
+    if (type === "fees") {
+      const fees = await sdk.state.getTokenLifetimeFees(new PublicKey(mint));
+      return res.status(200).json({
+        success: true,
+        response: {
+          feesSOL: fees / 1_000_000_000,
+        },
       });
     }
 
-    // Simulated response (for now)
-    return res.status(200).json({
-      success: true,
-      response: {
-        fees: 12450,
-        volume: 88234,
-        price: 0.000042
+    if (type === "creators") {
+      const creators = await sdk.state.getTokenCreators(new PublicKey(mint));
+      return res.status(200).json({
+        success: true,
+        response: creators,
+      });
+    }
+
+    // =============================
+    // 🌐 REST ROUTES (GENERIC PASS-THROUGH)
+    // =============================
+    if (endpoint) {
+      const response = await fetch(`${BASE_URL}${endpoint}`, {
+        headers: {
+          "x-api-key": process.env.BAGS_API_KEY,
+        },
+      });
+
+      const data = await response.json();
+
+      // 🔥 Normalize errors (per docs)
+      if (!data.success) {
+        return res.status(response.status).json({
+          success: false,
+          error: data.error,
+        });
       }
+
+      return res.status(200).json(data);
+    }
+
+    return res.status(400).json({
+      success: false,
+      error: "Missing type or endpoint",
     });
 
   } catch (error) {
+    console.error("🚨 Bags Proxy Error:", error);
+
     return res.status(500).json({
       success: false,
-      error: "An unexpected error occurred"
+      error: error.message || "Internal server error",
     });
   }
 }
