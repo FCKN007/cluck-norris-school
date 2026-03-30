@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
-const BAGS_API_KEY = "bags_prod_SIjyt_Gh-_pIaZyQ5E1jT3r-wLujR_0I-ZRD-f-CuJI";
 const BAGS_BASE_URL = "/api/bags-proxy?endpoint=";
 const SOL_MINT = "So11111111111111111111111111111111111111112";
 const LAMPORTS_PER_SOL = 1_000_000_000;
