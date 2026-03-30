@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
-const BAGS_BASE_URL = "/api/bags-proxy?endpoint=";
 const SOL_MINT = "So11111111111111111111111111111111111111112";
 const LAMPORTS_PER_SOL = 1_000_000_000;
 const CLKN_TRADE_LINK = "https://bags.fm/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS?ref=firechicken007";
@@ -162,11 +161,18 @@ function CLKNTicker() {
     async function fetchFees() {
       try {
         const res = await fetch(
-          `${BAGS_BASE_URL}analytics/token-lifetime-fees?tokenMint=${CLKN_MINT}`,
+          `/api/bags-proxy?type=fees&mint=${CLKN_MINT}`,
           {}
         );
         const data = await res.json();
-        if (data.success) setFees(data.response);
+        if (data.success) {
+          const r = data.response;
+          if (r.feesSOL !== undefined) {
+            setFees({ totalFeesSol: r.feesSOL });
+          } else {
+            setFees(r);
+          }
+        }
       } catch (e) {}
       finally { setLoading(false); }
     }
@@ -214,12 +220,20 @@ function CLKNWidget() {
       setLoading(true);
       setApiStatus("connecting");
       const [poolRes, feesRes] = await Promise.all([
-        fetch(`${BAGS_BASE_URL}solana/bags/pools/token-mint?tokenMint=${CLKN_MINT}`),
-        fetch(`${BAGS_BASE_URL}analytics/token-lifetime-fees?tokenMint=${CLKN_MINT}`),
+        fetch(`/api/bags-proxy?endpoint=solana/bags/pools/token-mint&tokenMint=${CLKN_MINT}`),
+        fetch(`/api/bags-proxy?type=fees&mint=${CLKN_MINT}`),
       ]);
       const [poolData, feesData] = await Promise.all([poolRes.json(), feesRes.json()]);
       if (poolData.success) setPool(poolData.response);
-      if (feesData.success) setFees(feesData.response);
+      if (feesData.success) {
+        // Handle both SDK format (feesSOL) and REST format (totalFeesSol)
+        const r = feesData.response;
+        if (r.feesSOL !== undefined) {
+          setFees({ totalFeesSol: r.feesSOL, claimedFeesSol: null, unclaimedFeesSol: null });
+        } else {
+          setFees(r);
+        }
+      }
       setLastUpdated(new Date());
       setDebugInfo({
         pool: JSON.stringify(poolData).slice(0, 200),
@@ -240,7 +254,7 @@ function CLKNWidget() {
       setQuoteLoading(true);
       setQuoteError(null);
       const lamports = Math.floor(num * LAMPORTS_PER_SOL);
-      const url = `${BAGS_BASE_URL}trade/quote?inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageMode=auto`;
+      const url = `/api/bags-proxy?endpoint=trade/quote&inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageMode=auto`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) setQuote(data.response);
