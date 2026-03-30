@@ -1,40 +1,20 @@
 import { BagsSDK } from "@bagsfm/bags-sdk";
 import { Connection, PublicKey } from "@solana/web3.js";
 
+const connection = new Connection(process.env.SOLANA_RPC_URL);
+const sdk = new BagsSDK(process.env.BAGS_API_KEY, connection, "processed");
+
 const BASE_URL = "https://public-api-v2.bags.fm/api/v1/";
 
 export default async function handler(req, res) {
   try {
-    // 🔍 DEBUG ENV (helps immediately)
-    if (!process.env.BAGS_API_KEY || !process.env.SOLANA_RPC_URL) {
-      return res.status(500).json({
-        success: false,
-        error: "Missing environment variables",
-        debug: {
-          hasApiKey: !!process.env.BAGS_API_KEY,
-          hasRpc: !!process.env.SOLANA_RPC_URL,
-        },
-      });
-    }
-
-    const connection = new Connection(process.env.SOLANA_RPC_URL);
-    const sdk = new BagsSDK(process.env.BAGS_API_KEY, connection, "processed");
-
     const { type, mint, endpoint } = req.query;
 
     // =============================
     // 🔥 SDK ROUTES
     // =============================
     if (type === "fees") {
-      if (!mint) {
-        return res.status(400).json({
-          success: false,
-          error: "Missing mint address",
-        });
-      }
-
       const fees = await sdk.state.getTokenLifetimeFees(new PublicKey(mint));
-
       return res.status(200).json({
         success: true,
         response: {
@@ -44,15 +24,7 @@ export default async function handler(req, res) {
     }
 
     if (type === "creators") {
-      if (!mint) {
-        return res.status(400).json({
-          success: false,
-          error: "Missing mint address",
-        });
-      }
-
       const creators = await sdk.state.getTokenCreators(new PublicKey(mint));
-
       return res.status(200).json({
         success: true,
         response: creators,
@@ -60,10 +32,13 @@ export default async function handler(req, res) {
     }
 
     // =============================
-    // 🌐 REST ROUTES
+    // 🌐 REST ROUTES (FIXED)
     // =============================
     if (endpoint) {
-      const response = await fetch(`${BASE_URL}${endpoint}`, {
+      // 🔥 THIS IS THE FIX
+      const safeEndpoint = decodeURIComponent(endpoint);
+
+      const response = await fetch(`${BASE_URL}${safeEndpoint}`, {
         headers: {
           "x-api-key": process.env.BAGS_API_KEY,
         },
