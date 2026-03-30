@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
 const BAGS_API_KEY = "bags_prod_SIjyt_Gh-_pIaZyQ5E1jT3r-wLujR_0I-ZRD-f-CuJI";
 const BAGS_BASE_URL = "https://public-api-v2.bags.fm/api/v1";
+const SOL_MINT = "So11111111111111111111111111111111111111112";
+const LAMPORTS_PER_SOL = 1_000_000_000;
 const CLKN_TRADE_LINK = "https://bags.fm/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS?ref=firechicken007";
 const PARTNER_LINK = "https://bags.fm/?ref=firechicken007";
 
@@ -201,6 +203,10 @@ function CLKNWidget() {
   const [fees, setFees] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [solAmount, setSolAmount] = useState("1");
+  const [quote, setQuote] = useState(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState(null);
 
   async function fetchData() {
     try {
@@ -218,7 +224,27 @@ function CLKNWidget() {
     finally { setLoading(false); }
   }
 
+  async function fetchQuote(sol) {
+    const num = parseFloat(sol);
+    if (!num || num <= 0) { setQuote(null); return; }
+    try {
+      setQuoteLoading(true);
+      setQuoteError(null);
+      const lamports = Math.floor(num * LAMPORTS_PER_SOL);
+      const url = `${BAGS_BASE_URL}/trade/quote?inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageMode=auto`;
+      const res = await fetch(url, { headers: { "x-api-key": BAGS_API_KEY } });
+      const data = await res.json();
+      if (data.success) setQuote(data.response);
+      else setQuoteError("Quote unavailable");
+    } catch (e) {
+      setQuoteError("Could not fetch quote");
+    } finally {
+      setQuoteLoading(false);
+    }
+  }
+
   useEffect(() => { fetchData(); const i = setInterval(fetchData, 30000); return () => clearInterval(i); }, []);
+  useEffect(() => { fetchQuote("1"); const i = setInterval(() => fetchQuote(solAmount), 30000); return () => clearInterval(i); }, []);
 
   const fmtSol = (n) => n ? parseFloat(n).toLocaleString(undefined,{maximumFractionDigits:3}) + " SOL" : "—";
   const shortKey = (k) => k ? `${k.slice(0,6)}...${k.slice(-4)}` : "Not active";
@@ -272,6 +298,77 @@ function CLKNWidget() {
         )}
       </div>
 
+
+      {/* Live Quote */}
+      <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(217,119,6,0.25)",borderRadius:12,padding:16,marginBottom:12}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706",marginBottom:12}}>💱 LIVE TRADE QUOTE</div>
+
+        {/* 1 SOL default quote */}
+        <div style={{background:"rgba(217,119,6,0.08)",borderRadius:10,padding:"14px 16px",marginBottom:12,textAlign:"center",border:"1px solid rgba(217,119,6,0.2)"}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:2,marginBottom:6}}>1 SOL CURRENTLY BUYS</div>
+          {quoteLoading && !quote ? (
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:24,color:"#4B5563"}}>...</div>
+          ) : quote ? (
+            <div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:28,fontWeight:900,color:"#FCD34D",lineHeight:1}}>
+                {parseInt(parseFloat(quote.outAmount) / Math.pow(10, 6)).toLocaleString()} CLKN
+              </div>
+              {quote.priceImpactPct && (
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",marginTop:4,letterSpacing:1}}>
+                  PRICE IMPACT: {parseFloat(quote.priceImpactPct).toFixed(3)}%
+                </div>
+              )}
+            </div>
+          ) : quoteError ? (
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#EF4444"}}>{quoteError}</div>
+          ) : null}
+        </div>
+
+        {/* Custom amount input */}
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <div style={{position:"relative",flex:1}}>
+            <input
+              type="number"
+              min="0.001"
+              step="0.1"
+              value={solAmount}
+              onChange={e => setSolAmount(e.target.value)}
+              placeholder="Enter SOL amount"
+              style={{
+                width:"100%",background:"rgba(255,255,255,0.05)",
+                border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,
+                padding:"10px 40px 10px 14px",color:"#F9FAFB",
+                fontFamily:"'Oswald',sans-serif",fontSize:14,outline:"none",
+                boxSizing:"border-box",
+              }}
+            />
+            <span style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280"}}>SOL</span>
+          </div>
+          <button
+            onClick={() => fetchQuote(solAmount)}
+            style={{
+              background:"rgba(217,119,6,0.2)",border:"1px solid rgba(217,119,6,0.4)",
+              borderRadius:8,padding:"10px 16px",color:"#D97706",
+              fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,cursor:"pointer",
+              whiteSpace:"nowrap",
+            }}
+          >
+            GET QUOTE
+          </button>
+        </div>
+
+        {/* Custom quote result */}
+        {quote && parseFloat(solAmount) !== 1 && !quoteLoading && (
+          <div style={{marginTop:10,background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"10px 14px",textAlign:"center"}}>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#FCD34D"}}>
+              {solAmount} SOL = {parseInt(parseFloat(quote.outAmount) / Math.pow(10, 6)).toLocaleString()} CLKN
+            </span>
+          </div>
+        )}
+        {quoteLoading && solAmount !== "1" && (
+          <div style={{marginTop:10,textAlign:"center",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:2}}>FETCHING QUOTE...</div>
+        )}
+      </div>
       {/* Trade Button */}
       <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{
         display:"block",width:"100%",background:"linear-gradient(135deg,#D97706,#EF4444)",
@@ -602,7 +699,9 @@ export default function App(){
         <div style={{display:"flex",gap:5}}>
           {LESSONS.map(l=><div key={l.id} style={{width:7,height:7,borderRadius:"50%",background:completed.includes(l.id)?l.color:"rgba(255,255,255,0.1)"}}/>)}
         </div>
-        <CLKNTicker/>
+        <div onClick={()=>setScreen(screen==="clkn"?"landing":"clkn")} style={{cursor:"pointer"}}>
+          <CLKNTicker/>
+        </div>
       </div>
       <div style={{paddingTop:28}}>
         {screen==="landing"&&<Landing onStart={()=>setScreen("select")} completed={completed}/>}
