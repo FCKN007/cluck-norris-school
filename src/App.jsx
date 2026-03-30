@@ -162,7 +162,7 @@ function CLKNTicker() {
     async function fetchFees() {
       try {
         const res = await fetch(
-          `${BAGS_BASE_URL}analytics/token-lifetime-fees&tokenMint=${CLKN_MINT}`,
+          `${BAGS_BASE_URL}analytics/token-lifetime-fees?tokenMint=${CLKN_MINT}`,
           {}
         );
         const data = await res.json();
@@ -214,8 +214,8 @@ function CLKNWidget() {
       setLoading(true);
       setApiStatus("connecting");
       const [poolRes, feesRes] = await Promise.all([
-        fetch(`${BAGS_BASE_URL}solana/bags/pools/token-mint&tokenMint=${CLKN_MINT}`),
-        fetch(`${BAGS_BASE_URL}analytics/token-lifetime-fees&tokenMint=${CLKN_MINT}`),
+        fetch(`${BAGS_BASE_URL}solana/bags/pools/token-mint?tokenMint=${CLKN_MINT}`),
+        fetch(`${BAGS_BASE_URL}analytics/token-lifetime-fees?tokenMint=${CLKN_MINT}`),
       ]);
       const [poolData, feesData] = await Promise.all([poolRes.json(), feesRes.json()]);
       if (poolData.success) setPool(poolData.response);
@@ -240,7 +240,7 @@ function CLKNWidget() {
       setQuoteLoading(true);
       setQuoteError(null);
       const lamports = Math.floor(num * LAMPORTS_PER_SOL);
-      const url = `${BAGS_BASE_URL}trade/quote&inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageMode=auto`;
+      const url = `${BAGS_BASE_URL}trade/quote?inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageMode=auto`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) setQuote(data.response);
