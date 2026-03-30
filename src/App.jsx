@@ -207,6 +207,7 @@ function CLKNWidget() {
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState(null);
   const [apiStatus, setApiStatus] = useState('connecting');
+  const [debugInfo, setDebugInfo] = useState(null);
 
   async function fetchData() {
     try {
@@ -220,9 +221,14 @@ function CLKNWidget() {
       if (poolData.success) setPool(poolData.response);
       if (feesData.success) setFees(feesData.response);
       setLastUpdated(new Date());
+      setDebugInfo({
+        pool: JSON.stringify(poolData).slice(0, 200),
+        fees: JSON.stringify(feesData).slice(0, 200),
+      });
       setApiStatus("ok");
     } catch (e) {
       setApiStatus("error");
+      setDebugInfo({ error: e.message });
     }
     finally { setLoading(false); }
   }
