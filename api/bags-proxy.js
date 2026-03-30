@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     const { type, mint, endpoint } = req.query;
 
     // =============================
-    // 🔥 SDK ROUTES
+    // 🔥 SDK ROUTES (UNCHANGED)
     // =============================
     if (type === "fees") {
       const fees = await sdk.state.getTokenLifetimeFees(new PublicKey(mint));
@@ -35,8 +35,10 @@ export default async function handler(req, res) {
     // 🌐 REST ROUTES (FIXED)
     // =============================
     if (endpoint) {
-      // 🔥 THIS IS THE FIX
+      // 🔥 CRITICAL FIX: preserve full query string
       const safeEndpoint = decodeURIComponent(endpoint);
+
+      console.log("BAGS ENDPOINT:", safeEndpoint); // optional debug
 
       const response = await fetch(`${BASE_URL}${safeEndpoint}`, {
         headers: {
