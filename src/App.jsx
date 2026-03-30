@@ -179,7 +179,7 @@ function CLKNTicker() {
   const fmtSol = (n) => n ? parseFloat(n).toFixed(3) + " SOL" : "—";
 
   return (
-    <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{
+    <div style={{
       display:"flex", alignItems:"center", gap:6,
       background:"rgba(217,119,6,0.1)", border:"1px solid rgba(217,119,6,0.3)",
       borderRadius:20, padding:"3px 10px", textDecoration:"none", cursor:"pointer",
@@ -194,7 +194,7 @@ function CLKNTicker() {
         </span>
       )}
       {loading && <span style={{fontSize:9,color:"#4B5563"}}>...</span>}
-    </a>
+    </div>
   );
 }
 
@@ -688,19 +688,50 @@ export default function App(){
         *{box-sizing:border-box} button{transition:all .15s ease}
       `}</style>
       {/* Header */}
-      <div style={{borderBottom:"1px solid rgba(255,255,255,0.06)",background:"rgba(0,0,0,0.5)",backdropFilter:"blur(10px)",padding:"10px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100}}>
-        <div onClick={()=>setScreen("landing")} style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}>
-          <AppIcon size={28}/>
-          <div>
-            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,letterSpacing:2,color:"#D97706",lineHeight:1}}>CLUCK NORRIS</div>
-            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:7,color:"#6B7280",letterSpacing:1.5,lineHeight:1}}>SCHOOL OF CRYPTO HARD KNOCKS</div>
+      {/* Header */}
+      <div style={{borderBottom:"1px solid rgba(255,255,255,0.08)",background:"rgba(0,0,0,0.6)",backdropFilter:"blur(10px)",padding:"12px 18px",position:"sticky",top:0,zIndex:100}}>
+        {/* Top row */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+          <div onClick={()=>setScreen("landing")} style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
+            <AppIcon size={34}/>
+            <div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,letterSpacing:2,color:"#D97706",lineHeight:1}}>CLUCK NORRIS</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:2,lineHeight:1.4}}>SCHOOL OF CRYPTO HARD KNOCKS</div>
+            </div>
+          </div>
+          <div style={{display:"flex",gap:5}}>
+            {LESSONS.map(l=><div key={l.id} style={{width:7,height:7,borderRadius:"50%",background:completed.includes(l.id)?l.color:"rgba(255,255,255,0.1)"}}/>)}
           </div>
         </div>
-        <div style={{display:"flex",gap:5}}>
-          {LESSONS.map(l=><div key={l.id} style={{width:7,height:7,borderRadius:"50%",background:completed.includes(l.id)?l.color:"rgba(255,255,255,0.1)"}}/>)}
-        </div>
-        <div onClick={()=>setScreen(screen==="clkn"?"landing":"clkn")} style={{cursor:"pointer"}}>
-          <CLKNTicker/>
+        {/* Bottom row — two buttons */}
+        <div style={{display:"flex",gap:8}}>
+          <button
+            onClick={()=>setScreen(screen==="clkn"?"landing":"clkn")}
+            style={{
+              flex:1, background:screen==="clkn"?"rgba(217,119,6,0.25)":"rgba(217,119,6,0.1)",
+              border:`1px solid ${screen==="clkn"?"rgba(217,119,6,0.6)":"rgba(217,119,6,0.3)"}`,
+              borderRadius:8, padding:"8px 0",
+              fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,
+              color:"#D97706",letterSpacing:2,cursor:"pointer",
+            }}
+          >
+            📊 LIVE TOKEN DATA
+          </button>
+          <a
+            href={PARTNER_LINK}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              flex:1, background:"rgba(255,255,255,0.05)",
+              border:"1px solid rgba(255,255,255,0.12)",
+              borderRadius:8, padding:"8px 0",
+              fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,
+              color:"#9CA3AF",letterSpacing:2,cursor:"pointer",
+              textDecoration:"none",textAlign:"center",display:"block",
+            }}
+          >
+            🌐 BAGS WEBSITE
+          </a>
         </div>
       </div>
       <div style={{paddingTop:28}}>
