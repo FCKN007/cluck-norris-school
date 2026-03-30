@@ -8,10 +8,10 @@ const BASE_URL = "https://public-api-v2.bags.fm/api/v1/";
 
 export default async function handler(req, res) {
   try {
-    const { type, mint, endpoint } = req.query;
+    const { type, mint, endpoint, ...rest } = req.query;
 
     // =============================
-    // 🔥 SDK ROUTES (UNCHANGED)
+    // 🔥 SDK ROUTES
     // =============================
     if (type === "fees") {
       const fees = await sdk.state.getTokenLifetimeFees(new PublicKey(mint));
@@ -32,15 +32,17 @@ export default async function handler(req, res) {
     }
 
     // =============================
-    // 🌐 REST ROUTES (FIXED)
+    // 🌐 REST ROUTES (FIXED CORRECTLY)
     // =============================
     if (endpoint) {
-      // 🔥 CRITICAL FIX: preserve full query string
-      const safeEndpoint = decodeURIComponent(endpoint);
+      // 🔥 Build query string from remaining params
+      const queryString = new URLSearchParams(rest).toString();
 
-      console.log("BAGS ENDPOINT:", safeEndpoint); // optional debug
+      const fullUrl = `${BASE_URL}${endpoint}${queryString ? `?${queryString}` : ""}`;
 
-      const response = await fetch(`${BASE_URL}${safeEndpoint}`, {
+      console.log("BAGS FULL URL:", fullUrl);
+
+      const response = await fetch(fullUrl, {
         headers: {
           "x-api-key": process.env.BAGS_API_KEY,
         },
