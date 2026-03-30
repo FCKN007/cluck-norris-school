@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
 const BAGS_API_KEY = "bags_prod_SIjyt_Gh-_pIaZyQ5E1jT3r-wLujR_0I-ZRD-f-CuJI";
-const BAGS_BASE_URL = "https://public-api-v2.bags.fm/api/v1";
+const BAGS_BASE_URL = "/api/bags-proxy?endpoint=";
 const SOL_MINT = "So11111111111111111111111111111111111111112";
 const LAMPORTS_PER_SOL = 1_000_000_000;
 const CLKN_TRADE_LINK = "https://bags.fm/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS?ref=firechicken007";
@@ -163,8 +163,8 @@ function CLKNTicker() {
     async function fetchFees() {
       try {
         const res = await fetch(
-          `${BAGS_BASE_URL}/analytics/token-lifetime-fees?tokenMint=${CLKN_MINT}`,
-          { headers: { "x-api-key": BAGS_API_KEY } }
+          `${BAGS_BASE_URL}analytics/token-lifetime-fees&tokenMint=${CLKN_MINT}`,
+          {}
         );
         const data = await res.json();
         if (data.success) setFees(data.response);
@@ -211,10 +211,10 @@ function CLKNWidget() {
   async function fetchData() {
     try {
       setLoading(true);
-      const headers = { "x-api-key": BAGS_API_KEY };
+      
       const [poolRes, feesRes] = await Promise.all([
-        fetch(`${BAGS_BASE_URL}/solana/bags/pools/token-mint?tokenMint=${CLKN_MINT}`, { headers }),
-        fetch(`${BAGS_BASE_URL}/analytics/token-lifetime-fees?tokenMint=${CLKN_MINT}`, { headers }),
+        fetch(`${BAGS_BASE_URL}solana/bags/pools/token-mint&tokenMint=${CLKN_MINT}`),
+        fetch(`${BAGS_BASE_URL}analytics/token-lifetime-fees&tokenMint=${CLKN_MINT}`),
       ]);
       const [poolData, feesData] = await Promise.all([poolRes.json(), feesRes.json()]);
       if (poolData.success) setPool(poolData.response);
@@ -231,8 +231,8 @@ function CLKNWidget() {
       setQuoteLoading(true);
       setQuoteError(null);
       const lamports = Math.floor(num * LAMPORTS_PER_SOL);
-      const url = `${BAGS_BASE_URL}/trade/quote?inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageMode=auto`;
-      const res = await fetch(url, { headers: { "x-api-key": BAGS_API_KEY } });
+      const url = `${BAGS_BASE_URL}trade/quote&inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageMode=auto`;
+      const res = await fetch(url);
       const data = await res.json();
       if (data.success) setQuote(data.response);
       else setQuoteError("Quote unavailable");
