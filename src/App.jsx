@@ -43,14 +43,25 @@ export default function App() {
   const [screen, setScreen] = useState("landing");
   const [lesson, setLesson] = useState(null);
   const [progress, setProgress] = useState(0);
-  const [apiStatus, setApiStatus] = useState("Loading...");
+  const [apiStatus, setApiStatus] = useState("Checking API...");
 
-  // SAFE API CALL (no eval, no CSP issues)
+  // ✅ SAFE WORKING API TEST
   useEffect(() => {
-    fetch("https://api.coingecko.com/api/v3/ping")
-      .then((res) => res.json())
-      .then(() => setApiStatus("API Connected ✅"))
-      .catch(() => setApiStatus("API Failed ❌"));
+    console.log("API call starting...");
+
+    fetch("https://jsonplaceholder.typicode.com/todos/1")
+      .then((res) => {
+        console.log("Response:", res);
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Data:", data);
+        setApiStatus("API Working ✅");
+      })
+      .catch((err) => {
+        console.error("API ERROR:", err);
+        setApiStatus("API Failed ❌");
+      });
   }, []);
 
   const completeLesson = () => {
@@ -68,8 +79,12 @@ export default function App() {
         fontFamily: "Arial"
       }}
     >
-      <h4>{apiStatus}</h4>
+      {/* API STATUS */}
+      <div style={{ marginBottom: 10 }}>
+        <strong>{apiStatus}</strong>
+      </div>
 
+      {/* LANDING */}
       {screen === "landing" && (
         <div style={{ textAlign: "center" }}>
           <h1>🐔 Cluck Norris Dojo</h1>
@@ -80,10 +95,13 @@ export default function App() {
         </div>
       )}
 
+      {/* SELECT */}
       {screen === "select" && (
         <div>
           <h2>Select Your Lesson</h2>
-          <p>Progress: {progress} / {LESSONS.length}</p>
+          <p>
+            Progress: {progress} / {LESSONS.length}
+          </p>
 
           {LESSONS.map((l) => (
             <button
@@ -100,6 +118,7 @@ export default function App() {
         </div>
       )}
 
+      {/* LESSON */}
       {screen === "lesson" && lesson && (
         <div>
           <h2>{lesson.title}</h2>
@@ -111,6 +130,7 @@ export default function App() {
         </div>
       )}
 
+      {/* QUIZ */}
       {screen === "quiz" && lesson && (
         <div>
           <h3>{lesson.questions[0].q}</h3>
@@ -127,6 +147,7 @@ export default function App() {
         </div>
       )}
 
+      {/* RESULT */}
       {screen === "result" && (
         <div style={{ textAlign: "center" }}>
           <h2>🏆 Lesson Complete</h2>
