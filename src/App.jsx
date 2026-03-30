@@ -36,6 +36,24 @@ const LESSONS = [
         correct: 1
       }
     ]
+  },
+  {
+    id: "volatility",
+    title: "Volatility",
+    belt: "Orange Belt",
+    intro: "Crypto moves fast. Big gains and big losses.",
+    questions: [
+      {
+        q: "What do weak hands do?",
+        options: [
+          "Hold strong",
+          "Panic sell",
+          "Buy more",
+          "Stake"
+        ],
+        correct: 1
+      }
+    ]
   }
 ];
 
@@ -44,30 +62,34 @@ export default function App() {
   const [lesson, setLesson] = useState(null);
   const [progress, setProgress] = useState(0);
   const [apiStatus, setApiStatus] = useState("Checking API...");
+  const [rank, setRank] = useState("Rookie");
 
-  // ✅ SAFE WORKING API TEST
+  // API CHECK
   useEffect(() => {
-    console.log("API call starting...");
-
     fetch("https://jsonplaceholder.typicode.com/todos/1")
-      .then((res) => {
-        console.log("Response:", res);
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Data:", data);
-        setApiStatus("API Working ✅");
-      })
-      .catch((err) => {
-        console.error("API ERROR:", err);
-        setApiStatus("API Failed ❌");
-      });
+      .then((res) => res.json())
+      .then(() => setApiStatus("API Working ✅"))
+      .catch(() => setApiStatus("API Failed ❌"));
   }, []);
+
+  // Rank logic
+  useEffect(() => {
+    if (progress >= 3) setRank("Master");
+    else if (progress === 2) setRank("Survivor");
+    else if (progress === 1) setRank("Trader");
+    else setRank("Rookie");
+  }, [progress]);
 
   const completeLesson = () => {
     setProgress((prev) => prev + 1);
     setScreen("result");
   };
+
+  const cluckWisdom = [
+    "If you don’t understand liquidity, you ARE the liquidity.",
+    "Cluck Norris doesn’t chase pumps. Pumps chase him.",
+    "Weak hands feed strong wallets."
+  ];
 
   return (
     <div
@@ -79,16 +101,20 @@ export default function App() {
         fontFamily: "Arial"
       }}
     >
-      {/* API STATUS */}
+      {/* HEADER */}
       <div style={{ marginBottom: 10 }}>
         <strong>{apiStatus}</strong>
+        <div>Rank: {rank}</div>
+        <div>Progress: {progress} / {LESSONS.length}</div>
       </div>
 
       {/* LANDING */}
       {screen === "landing" && (
         <div style={{ textAlign: "center" }}>
-          <h1>🐔 Cluck Norris Dojo</h1>
-          <p>School of Crypto Hard Knocks</p>
+          <h1>🐔 Cluck Norris</h1>
+          <h2>School of Crypto Hard Knocks</h2>
+          <p>{cluckWisdom[Math.floor(Math.random() * cluckWisdom.length)]}</p>
+
           <button onClick={() => setScreen("select")}>
             Begin Training
           </button>
@@ -99,9 +125,6 @@ export default function App() {
       {screen === "select" && (
         <div>
           <h2>Select Your Lesson</h2>
-          <p>
-            Progress: {progress} / {LESSONS.length}
-          </p>
 
           {LESSONS.map((l) => (
             <button
@@ -151,7 +174,7 @@ export default function App() {
       {screen === "result" && (
         <div style={{ textAlign: "center" }}>
           <h2>🏆 Lesson Complete</h2>
-          <p>Cluck Norris approves.</p>
+          <p>{cluckWisdom[Math.floor(Math.random() * cluckWisdom.length)]}</p>
 
           <button onClick={() => setScreen("select")}>
             Continue Training
