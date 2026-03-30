@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(url, {
-      headers: { "x-api-key": "bags_prod_SIjyt_Gh-_pIaZyQ5E1jT3r-wLujR_0I-ZRD-f-CuJI" },
+      headers: { "x-api-key": process.env.BAGS_API_KEY },
     });
     const data = await response.json();
     res.status(200).json(data);
