@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
 const BAGS_API_KEY = "bags_prod_SIjyt_Gh-_pIaZyQ5E1jT3r-wLujR_0I-ZRD-f-CuJI";
 const BAGS_BASE_URL = "https://public-api-v2.bags.fm/api/v1";
-const CLKN_TRADE_LINK = "https://bags.fm/t/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS?ref=firechicken007";
+const CLKN_TRADE_LINK = "https://bags.fm/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS?ref=firechicken007";
 const PARTNER_LINK = "https://bags.fm/?ref=firechicken007";
 
 
