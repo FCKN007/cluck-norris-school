@@ -1,239 +1,198 @@
 import { useState, useEffect } from "react";
 
 const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
+const BAGS_BASE_URL = "/api/bags-proxy?endpoint=";
+const SOL_MINT = "So11111111111111111111111111111111111111112";
+const LAMPORTS_PER_SOL = 1_000_000_000;
 
-// 🔥 SAFE FETCH (proxy → fallback to public endpoint)
-async function fetchBagsData() {
+// ✅ SAFE FETCH (proxy → fallback)
+async function safeFetch(endpoint) {
   try {
-    const res = await fetch(
-      `/api/bags-proxy?endpoint=analytics/token-lifetime-fees&tokenMint=${CLKN_MINT}`
-    );
+    const res = await fetch(`${BAGS_BASE_URL}${endpoint}`);
     const data = await res.json();
-    if (data?.success) return data.response;
+    if (data?.success) return data;
   } catch (e) {
-    console.log("Proxy failed, trying public endpoint...");
+    console.log("Proxy failed, trying direct...");
   }
 
   try {
-    const res = await fetch(
-      `https://bags.fm/api/analytics/token-lifetime-fees?tokenMint=${CLKN_MINT}`
-    );
+    const res = await fetch(`https://bags.fm/api/${endpoint}`);
     const data = await res.json();
-    return data?.response || data;
+    return data;
   } catch (e) {
-    console.error("All API attempts failed");
+    console.error("Both API attempts failed");
     return null;
   }
 }
 
+// 🔥 TICKER
+function CLKNTicker() {
+  const [fees, setFees] = useState(null);
+
+  useEffect(() => {
+    async function fetchFees() {
+      const data = await safeFetch(
+        `analytics/token-lifetime-fees?tokenMint=${CLKN_MINT}`
+      );
+      if (data?.success) setFees(data.response);
+    }
+
+    fetchFees();
+    const i = setInterval(fetchFees, 30000);
+    return () => clearInterval(i);
+  }, []);
+
+  return (
+    <div style={{ marginBottom: 10 }}>
+      {fees ? `CLKN Fees: ${fees.totalFeesSol} SOL` : "Loading CLKN data..."}
+    </div>
+  );
+}
+
+// 🔥 MAIN WIDGET
+function CLKNWidget() {
+  const [pool, setPool] = useState(null);
+  const [fees, setFees] = useState(null);
+  const [quote, setQuote] = useState(null);
+
+  async function fetchData() {
+    const [poolData, feesData] = await Promise.all([
+      safeFetch(`solana/bags/pools/token-mint?tokenMint=${CLKN_MINT}`),
+      safeFetch(`analytics/token-lifetime-fees?tokenMint=${CLKN_MINT}`)
+    ]);
+
+    if (poolData?.success) setPool(poolData.response);
+    if (feesData?.success) setFees(feesData.response);
+  }
+
+  async function fetchQuote(sol) {
+    const lamports = Math.floor(sol * LAMPORTS_PER_SOL);
+
+    const data = await safeFetch(
+      `trade/quote?inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageMode=auto`
+    );
+
+    if (data?.success) setQuote(data.response);
+  }
+
+  useEffect(() => {
+    fetchData();
+    fetchQuote(1);
+  }, []);
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <h3>CLKN Dashboard</h3>
+
+      {fees && (
+        <div>
+          <p>Total Fees: {fees.totalFeesSol} SOL</p>
+          <p>Claimed: {fees.claimedFeesSol} SOL</p>
+        </div>
+      )}
+
+      {quote && (
+        <div>
+          <p>1 SOL → {parseInt(quote.outAmount / 1e6)} CLKN</p>
+        </div>
+      )}
+
+      {pool && <p>Pool Loaded ✅</p>}
+    </div>
+  );
+}
+
+// 🔥 LESSONS (UNCHANGED)
+const LESSONS = [
+  {
+    id: "lp",
+    title: "Liquidity Pools",
+    belt: "White Belt",
+    intro: "Liquidity Pools power decentralized trading.",
+    questions: [
+      {
+        q: "What do liquidity providers earn?",
+        options: ["Free NFTs", "Trading fees", "Nothing", "Dev rewards"],
+        correct: 1
+      }
+    ]
+  },
+  {
+    id: "rugs",
+    title: "Rug Pulls",
+    belt: "Yellow Belt",
+    intro: "Rugs happen when devs remove liquidity or dump.",
+    questions: [
+      {
+        q: "What is a rug pull?",
+        options: ["Price pump", "Liquidity removal", "Airdrop", "Staking reward"],
+        correct: 1
+      }
+    ]
+  }
+];
+
+// 🔥 APP
 export default function App() {
   const [screen, setScreen] = useState("landing");
   const [lesson, setLesson] = useState(null);
   const [progress, setProgress] = useState(0);
 
-  const [fees, setFees] = useState(null);
-  const [apiStatus, setApiStatus] = useState("Connecting...");
-
-  useEffect(() => {
-    async function loadData() {
-      const data = await fetchBagsData();
-
-      if (data) {
-        setFees(data);
-        setApiStatus("Bags API Connected ✅");
-      } else {
-        setApiStatus("Using Public Data ⚠️");
-      }
-    }
-
-    loadData();
-  }, []);
-
-  const LESSONS = [
-    {
-      id: "lp",
-      title: "Liquidity Pools",
-      belt: "White Belt",
-      intro: "Liquidity Pools power decentralized trading.",
-      questions: [
-        {
-          q: "What do liquidity providers earn?",
-          options: [
-            "Free NFTs",
-            "Trading fees",
-            "Nothing",
-            "Dev rewards"
-          ],
-          correct: 1
-        }
-      ]
-    },
-    {
-      id: "rugs",
-      title: "Rug Pulls",
-      belt: "Yellow Belt",
-      intro: "Rugs happen when devs remove liquidity or dump.",
-      questions: [
-        {
-          q: "What is a rug pull?",
-          options: [
-            "Price pump",
-            "Liquidity removal",
-            "Airdrop",
-            "Staking reward"
-          ],
-          correct: 1
-        }
-      ]
-    }
-  ];
-
   const completeLesson = () => {
-    setProgress((prev) => prev + 1);
+    setProgress((p) => p + 1);
     setScreen("result");
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0C0C0C",
-        color: "#F9FAFB",
-        padding: 20,
-        fontFamily: "Arial"
-      }}
-    >
-      {/* 🔥 API STATUS */}
-      <div style={{ marginBottom: 10 }}>
-        <strong>{apiStatus}</strong>
-      </div>
+    <div style={{ padding: 20 }}>
+      <CLKNTicker />
+      <CLKNWidget />
 
-      {/* 🔐 API PANEL */}
-      <div
-        style={{
-          background: "rgba(217,119,6,0.08)",
-          border: "1px solid rgba(217,119,6,0.3)",
-          borderRadius: 12,
-          padding: 16,
-          marginBottom: 20,
-          maxWidth: 520
-        }}
-      >
-        <div
-          style={{
-            fontFamily: "'Oswald',sans-serif",
-            fontSize: 10,
-            letterSpacing: 3,
-            color: "#D97706",
-            marginBottom: 10
-          }}
-        >
-          🔐 BAGS API ACCESS
-        </div>
-
-        <div style={{ fontSize: 12, color: "#E5E7EB", lineHeight: 1.5 }}>
-          <p><strong>Cluck Norris says:</strong> Secure your keys or get wrecked.</p>
-
-          <ol style={{ paddingLeft: 16 }}>
-            <li>Go to dev.bags.fm</li>
-            <li>Create a new API key</li>
-            <li>Name it (Production / Dev / Mobile)</li>
-            <li>Store it securely (never public)</li>
-          </ol>
-
-          <p style={{ marginTop: 10, color: "#FCD34D" }}>
-            ⚠️ Max 10 keys per account • Revoke instantly if compromised
-          </p>
-
-          <p style={{ marginTop: 8, fontSize: 11, color: "#9CA3AF" }}>
-            App currently uses public endpoints. Full v2 API integration ready when key access is enabled.
-          </p>
-        </div>
-      </div>
-
-      {/* 🔥 FEES DISPLAY */}
-      {fees && (
-        <div style={{ marginBottom: 20 }}>
-          <h3>🔥 CLKN Lifetime Fees</h3>
-          <p>Total: {fees.totalFeesSol ?? "—"} SOL</p>
-          <p>Claimed: {fees.claimedFeesSol ?? "—"} SOL</p>
-          <p>Unclaimed: {fees.unclaimedFeesSol ?? "—"} SOL</p>
-        </div>
-      )}
-
-      {/* LANDING */}
       {screen === "landing" && (
-        <div style={{ textAlign: "center" }}>
+        <div>
           <h1>🐔 Cluck Norris Dojo</h1>
-          <p>School of Crypto Hard Knocks</p>
-
-          <button onClick={() => setScreen("select")}>
-            Begin Training
-          </button>
+          <button onClick={() => setScreen("select")}>Begin</button>
         </div>
       )}
 
-      {/* SELECT */}
       {screen === "select" && (
         <div>
-          <h2>Select Your Lesson</h2>
-          <p>
-            Progress: {progress} / {LESSONS.length}
-          </p>
-
           {LESSONS.map((l) => (
             <button
               key={l.id}
-              style={{ display: "block", margin: "10px 0" }}
               onClick={() => {
                 setLesson(l);
                 setScreen("lesson");
               }}
             >
-              {l.title} ({l.belt})
+              {l.title}
             </button>
           ))}
         </div>
       )}
 
-      {/* LESSON */}
       {screen === "lesson" && lesson && (
         <div>
           <h2>{lesson.title}</h2>
-          <p>{lesson.intro}</p>
-
-          <button onClick={() => setScreen("quiz")}>
-            Take Quiz
-          </button>
+          <button onClick={() => setScreen("quiz")}>Quiz</button>
         </div>
       )}
 
-      {/* QUIZ */}
       {screen === "quiz" && lesson && (
         <div>
           <h3>{lesson.questions[0].q}</h3>
-
           {lesson.questions[0].options.map((opt, i) => (
-            <button
-              key={i}
-              style={{ display: "block", margin: "10px 0" }}
-              onClick={completeLesson}
-            >
+            <button key={i} onClick={completeLesson}>
               {opt}
             </button>
           ))}
         </div>
       )}
 
-      {/* RESULT */}
       {screen === "result" && (
-        <div style={{ textAlign: "center" }}>
-          <h2>🏆 Lesson Complete</h2>
-          <p>Cluck Norris approves.</p>
-
-          <button onClick={() => setScreen("select")}>
-            Continue Training
-          </button>
+        <div>
+          <h2>Complete</h2>
+          <button onClick={() => setScreen("select")}>Continue</button>
         </div>
       )}
     </div>
