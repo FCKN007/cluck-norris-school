@@ -718,7 +718,7 @@ export default function App(){
             📊 LIVE TOKEN DATA
           </button>
           <a
-            href={PARTNER_LINK}
+            href={CLKN_TRADE_LINK}
             target="_blank"
             rel="noreferrer"
             style={{
