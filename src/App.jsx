@@ -480,19 +480,19 @@ function CLKNWidget() {
 
       {/* Holder Count + Locks — Helius powered */}
       <div style={{display:"flex",gap:8,marginBottom:12}}>
-        <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,padding:"12px",textAlign:"center"}}>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,letterSpacing:2,color:"#6B7280",marginBottom:4}}>👥 HOLDERS</div>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:22,fontWeight:700,color:"#FCD34D"}}>
+        <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"16px",textAlign:"center"}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,color:"#9CA3AF",marginBottom:6}}>👥 HOLDERS</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:40,fontWeight:700,color:"#FCD34D",lineHeight:1}}>
             {holderCount !== null ? holderCount.toLocaleString() : "—"}
           </div>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:7,color:"#4B5563",letterSpacing:1,marginTop:2}}>VIA HELIUS</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginTop:6}}>VIA HELIUS</div>
         </div>
-        <a href="https://lock.jup.ag/token/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS" target="_blank" rel="noreferrer" style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:10,padding:"12px",textAlign:"center",textDecoration:"none",display:"block"}}>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,letterSpacing:2,color:"#10B981",marginBottom:4}}>🔒 LOCKED</div>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:22,fontWeight:700,color:"#10B981"}}>
+        <a href="https://lock.jup.ag/token/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS" target="_blank" rel="noreferrer" style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:10,padding:"16px",textAlign:"center",textDecoration:"none",display:"block"}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,color:"#10B981",marginBottom:6}}>🔒 LOCKED</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:32,fontWeight:700,color:"#10B981",lineHeight:1}}>
             {locks ? fmtNum(locks.totalLocked, 0) : "—"}
           </div>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:7,color:"#4B5563",letterSpacing:1,marginTop:2}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginTop:6}}>
             {locks ? `${locks.lockCount} JUPITER LOCK${locks.lockCount !== 1 ? "S" : ""}` : "VIA JUPITER"}
           </div>
         </a>
@@ -534,8 +534,8 @@ function CLKNWidget() {
                   {label:"24H CHANGE",value:dexData.priceChange?.h24 ? `${dexData.priceChange.h24 > 0 ? "+" : ""}${parseFloat(dexData.priceChange.h24).toFixed(2)}%` : "—",color:dexData.priceChange?.h24 > 0 ? "#10B981" : "#EF4444"},
                 ].map(r=>(
                   <div key={r.label} style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"8px 12px",display:"flex",justifyContent:"space-between"}}>
-                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:2,color:"#4B5563"}}>{r.label}</span>
-                    <span style={{fontFamily:"monospace",fontSize:11,color:r.color}}>{r.value}</span>
+                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:2,color:"#6B7280"}}>{r.label}</span>
+                    <span style={{fontFamily:"monospace",fontSize:13,fontWeight:600,color:r.color}}>{r.value}</span>
                   </div>
                 ))}
               </div>
