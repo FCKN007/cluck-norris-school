@@ -307,6 +307,7 @@ function CLKNWidget() {
   const [quoteError, setQuoteError] = useState(null);
   const [apiStatus, setApiStatus] = useState("connecting");
   const [meteoraPool, setMeteorPool] = useState(null);
+  const [dexData, setDexData] = useState(null);
   const [debugInfo, setDebugInfo] = useState(null);
 
   const isGraduated = pool && pool.dammV2PoolKey;
@@ -316,6 +317,18 @@ function CLKNWidget() {
       const res = await fetch(`https://damm-v2.datapi.meteora.ag/pools?address=${dammKey}`);
       const data = await res.json();
       if (data && data.data && data.data.length > 0) setMeteorPool(data.data[0]);
+    } catch (e) {}
+  }
+
+  async function fetchDex() {
+    try {
+      const res = await fetch(`https://api.dexscreener.com/token-pairs/v1/solana/${CLKN_MINT}`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        // Find the most liquid pair
+        const pair = data.sort((a,b) => (b.liquidity?.usd||0) - (a.liquidity?.usd||0))[0];
+        setDexData(pair);
+      }
     } catch (e) {}
   }
 
@@ -333,6 +346,7 @@ function CLKNWidget() {
           fetchMeteora(poolData.response.dammV2PoolKey);
         }
       }
+      fetchDex();
       setLastUpdated(new Date());
       setDebugInfo({
         pool: JSON.stringify(poolData).slice(0, 200),
@@ -392,17 +406,26 @@ function CLKNWidget() {
         </div>
       </div>
 
-      {/* Bonding Curve Progress — hidden after graduation */}
+      {/* Bonding Curve Progress + Market Data — hidden after graduation */}
       {!isGraduated && (
         <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(59,130,246,0.3)",borderRadius:12,padding:16,marginBottom:12,boxShadow:"0 0 20px rgba(59,130,246,0.08)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#3B82F6"}}>📈 BONDING CURVE PROGRESS</div>
-            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,color:"#FCD34D"}}>81%</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,color:"#FCD34D"}}>
+              {dexData && dexData.marketCap ? `${Math.min(Math.round((dexData.marketCap / 69000) * 100), 99)}%` : "..."}
+            </div>
           </div>
           <div style={{height:10,background:"rgba(255,255,255,0.08)",borderRadius:20,overflow:"hidden",marginBottom:10}}>
-            <div style={{height:"100%",width:"81%",background:"linear-gradient(90deg,#3B82F6,#06B6D4,#FCD34D)",borderRadius:20,boxShadow:"0 0 10px rgba(6,182,212,0.5)",transition:"width 1s ease"}}/>
+            <div style={{
+              height:"100%",
+              width: dexData && dexData.marketCap ? `${Math.min(Math.round((dexData.marketCap / 69000) * 100), 99)}%` : "0%",
+              background:"linear-gradient(90deg,#3B82F6,#06B6D4,#FCD34D)",
+              borderRadius:20,
+              boxShadow:"0 0 10px rgba(6,182,212,0.5)",
+              transition:"width 1s ease"
+            }}/>
           </div>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
             <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#6B7280",letterSpacing:1}}>LAUNCH</span>
             <div style={{textAlign:"center"}}>
               <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#06B6D4",letterSpacing:1}}>🎓 GRADUATION → METEORA</div>
@@ -410,6 +433,22 @@ function CLKNWidget() {
             </div>
             <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#FCD34D",letterSpacing:1}}>100%</span>
           </div>
+          {/* Market Stats from DexScreener */}
+          {dexData && (
+            <div style={{display:"flex",gap:8}}>
+              {[
+                {label:"PRICE", value: dexData.priceUsd ? `$${parseFloat(dexData.priceUsd).toFixed(8)}` : "—", color:"#FCD34D"},
+                {label:"MKT CAP", value: dexData.marketCap ? `$${fmtNum(dexData.marketCap,0)}` : "—", color:"#10B981"},
+                {label:"24H VOL", value: dexData.volume?.h24 ? `$${fmtNum(dexData.volume.h24,0)}` : "—", color:"#8B5CF6"},
+                {label:"LIQUIDITY", value: dexData.liquidity?.usd ? `$${fmtNum(dexData.liquidity.usd,0)}` : "—", color:"#06B6D4"},
+              ].map(s=>(
+                <div key={s.label} style={{flex:1,background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"8px 4px",textAlign:"center"}}>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:7,letterSpacing:1,color:"#6B7280",marginBottom:3}}>{s.label}</div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,color:s.color}}>{s.value}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
