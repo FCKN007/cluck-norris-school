@@ -308,6 +308,8 @@ function CLKNWidget() {
   const [apiStatus, setApiStatus] = useState("connecting");
   const [meteoraPool, setMeteorPool] = useState(null);
   const [dexData, setDexData] = useState(null);
+  const [holderCount, setHolderCount] = useState(null);
+  const [locks, setLocks] = useState(null);
   const [debugInfo, setDebugInfo] = useState(null);
 
   const isGraduated = pool && pool.dammV2PoolKey;
@@ -342,6 +344,18 @@ function CLKNWidget() {
     } catch (e) {}
   }
 
+  async function fetchHelius() {
+    try {
+      const [holdersRes, locksRes] = await Promise.all([
+        fetch(`/api/holders?mint=${CLKN_MINT}`),
+        fetch(`/api/locks?mint=${CLKN_MINT}`),
+      ]);
+      const [holdersData, locksData] = await Promise.all([holdersRes.json(), locksRes.json()]);
+      if (holdersData.success) setHolderCount(holdersData.holderCount);
+      if (locksData.success) setLocks(locksData);
+    } catch (e) { console.log("Helius error:", e.message); }
+  }
+
   async function fetchData() {
     try {
       setLoading(true);
@@ -357,6 +371,7 @@ function CLKNWidget() {
         }
       }
       fetchDex();
+      fetchHelius();
       setLastUpdated(new Date());
       setDebugInfo({
         pool: JSON.stringify(poolData).slice(0, 200),
@@ -461,6 +476,26 @@ function CLKNWidget() {
           )}
         </div>
       )}
+
+      {/* Holder Count + Locks — Helius powered */}
+      <div style={{display:"flex",gap:8,marginBottom:12}}>
+        <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,padding:"12px",textAlign:"center"}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,letterSpacing:2,color:"#6B7280",marginBottom:4}}>👥 HOLDERS</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:22,fontWeight:700,color:"#FCD34D"}}>
+            {holderCount !== null ? holderCount.toLocaleString() : "—"}
+          </div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:7,color:"#4B5563",letterSpacing:1,marginTop:2}}>VIA HELIUS</div>
+        </div>
+        <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:10,padding:"12px",textAlign:"center"}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,letterSpacing:2,color:"#10B981",marginBottom:4}}>🔒 LOCKED</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:22,fontWeight:700,color:"#10B981"}}>
+            {locks ? fmtNum(locks.totalLocked / Math.pow(10,6), 0) : "—"}
+          </div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:7,color:"#4B5563",letterSpacing:1,marginTop:2}}>
+            {locks ? `${locks.lockCount} JUPITER LOCK${locks.lockCount !== 1 ? "S" : ""}` : "VIA JUPITER"}
+          </div>
+        </div>
+      </div>
 
       {/* Pool Info — switches between DBC and Meteora */}
       <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${isGraduated?"rgba(212,175,55,0.3)":"rgba(255,255,255,0.08)"}`,borderRadius:12,padding:16,marginBottom:12,boxShadow:isGraduated?"0 0 20px rgba(212,175,55,0.1)":"none"}}>
