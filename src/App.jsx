@@ -289,10 +289,7 @@ function CLKNTicker() {
   useEffect(() => {
     async function fetchFees() {
       try {
-        const res = await fetch(
-          `/api/bags-proxy?endpoint=analytics/token-lifetime-fees&tokenMint=${CLKN_MINT}`,
-          {}
-        );
+        const res = await fetch(`/api/bags-proxy?endpoint=analytics/token-lifetime-fees&tokenMint=${CLKN_MINT}`);
         const data = await res.json();
         if (data.success) setFees(data.response);
       } catch (e) {}
@@ -303,13 +300,11 @@ function CLKNTicker() {
     return () => clearInterval(interval);
   }, []);
 
-  const fmtSol = (n) => n ? parseFloat(n).toFixed(3) + " SOL" : "—";
-
   return (
     <div style={{
       display:"flex", alignItems:"center", gap:6,
       background:"rgba(217,119,6,0.1)", border:"1px solid rgba(217,119,6,0.3)",
-      borderRadius:20, padding:"3px 10px", textDecoration:"none", cursor:"pointer",
+      borderRadius:20, padding:"3px 10px", cursor:"pointer",
     }}>
       <div style={{width:5,height:5,borderRadius:"50%",background:"#10B981",animation:"pulse 2s infinite"}}/>
       <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#D97706",letterSpacing:1}}>
@@ -317,7 +312,7 @@ function CLKNTicker() {
       </span>
       {!loading && fees && (
         <span style={{fontFamily:"monospace",fontSize:9,color:"#FCD34D"}}>
-          {fmtSol(fees.totalFeesSol)} earned
+          {parseFloat(fees.totalFeesSol).toFixed(3)} SOL earned
         </span>
       )}
       {loading && <span style={{fontSize:9,color:"#4B5563"}}>...</span>}
@@ -334,8 +329,20 @@ function CLKNWidget() {
   const [quote, setQuote] = useState(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState(null);
-  const [apiStatus, setApiStatus] = useState('connecting');
+  const [apiStatus, setApiStatus] = useState("connecting");
+  const [fees, setFees] = useState(null);
+  const [meteoraPool, setMeteorPool] = useState(null);
   const [debugInfo, setDebugInfo] = useState(null);
+
+  const isGraduated = pool && pool.dammV2PoolKey;
+
+  async function fetchMeteora(dammKey) {
+    try {
+      const res = await fetch(`https://damm-v2.datapi.meteora.ag/pools?address=${dammKey}`);
+      const data = await res.json();
+      if (data && data.data && data.data.length > 0) setMeteorPool(data.data[0]);
+    } catch (e) {}
+  }
 
   async function fetchData() {
     try {
@@ -343,10 +350,14 @@ function CLKNWidget() {
       setApiStatus("connecting");
       const [poolRes, feesRes] = await Promise.all([
         fetch(`/api/bags-proxy?endpoint=solana/bags/pools/token-mint&tokenMint=${CLKN_MINT}`),
-        fetch(`/api/bags-proxy?endpoint=analytics/token-lifetime-fees&tokenMint=${CLKN_MINT}`),
       ]);
       const [poolData, feesData] = await Promise.all([poolRes.json(), feesRes.json()]);
-      if (poolData.success) setPool(poolData.response);
+      if (poolData.success) {
+        setPool(poolData.response);
+        if (poolData.response.dammV2PoolKey) {
+          fetchMeteora(poolData.response.dammV2PoolKey);
+        }
+      }
       if (feesData.success) setFees(feesData.response);
       setLastUpdated(new Date());
       setDebugInfo({
@@ -384,6 +395,7 @@ function CLKNWidget() {
   useEffect(() => { fetchQuote("1"); const i = setInterval(() => fetchQuote(solAmount), 30000); return () => clearInterval(i); }, []);
 
   const fmtSol = (n) => n ? parseFloat(n).toLocaleString(undefined,{maximumFractionDigits:3}) + " SOL" : "—";
+  const fmtNum = (n, dec=2) => n ? parseFloat(n).toLocaleString(undefined,{maximumFractionDigits:dec}) : "—";
   const shortKey = (k) => k ? `${k.slice(0,6)}...${k.slice(-4)}` : "Not active";
 
   return (
@@ -391,15 +403,23 @@ function CLKNWidget() {
       <div style={{textAlign:"center",marginBottom:20}}>
         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:4,color:"#D97706",marginBottom:4}}>LIVE TOKEN DATA</div>
         <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:26,color:"#F9FAFB",margin:"0 0 8px"}}>CLKN on Bags.fm</h2>
-        <div style={{display:"inline-flex",alignItems:"center",gap:6,background:apiStatus==="ok"?"rgba(16,185,129,0.1)":apiStatus==="error"?"rgba(239,68,68,0.1)":"rgba(100,100,100,0.1)",border:`1px solid ${apiStatus==="ok"?"#10B981":apiStatus==="error"?"#EF4444":"#555"}`,borderRadius:20,padding:"4px 12px"}}>
-          <div style={{width:7,height:7,borderRadius:"50%",background:apiStatus==="ok"?"#10B981":apiStatus==="error"?"#EF4444":"#888",animation:apiStatus==="connecting"?"pulse 1s infinite":"none"}}/>
-          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:2,color:apiStatus==="ok"?"#10B981":apiStatus==="error"?"#EF4444":"#888"}}>
-            {apiStatus==="ok"?"BAGS API CONNECTED":apiStatus==="error"?"BAGS API ERROR":"CONNECTING..."}
-          </span>
+        <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:6,background:apiStatus==="ok"?"rgba(16,185,129,0.1)":apiStatus==="error"?"rgba(239,68,68,0.1)":"rgba(100,100,100,0.1)",border:`1px solid ${apiStatus==="ok"?"#10B981":apiStatus==="error"?"#EF4444":"#555"}`,borderRadius:20,padding:"4px 12px"}}>
+            <div style={{width:7,height:7,borderRadius:"50%",background:apiStatus==="ok"?"#10B981":apiStatus==="error"?"#EF4444":"#888",animation:apiStatus==="connecting"?"pulse 1s infinite":"none"}}/>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:2,color:apiStatus==="ok"?"#10B981":apiStatus==="error"?"#EF4444":"#888"}}>
+              {apiStatus==="ok"?"BAGS API CONNECTED":apiStatus==="error"?"BAGS API ERROR":"CONNECTING..."}
+            </span>
+          </div>
+          <div style={{display:"inline-flex",alignItems:"center",gap:6,background:isGraduated?"rgba(212,175,55,0.1)":"rgba(59,130,246,0.1)",border:`1px solid ${isGraduated?"#D4AF37":"#3B82F6"}`,borderRadius:20,padding:"4px 12px"}}>
+            <span style={{fontSize:10}}>{isGraduated?"🎓":"📈"}</span>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:2,color:isGraduated?"#D4AF37":"#3B82F6"}}>
+              {isGraduated?"GRADUATED — METEORA":"BONDING CURVE"}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Fee Stats */}
+      {/* Lifetime Fees */}
       <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:12,padding:16,marginBottom:12,boxShadow:"0 0 20px rgba(217,119,6,0.08)"}}>
         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706",marginBottom:12}}>📊 LIFETIME FEES</div>
         {fees ? (
@@ -420,15 +440,40 @@ function CLKNWidget() {
         )}
       </div>
 
-      {/* Pool Info */}
-      <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:16,marginBottom:16}}>
-        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706",marginBottom:12}}>🏊 POOL DATA</div>
-        {pool ? (
+      {/* Bonding Curve Progress — hidden after graduation */}
+      {!isGraduated && (
+        <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(59,130,246,0.3)",borderRadius:12,padding:16,marginBottom:12,boxShadow:"0 0 20px rgba(59,130,246,0.08)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#3B82F6"}}>📈 BONDING CURVE PROGRESS</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,color:"#FCD34D"}}>81%</div>
+          </div>
+          <div style={{height:10,background:"rgba(255,255,255,0.08)",borderRadius:20,overflow:"hidden",marginBottom:10}}>
+            <div style={{height:"100%",width:"81%",background:"linear-gradient(90deg,#3B82F6,#06B6D4,#FCD34D)",borderRadius:20,boxShadow:"0 0 10px rgba(6,182,212,0.5)",transition:"width 1s ease"}}/>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#6B7280",letterSpacing:1}}>LAUNCH</span>
+            <div style={{textAlign:"center"}}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#06B6D4",letterSpacing:1}}>🎓 GRADUATION → METEORA</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563",letterSpacing:1,marginTop:2}}>DAMM V2 POOL INCOMING</div>
+            </div>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#FCD34D",letterSpacing:1}}>100%</span>
+          </div>
+        </div>
+      )}
+
+      {/* Pool Info — switches between DBC and Meteora */}
+      <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${isGraduated?"rgba(212,175,55,0.3)":"rgba(255,255,255,0.08)"}`,borderRadius:12,padding:16,marginBottom:12,boxShadow:isGraduated?"0 0 20px rgba(212,175,55,0.1)":"none"}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:isGraduated?"#D4AF37":"#D97706",marginBottom:12}}>
+          {isGraduated?"🎓 METEORA DAMM V2 POOL":"🏊 DBC POOL DATA"}
+        </div>
+
+        {/* DBC Pool — before graduation */}
+        {!isGraduated && pool && (
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
             {[
               {label:"TOKEN MINT",value:shortKey(CLKN_MINT),color:"#06B6D4"},
               {label:"DBC POOL",value:shortKey(pool.dbcPoolKey),color:"#D97706"},
-              {label:"DAMM V2",value:shortKey(pool.dammV2PoolKey),color:"#8B5CF6"},
+              {label:"DAMM V2",value:"Pending graduation",color:"#6B7280"},
             ].map(r=>(
               <div key={r.label} style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"8px 12px",display:"flex",justifyContent:"space-between"}}>
                 <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:2,color:"#4B5563"}}>{r.label}</span>
@@ -436,17 +481,39 @@ function CLKNWidget() {
               </div>
             ))}
           </div>
-        ) : (
-          <div style={{height:80,background:"rgba(255,255,255,0.03)",borderRadius:10,animation:"pulse 1.5s infinite"}}/>
+        )}
+
+        {/* Meteora Pool — after graduation */}
+        {isGraduated && (
+          <div>
+            {meteoraPool ? (
+              <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                {[
+                  {label:"POOL ADDRESS",value:shortKey(pool.dammV2PoolKey),color:"#D4AF37"},
+                  {label:"TOKEN A (CLKN)",value:meteoraPool.token_a_amount ? fmtNum(meteoraPool.token_a_amount/Math.pow(10,6),0) + " CLKN" : "—",color:"#FCD34D"},
+                  {label:"TOKEN B (SOL)",value:meteoraPool.token_b_amount ? fmtSol(meteoraPool.token_b_amount/LAMPORTS_PER_SOL) : "—",color:"#06B6D4"},
+                  {label:"TVL",value:meteoraPool.pool_tvl ? "$" + fmtNum(meteoraPool.pool_tvl,0) : "—",color:"#10B981"},
+                  {label:"24H VOLUME",value:meteoraPool.trade_volume_24h ? "$" + fmtNum(meteoraPool.trade_volume_24h,0) : "—",color:"#8B5CF6"},
+                  {label:"24H FEES",value:meteoraPool.fees_24h ? "$" + fmtNum(meteoraPool.fees_24h,2) : "—",color:"#F59E0B"},
+                ].map(r=>(
+                  <div key={r.label} style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"8px 12px",display:"flex",justifyContent:"space-between"}}>
+                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:2,color:"#4B5563"}}>{r.label}</span>
+                    <span style={{fontFamily:"monospace",fontSize:11,color:r.color}}>{r.value}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{height:120,background:"rgba(255,255,255,0.03)",borderRadius:10,animation:"pulse 1.5s infinite",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:2}}>LOADING METEORA DATA...</span>
+              </div>
+            )}
+          </div>
         )}
       </div>
-
 
       {/* Live Quote */}
       <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(217,119,6,0.25)",borderRadius:12,padding:16,marginBottom:12}}>
         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706",marginBottom:12}}>💱 LIVE TRADE QUOTE</div>
-
-        {/* 1 SOL default quote */}
         <div style={{background:"rgba(217,119,6,0.08)",borderRadius:10,padding:"14px 16px",marginBottom:12,textAlign:"center",border:"1px solid rgba(217,119,6,0.2)"}}>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:2,marginBottom:6}}>1 SOL CURRENTLY BUYS</div>
           {quoteLoading && !quote ? (
@@ -466,41 +533,20 @@ function CLKNWidget() {
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#EF4444"}}>{quoteError}</div>
           ) : null}
         </div>
-
-        {/* Custom amount input */}
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
           <div style={{position:"relative",flex:1}}>
             <input
-              type="number"
-              min="0.001"
-              step="0.1"
-              value={solAmount}
+              type="number" min="0.001" step="0.1" value={solAmount}
               onChange={e => setSolAmount(e.target.value)}
               placeholder="Enter SOL amount"
-              style={{
-                width:"100%",background:"rgba(255,255,255,0.05)",
-                border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,
-                padding:"10px 40px 10px 14px",color:"#F9FAFB",
-                fontFamily:"'Oswald',sans-serif",fontSize:14,outline:"none",
-                boxSizing:"border-box",
-              }}
+              style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"10px 40px 10px 14px",color:"#F9FAFB",fontFamily:"'Oswald',sans-serif",fontSize:14,outline:"none",boxSizing:"border-box"}}
             />
             <span style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280"}}>SOL</span>
           </div>
-          <button
-            onClick={() => fetchQuote(solAmount)}
-            style={{
-              background:"rgba(217,119,6,0.2)",border:"1px solid rgba(217,119,6,0.4)",
-              borderRadius:8,padding:"10px 16px",color:"#D97706",
-              fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,cursor:"pointer",
-              whiteSpace:"nowrap",
-            }}
-          >
+          <button onClick={() => fetchQuote(solAmount)} style={{background:"rgba(217,119,6,0.2)",border:"1px solid rgba(217,119,6,0.4)",borderRadius:8,padding:"10px 16px",color:"#D97706",fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,cursor:"pointer",whiteSpace:"nowrap"}}>
             GET QUOTE
           </button>
         </div>
-
-        {/* Custom quote result */}
         {quote && parseFloat(solAmount) !== 1 && !quoteLoading && (
           <div style={{marginTop:10,background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"10px 14px",textAlign:"center"}}>
             <span style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#FCD34D"}}>
@@ -508,18 +554,10 @@ function CLKNWidget() {
             </span>
           </div>
         )}
-        {quoteLoading && solAmount !== "1" && (
-          <div style={{marginTop:10,textAlign:"center",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:2}}>FETCHING QUOTE...</div>
-        )}
       </div>
+
       {/* Trade Button */}
-      <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{
-        display:"block",width:"100%",background:"linear-gradient(135deg,#D97706,#EF4444)",
-        border:"none",borderRadius:10,padding:"14px",
-        fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,
-        color:"#fff",letterSpacing:3,textDecoration:"none",textAlign:"center",
-        boxShadow:"0 0 28px rgba(217,119,6,0.5)",marginBottom:10,
-      }}>
+      <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{display:"block",width:"100%",background:"linear-gradient(135deg,#D97706,#EF4444)",border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#fff",letterSpacing:3,textDecoration:"none",textAlign:"center",boxShadow:"0 0 28px rgba(217,119,6,0.5)",marginBottom:10}}>
         🔥 TRADE CLKN ON BAGS.FM
       </a>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 4px"}}>
@@ -534,6 +572,7 @@ function CLKNWidget() {
     </div>
   );
 }
+
 
 function AppIcon({size=64}){
   return(
