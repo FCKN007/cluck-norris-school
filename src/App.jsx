@@ -346,14 +346,15 @@ function CLKNWidget() {
 
   async function fetchHelius() {
     try {
-      const [holdersRes, locksRes] = await Promise.all([
-        fetch(`/api/holders?mint=${CLKN_MINT}`),
-        fetch(`/api/locks?mint=${CLKN_MINT}`),
-      ]);
-      const [holdersData, locksData] = await Promise.all([holdersRes.json(), locksRes.json()]);
+      const holdersRes = await fetch(`/api/holders?mint=${CLKN_MINT}`);
+      const holdersData = await holdersRes.json();
       if (holdersData.success) setHolderCount(holdersData.holderCount);
+    } catch (e) { console.log("Holders error:", e.message); }
+    try {
+      const locksRes = await fetch(`/api/locks?mint=${CLKN_MINT}`);
+      const locksData = await locksRes.json();
       if (locksData.success) setLocks(locksData);
-    } catch (e) { console.log("Helius error:", e.message); }
+    } catch (e) { console.log("Locks error:", e.message); }
   }
 
   async function fetchData() {
