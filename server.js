@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const BAGS_BASE = "https://public-api-v2.bags.fm/api/v1/";
-const JUPITER_LOCK_PROGRAM = "LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1MaluFw55K";
+const JUPITER_LOCK_PROGRAM = "LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1QaQhQQqjn";
 
 // ── Bags API Proxy ──
 app.get("/api/bags-proxy", async (req, res) => {
