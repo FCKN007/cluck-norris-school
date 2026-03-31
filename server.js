@@ -14,6 +14,7 @@ const JUPITER_LOCK_PROGRAM = "LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1QaQhQQqjn";
 // ── Bags API Proxy ──
 app.get("/api/bags-proxy", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
   const { endpoint, ...params } = req.query;
   const API_KEY = process.env.BAGS_API_KEY;
   if (!API_KEY) return res.status(500).json({ success: false, error: "Missing BAGS_API_KEY" });
@@ -35,6 +36,8 @@ app.get("/api/bags-proxy", async (req, res) => {
 // ── Helius — Holder Count ──
 app.get("/api/holders", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
   const { mint } = req.query;
   const HELIUS_KEY = process.env.HELIUS_API_KEY;
   console.log("→ Holders request for mint:", mint);
@@ -75,6 +78,8 @@ app.get("/api/holders", async (req, res) => {
 // ── Helius — Jupiter Locks ──
 app.get("/api/locks", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
   const { mint } = req.query;
   const HELIUS_KEY = process.env.HELIUS_API_KEY;
   console.log("→ Locks request for mint:", mint);
