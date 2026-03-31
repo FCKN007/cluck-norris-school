@@ -283,22 +283,6 @@ function Belt({belt,small}){return(<span style={{display:"inline-block",backgrou
 // ── APP ICON SVG (School of Crypto Hard Knocks) ──
 
 function CLKNTicker() {
-  const [fees, setFees] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchFees() {
-      try {
-        const res = await fetch(`/api/bags-proxy?endpoint=analytics/token-lifetime-fees&tokenMint=${CLKN_MINT}`);
-        const data = await res.json();
-        if (data.success) setFees(data.response);
-      } catch (e) {}
-      finally { setLoading(false); }
-    }
-    fetchFees();
-    const interval = setInterval(fetchFees, 30000);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div style={{
@@ -307,22 +291,14 @@ function CLKNTicker() {
       borderRadius:20, padding:"3px 10px", cursor:"pointer",
     }}>
       <div style={{width:5,height:5,borderRadius:"50%",background:"#10B981",animation:"pulse 2s infinite"}}/>
-      <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#D97706",letterSpacing:1}}>
-        CLKN
-      </span>
-      {!loading && fees && (
-        <span style={{fontFamily:"monospace",fontSize:9,color:"#FCD34D"}}>
-          {parseFloat(fees.totalFeesSol).toFixed(3)} SOL earned
-        </span>
-      )}
-      {loading && <span style={{fontSize:9,color:"#4B5563"}}>...</span>}
+      <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#D97706",letterSpacing:1}}>CLKN</span>
+      <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#FCD34D",letterSpacing:1}}>LIVE</span>
     </div>
   );
 }
 
 function CLKNWidget() {
   const [pool, setPool] = useState(null);
-  const [fees, setFees] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [solAmount, setSolAmount] = useState("1");
@@ -330,7 +306,6 @@ function CLKNWidget() {
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState(null);
   const [apiStatus, setApiStatus] = useState("connecting");
-  const [fees, setFees] = useState(null);
   const [meteoraPool, setMeteorPool] = useState(null);
   const [debugInfo, setDebugInfo] = useState(null);
 
@@ -348,21 +323,19 @@ function CLKNWidget() {
     try {
       setLoading(true);
       setApiStatus("connecting");
-      const [poolRes, feesRes] = await Promise.all([
+      const [poolRes] = await Promise.all([
         fetch(`/api/bags-proxy?endpoint=solana/bags/pools/token-mint&tokenMint=${CLKN_MINT}`),
       ]);
-      const [poolData, feesData] = await Promise.all([poolRes.json(), feesRes.json()]);
+      const [poolData] = await Promise.all([poolRes.json()]);
       if (poolData.success) {
         setPool(poolData.response);
         if (poolData.response.dammV2PoolKey) {
           fetchMeteora(poolData.response.dammV2PoolKey);
         }
       }
-      if (feesData.success) setFees(feesData.response);
       setLastUpdated(new Date());
       setDebugInfo({
         pool: JSON.stringify(poolData).slice(0, 200),
-        fees: JSON.stringify(feesData).slice(0, 200),
       });
       setApiStatus("ok");
     } catch (e) {
@@ -417,27 +390,6 @@ function CLKNWidget() {
             </span>
           </div>
         </div>
-      </div>
-
-      {/* Lifetime Fees */}
-      <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:12,padding:16,marginBottom:12,boxShadow:"0 0 20px rgba(217,119,6,0.08)"}}>
-        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706",marginBottom:12}}>📊 LIFETIME FEES</div>
-        {fees ? (
-          <div style={{display:"flex",gap:8}}>
-            {[
-              {label:"Total Earned",value:fmtSol(fees.totalFeesSol),color:"#FCD34D"},
-              {label:"Claimed",value:fmtSol(fees.claimedFeesSol),color:"#10B981"},
-              {label:"Unclaimed",value:fmtSol(fees.unclaimedFeesSol),color:"#F59E0B"},
-            ].map(s=>(
-              <div key={s.label} style={{flex:1,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"10px 8px",textAlign:"center"}}>
-                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,letterSpacing:2,color:"#6B7280",marginBottom:4}}>{s.label}</div>
-                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:s.color}}>{s.value}</div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{height:60,background:"rgba(255,255,255,0.03)",borderRadius:10,animation:"pulse 1.5s infinite"}}/>
-        )}
       </div>
 
       {/* Bonding Curve Progress — hidden after graduation */}
