@@ -9,23 +9,29 @@ const PARTNER_LINK = "https://bags.fm/?ref=firechicken007";
 const LOGO_B64 = "/cluck-norris.png";
 
 const LESSONS = [
+  // ── EXISTING (expanded questions) ──────────────────────────
+
   {
     id: "lp", belt: "FRESHMAN", icon: "💧", title: "Liquidity Pools",
     quote: "Cluck Norris doesn't chase liquidity… he BECOMES it.",
     color: "#3B82F6", glow: "rgba(59,130,246,0.4)",
-    intro: "Every trade on a DEX pulls from a Liquidity Pool  -  a smart contract holding two tokens. LP providers earn fees from every swap. No order books. No middlemen. Just math and the market.",
+    intro: "Every trade on a DEX pulls from a Liquidity Pool — a smart contract holding two tokens. LP providers earn fees from every swap. No order books. No middlemen. Just math and the market.",
     concepts: [
       { term: "Liquidity Pool", def: "A smart contract holding two tokens (e.g. SOL/USDC) that traders swap against." },
       { term: "LP Provider", def: "Someone who deposits tokens into a pool and earns a share of every trading fee." },
       { term: "Trading Fees", def: "Usually 0.25-1% per swap, split proportionally among all LP providers." },
-      { term: "Impermanent Loss", def: "When token prices diverge, your pool share shifts  -  you may end up with less than just holding." },
+      { term: "Impermanent Loss", def: "When token prices diverge, your pool share shifts — you may end up with less than just holding." },
+      { term: "AMM", def: "Automated Market Maker — the algorithm that prices trades based on pool ratios instead of order books." },
     ],
     questions: [
-      { q: "What do liquidity providers earn?", options: ["Free NFT airdrops", "A share of trading fees", "Tokens from the dev wallet", "Nothing  -  it's charity"], correct: 1, explanation: "LP providers earn a cut of every swap fee. The more volume through the pool, the more you earn." },
-      { q: "What is 'Impermanent Loss'?", options: ["Losing your wallet password", "A rug pull by the dev", "Value loss when token prices diverge vs. just holding", "Gas fees eating your profits"], correct: 2, explanation: "IL happens when the price ratio of your pooled tokens changes. It's 'impermanent' because it can reverse if prices converge." },
-      { q: "What does a Liquidity Pool replace?", options: ["A bank account", "A traditional order book", "Your hardware wallet", "A CEX listing"], correct: 1, explanation: "DEXs use automated market makers (AMMs) with liquidity pools instead of traditional order books used by CEXs." },
+      { q: "What do liquidity providers earn?", options: ["Free NFT airdrops", "A share of trading fees", "Tokens from the dev wallet", "Nothing — it's charity"], correct: 1, explanation: "LP providers earn a cut of every swap fee. The more volume through the pool, the more you earn." },
+      { q: "What is Impermanent Loss?", options: ["Losing your wallet password", "A rug pull by the dev", "Value loss when token prices diverge vs. just holding", "Gas fees eating your profits"], correct: 2, explanation: "IL happens when the price ratio of your pooled tokens changes. It's 'impermanent' because it can reverse if prices converge." },
+      { q: "What does a Liquidity Pool replace?", options: ["A bank account", "A traditional order book", "Your hardware wallet", "A CEX listing"], correct: 1, explanation: "DEXs use AMMs with liquidity pools instead of traditional order books used by CEXs." },
+      { q: "What is an AMM?", options: ["A type of hardware wallet", "An algorithm that prices trades based on pool ratios", "A centralized exchange feature", "A token burning mechanism"], correct: 1, explanation: "AMM stands for Automated Market Maker. It uses a mathematical formula to price trades based on the ratio of tokens in the pool." },
+      { q: "If a pool has equal value of SOL and USDC, and SOL price doubles, what happens to an LP provider?", options: ["They double their money", "They experience impermanent loss vs just holding SOL", "Nothing changes", "They earn double the fees"], correct: 1, explanation: "When prices diverge, the AMM rebalances the pool automatically. You end up with less of the token that went up and more of the one that didn't — impermanent loss." },
     ],
   },
+
   {
     id: "rugs", belt: "SOPHOMORE", icon: "⚠️", title: "Rugs & Scams",
     quote: "Cluck Norris doesn't get rugged… he STUDIES the rug.",
@@ -33,122 +39,245 @@ const LESSONS = [
     intro: "In crypto, a rug pull is when devs drain liquidity or dump tokens, leaving holders with worthless bags. Knowing the red flags is your first line of defense.",
     concepts: [
       { term: "Rug Pull", def: "Devs remove all liquidity or dump tokens suddenly, crashing the price to zero." },
-      { term: "Liquidity Lock", def: "LP tokens locked in a time contract  -  proves devs can't pull liquidity early." },
+      { term: "Liquidity Lock", def: "LP tokens locked in a time contract — proves devs can't pull liquidity early." },
       { term: "Dev Wallet", def: "The wallet that deployed the token. Large allocations here = major red flag." },
       { term: "Honeypot", def: "A contract that lets you buy but blocks selling. You're trapped the moment you enter." },
+      { term: "Social Engineering", def: "Manipulating people psychologically to gain trust before executing a scam." },
     ],
     questions: [
-      { q: "What is a 'honeypot' token?", options: ["A token that pays honey as rewards", "A contract you can buy but not sell", "A token with locked liquidity", "A governance voting token"], correct: 1, explanation: "Honeypots are coded to block sell transactions. Once you buy, your funds are stuck. Always test with a small amount first." },
-      { q: "Why is a liquidity lock important?", options: ["It makes the token more expensive", "It means the dev can't remove liquidity early", "It freezes trading for everyone", "It guarantees price increase"], correct: 1, explanation: "A liquidity lock proves devs committed their LP for a period of time  -  they physically can't rug before the lock expires." },
+      { q: "What is a honeypot token?", options: ["A token that pays honey as rewards", "A contract you can buy but not sell", "A token with locked liquidity", "A governance voting token"], correct: 1, explanation: "Honeypots are coded to block sell transactions. Once you buy, your funds are stuck. Always test with a small amount first." },
+      { q: "Why is a liquidity lock important?", options: ["It makes the token more expensive", "It means the dev can't remove liquidity early", "It freezes trading for everyone", "It guarantees price increase"], correct: 1, explanation: "A liquidity lock proves devs committed their LP for a period of time — they physically can't rug before the lock expires." },
       { q: "Which is a major red flag on a new token?", options: ["Active community on X/Twitter", "Locked liquidity for 6+ months", "Dev wallet holds 40% of supply", "Listed on a DEX aggregator"], correct: 2, explanation: "Concentrated dev wallet = concentrated dump risk. If they hold 40%, one sell can collapse the price." },
+      { q: "A project DMs you saying you won a giveaway and need to connect your wallet to claim. What do you do?", options: ["Connect immediately — free money!", "Ignore and report — it's a scam", "Ask for more details first", "Share it with friends"], correct: 1, explanation: "Unsolicited DMs asking you to connect your wallet are almost always phishing scams. Legitimate projects don't give away tokens through cold DMs." },
+      { q: "What is social engineering in crypto?", options: ["Building a social media presence", "Psychologically manipulating people to gain trust before scamming them", "Community governance voting", "Influencer marketing"], correct: 1, explanation: "Social engineering is when scammers build fake relationships or urgency to trick you into giving up access to your wallet or funds." },
     ],
   },
+
   {
     id: "volatility", belt: "JUNIOR", icon: "📈", title: "Volatility & Weak Hands",
     quote: "Volatility doesn't break warriors… it BUILDS them.",
     color: "#F59E0B", glow: "rgba(245,158,11,0.4)",
-    intro: "Crypto moves fast. 50% drops in hours. 10x runs overnight. The biggest losses in crypto don't come from bad projects  -  they come from panic selling at the bottom.",
+    intro: "Crypto moves fast. 50% drops in hours. 10x runs overnight. The biggest losses in crypto don't come from bad projects — they come from panic selling at the bottom.",
     concepts: [
       { term: "Volatility", def: "The rate at which a price moves up or down. High vol = big swings both ways." },
       { term: "Weak Hands", def: "Traders who sell at the first sign of red, usually locking in losses at the worst moment." },
       { term: "Diamond Hands", def: "Holding through extreme volatility without panic selling." },
       { term: "Stop Loss", def: "A pre-set price where you automatically sell to limit downside. Discipline over emotion." },
+      { term: "Dollar Cost Averaging", def: "Buying fixed amounts at regular intervals regardless of price. Reduces timing risk." },
     ],
     questions: [
-      { q: "What do 'weak hands' do during a price dip?", options: ["Buy more at a discount", "Wait and analyze", "Panic sell, locking in losses", "Stake their tokens"], correct: 2, explanation: "Weak hands react emotionally. They sell the dip  -  often right before recovery. Most losses in crypto are from panic, not price." },
-      { q: "What is a stop loss?", options: ["A way to stop losing friends in crypto", "A pre-set automatic sell to limit downside", "A lock on your wallet", "A fee charged by DEXs"], correct: 1, explanation: "A stop loss removes emotion from the equation. You pre-decide your exit  -  the market doesn't get to decide for you." },
-      { q: "High volatility means:", options: ["The token is always going up", "Large price swings in both directions", "The project is a scam", "Low trading volume"], correct: 1, explanation: "Volatility is neutral  -  it means big moves happen. That means big gains AND big losses are both possible." },
+      { q: "What do weak hands do during a price dip?", options: ["Buy more at a discount", "Wait and analyze", "Panic sell, locking in losses", "Stake their tokens"], correct: 2, explanation: "Weak hands react emotionally. They sell the dip — often right before recovery. Most losses in crypto are from panic, not price." },
+      { q: "What is a stop loss?", options: ["A way to stop losing friends in crypto", "A pre-set automatic sell to limit downside", "A lock on your wallet", "A fee charged by DEXs"], correct: 1, explanation: "A stop loss removes emotion from the equation. You pre-decide your exit — the market doesn't get to decide for you." },
+      { q: "High volatility means:", options: ["The token is always going up", "Large price swings in both directions", "The project is a scam", "Low trading volume"], correct: 1, explanation: "Volatility is neutral — it means big moves happen. That means big gains AND big losses are both possible." },
+      { q: "What is Dollar Cost Averaging (DCA)?", options: ["Buying all at once at the lowest price", "Buying fixed amounts at regular intervals regardless of price", "Selling in small increments", "Averaging your losses"], correct: 1, explanation: "DCA removes the pressure of timing the market. You buy $50 every week whether price is up or down — over time it averages out your entry price." },
+      { q: "A token drops 60% in a day. A disciplined trader would:", options: ["Immediately sell everything", "Buy more if fundamentals are unchanged", "Tell everyone to panic", "Never look at the chart again"], correct: 1, explanation: "60% drops happen regularly in crypto. If nothing has changed about the project, a disciplined trader sees it as a potential buying opportunity — not a reason to panic sell." },
     ],
   },
+
   {
     id: "wallets", belt: "SENIOR", icon: "🔐", title: "Wallets & Keys",
     quote: "Not your keys, not your coins. Cluck Norris never forgets this.",
     color: "#10B981", glow: "rgba(16,185,129,0.4)",
-    intro: "Your wallet doesn't hold tokens  -  the blockchain does. Your wallet holds the KEYS that prove ownership. Lose the keys, lose everything. Forever.",
+    intro: "Your wallet doesn't hold tokens — the blockchain does. Your wallet holds the KEYS that prove ownership. Lose the keys, lose everything. Forever.",
     concepts: [
       { term: "Private Key", def: "A secret string that gives full control over your wallet. Never share it. Ever." },
       { term: "Seed Phrase", def: "12-24 words that regenerate your private key. Write it on paper. Never digitally." },
-      { term: "Custodial Wallet", def: "An exchange holds your keys. Convenient but risky  -  'not your keys, not your coins.'" },
+      { term: "Custodial Wallet", def: "An exchange holds your keys. Convenient but risky — 'not your keys, not your coins.'" },
       { term: "Non-Custodial Wallet", def: "You hold your own keys. Full control. Full responsibility. Phantom, Backpack, etc." },
+      { term: "Hardware Wallet", def: "A physical device that stores your private key offline. Most secure option for large holdings." },
     ],
     questions: [
-      { q: "What does 'not your keys, not your coins' mean?", options: ["You need a physical key to access crypto", "If an exchange holds your keys, they control your funds", "Lost keys can be recovered by support", "Private keys are optional"], correct: 1, explanation: "When a CEX holds your keys, they actually control your funds. If they go bankrupt or freeze withdrawals  -  you have no recourse." },
+      { q: "What does 'not your keys, not your coins' mean?", options: ["You need a physical key to access crypto", "If an exchange holds your keys, they control your funds", "Lost keys can be recovered by support", "Private keys are optional"], correct: 1, explanation: "When a CEX holds your keys, they actually control your funds. If they go bankrupt or freeze withdrawals — you have no recourse." },
       { q: "Where should you store your seed phrase?", options: ["Screenshot on your phone", "Google Drive folder", "Written on paper, stored offline", "Emailed to yourself"], correct: 2, explanation: "Seed phrases stored digitally can be hacked. Paper doesn't get hacked. Store it offline, somewhere safe." },
       { q: "What is a non-custodial wallet?", options: ["A wallet run by a bank", "A wallet where you control your own private keys", "A wallet with no fees", "A wallet locked by the government"], correct: 1, explanation: "Non-custodial means YOU hold the keys. Phantom, Backpack, and Solflare are non-custodial Solana wallets." },
+      { q: "Why is a hardware wallet more secure than a software wallet?", options: ["It's faster", "It stores your private key offline, away from internet threats", "It's cheaper to use", "It connects to more blockchains"], correct: 1, explanation: "Hardware wallets keep your private key on a physical device that never touches the internet. Even if your computer is hacked, your keys are safe." },
+      { q: "Someone online says they can recover your lost crypto if you give them your seed phrase. What do you do?", options: ["Give them the first 6 words only", "Trust them — they're a professional", "Never share your seed phrase with anyone, ever", "Share it only if they have good reviews"], correct: 2, explanation: "Your seed phrase gives complete control of your wallet. Anyone who asks for it is trying to steal your funds. No legitimate service ever needs your seed phrase." },
     ],
   },
+
   {
     id: "slippage", belt: "GRADUATE", icon: "🤖", title: "Slippage & MEV",
     quote: "Cluck Norris doesn't get sandwiched. He IS the sandwich.",
     color: "#06B6D4", glow: "rgba(6,182,212,0.4)",
-    intro: "Every time you swap on a DEX, bots are watching. MEV bots can see your transaction before it confirms and jump in front of it  -  paying more gas to get ahead of you, driving the price up so you buy higher. It's called a sandwich attack. Knowing this changes how you trade.",
+    intro: "Every time you swap on a DEX, bots are watching. MEV bots can see your transaction before it confirms and jump in front of it — paying more gas to get ahead of you, driving the price up so you buy higher. It's called a sandwich attack. Knowing this changes how you trade.",
     concepts: [
-      { term: "Slippage", def: "The difference between the price you expect and the price you actually get. Happens when liquidity is low or a bot moves the price first." },
-      { term: "MEV (Maximal Extractable Value)", def: "Profit bots extract by reordering, inserting, or censoring transactions within a block." },
-      { term: "Sandwich Attack", def: "A bot sees your swap, buys before you (raising price), lets your trade execute at the worse price, then sells for profit. You're the filling." },
-      { term: "Slippage Tolerance", def: "The max % price change you'll accept on a trade. Set too high = bot target. Set too low = transaction fails." },
+      { term: "Slippage", def: "The difference between the price you expect and the price you actually get." },
+      { term: "MEV", def: "Maximal Extractable Value — profit bots extract by reordering transactions within a block." },
+      { term: "Sandwich Attack", def: "A bot buys before your trade (raising price), lets you buy higher, then sells for profit." },
+      { term: "Slippage Tolerance", def: "The max % price change you'll accept. Set too high = bot target. Too low = failed trade." },
+      { term: "Front-running", def: "A bot sees your pending transaction and executes the same trade first to profit from your price impact." },
     ],
     questions: [
-      { q: "What is a sandwich attack?", options: ["A bot buys before and sells after your trade to profit at your expense", "A hack that drains your wallet", "A phishing attack via DMs", "When two tokens merge into one"], correct: 0, explanation: "Sandwich bots front-run your swap (buying first to raise the price), then back-run it (selling right after). You pay more, they profit. Setting tight slippage is your defense." },
-      { q: "What does setting a LOW slippage tolerance do?", options: ["Makes your trade faster", "Protects you from sandwich attacks but may cause failed transactions", "Gives you a better price always", "Reduces gas fees"], correct: 1, explanation: "Low slippage = the trade only executes if the price stays close to what you expect. Bots can't profitably sandwich you, but you risk the trade failing if price moves naturally." },
-      { q: "What does MEV stand for?", options: ["Maximum Exchange Value", "Maximal Extractable Value", "Market Execution Volume", "Minimum Entry Variance"], correct: 1, explanation: "MEV is profit extracted by validators or bots who control transaction ordering. On Solana it's less severe than Ethereum but still happens on high-volume DEXs." },
+      { q: "What is a sandwich attack?", options: ["A bot buys before and sells after your trade to profit at your expense", "A hack that drains your wallet", "A phishing attack via DMs", "When two tokens merge into one"], correct: 0, explanation: "Sandwich bots front-run your swap, then back-run it. You pay more, they profit. Setting tight slippage is your defense." },
+      { q: "What does setting a LOW slippage tolerance do?", options: ["Makes your trade faster", "Protects you from sandwich attacks but may cause failed transactions", "Gives you a better price always", "Reduces gas fees"], correct: 1, explanation: "Low slippage = trade only executes if price stays close to what you expect. Bots can't profitably sandwich you, but you risk the trade failing." },
+      { q: "What does MEV stand for?", options: ["Maximum Exchange Value", "Maximal Extractable Value", "Market Execution Volume", "Minimum Entry Variance"], correct: 1, explanation: "MEV is profit extracted by validators or bots who control transaction ordering." },
+      { q: "What is front-running?", options: ["Being first to buy a new token launch", "A bot executing the same trade as you but before your transaction confirms", "Running away from a bad investment", "Early access to a token presale"], correct: 1, explanation: "Front-running bots monitor the mempool for large pending transactions, then insert their own transaction first to profit from the price impact your trade will cause." },
+      { q: "On Solana, MEV is:", options: ["Impossible — Solana is too fast", "Less severe than Ethereum but still occurs on high-volume DEXs", "More severe than on Ethereum", "Only affects large traders"], correct: 1, explanation: "Solana's speed reduces but doesn't eliminate MEV. High-volume pools on Jupiter and Raydium still see bot activity, especially during high-profile launches." },
     ],
   },
+
   {
     id: "tokenomics", belt: "POST-GRAD", icon: "📊", title: "Tokenomics",
     quote: "Cluck Norris reads the whitepaper. Then he reads it again.",
     color: "#F97316", glow: "rgba(249,115,22,0.4)",
-    intro: "Tokenomics is the economics of a token  -  supply, distribution, vesting, and inflation. A token with bad tokenomics will dump no matter how good the project is. This is where most retail traders get wrecked  -  they see price and ignore structure.",
+    intro: "Tokenomics is the economics of a token — supply, distribution, vesting, and inflation. A token with bad tokenomics will dump no matter how good the project is.",
     concepts: [
-      { term: "Total Supply", def: "The max number of tokens that will ever exist. Fixed supply = deflationary pressure. Unlimited = inflation risk." },
-      { term: "Circulating Supply", def: "How many tokens are actually in circulation and tradeable right now. This drives real market cap." },
-      { term: "Vesting Schedule", def: "A lock-up period for team/investor tokens. When vesting unlocks, insiders can sell  -  watch these dates." },
-      { term: "Token Distribution", def: "How tokens are split between team, investors, community, treasury. Heavy team allocation = concentrated dump risk." },
+      { term: "Total Supply", def: "The max number of tokens that will ever exist." },
+      { term: "Circulating Supply", def: "How many tokens are actually tradeable right now." },
+      { term: "Vesting Schedule", def: "A lock-up period for team/investor tokens. Watch unlock dates." },
+      { term: "Token Distribution", def: "How tokens are split between team, investors, community, treasury." },
+      { term: "Burn Mechanism", def: "Permanently removing tokens from circulation to reduce supply over time." },
     ],
     questions: [
-      { q: "Why does vesting schedule matter to traders?", options: ["It determines staking rewards", "It shows when locked team/investor tokens unlock and can be sold", "It controls gas fees", "It sets the token price at launch"], correct: 1, explanation: "When a vesting cliff hits, millions of insider tokens unlock. If team or VCs sell, price can crash hard. Always check unlock dates before entering a position." },
-      { q: "A token has 1 trillion total supply and costs $0.000001. Is it cheap?", options: ["Yes, it's under a penny", "No  -  supply determines real value, not price per token", "Yes, low price means room to grow", "Can't tell without chart data"], correct: 1, explanation: "Price per token is meaningless without supply context. 1 trillion tokens at $0.000001 = $1B market cap. That's not cheap  -  that's already a large cap project at tiny price." },
-      { q: "What is 'circulating supply'?", options: ["Total tokens ever created", "Tokens currently tradeable in the market", "Tokens held by the dev team", "Tokens burned forever"], correct: 1, explanation: "Circulating supply is what's actually on the market. Market cap = price × circulating supply. Low circulating supply can make a token look cheap while real valuation is already high." },
+      { q: "Why does vesting schedule matter to traders?", options: ["It determines staking rewards", "It shows when locked team/investor tokens unlock and can be sold", "It controls gas fees", "It sets the token price at launch"], correct: 1, explanation: "When a vesting cliff hits, millions of insider tokens unlock. If team or VCs sell, price can crash hard." },
+      { q: "A token has 1 trillion total supply and costs $0.000001. Is it cheap?", options: ["Yes, it's under a penny", "No — supply determines real value, not price per token", "Yes, low price means room to grow", "Can't tell without chart data"], correct: 1, explanation: "1 trillion tokens at $0.000001 = $1B market cap. That's not cheap." },
+      { q: "What is circulating supply?", options: ["Total tokens ever created", "Tokens currently tradeable in the market", "Tokens held by the dev team", "Tokens burned forever"], correct: 1, explanation: "Circulating supply is what's actually on the market. Market cap = price × circulating supply." },
+      { q: "What does a burn mechanism do?", options: ["Destroys the project permanently", "Permanently removes tokens from circulation reducing supply", "Freezes trading temporarily", "Sends tokens to the dev wallet"], correct: 1, explanation: "Burning tokens reduces supply over time. If demand stays the same and supply decreases, price pressure is upward. Bitcoin's halving is a similar concept." },
+      { q: "A token has 5% team allocation with a 4-year vesting schedule. Is this good or bad?", options: ["Bad — team should have more tokens", "Good — low allocation with long vesting means team is incentivized long-term", "Irrelevant to price", "Bad — 4 years is too long"], correct: 1, explanation: "Low team allocation with long vesting is a green flag. It means the team can't dump on holders early and is incentivized to build long-term value." },
+      { q: "What happens to price when a large vesting unlock occurs?", options: ["Price always goes up", "Price often drops as insiders sell their newly unlocked tokens", "Nothing — markets already price it in", "Trading is halted"], correct: 1, explanation: "Vesting unlocks create sell pressure. Even if markets partially price it in, the actual unlock often causes a price dip as insiders take profits." },
     ],
   },
+
   {
     id: "marketcap", belt: "TENURED", icon: "💰", title: "Market Cap vs Price",
     quote: "Price is what you pay. Market cap is what you're really buying.",
     color: "#EC4899", glow: "rgba(236,72,153,0.4)",
-    intro: "The biggest beginner mistake in crypto: thinking a $0.001 token is 'cheaper' than a $50,000 BTC. Price per token means nothing. Market cap is everything. It tells you the total value of a project  -  and how much it would need to grow to hit your target return.",
+    intro: "The biggest beginner mistake in crypto: thinking a $0.001 token is cheaper than $50,000 BTC. Price per token means nothing. Market cap is everything.",
     concepts: [
-      { term: "Market Cap", def: "Price × Circulating Supply. The total value of a token at current price. This is the real size of a project." },
-      { term: "Fully Diluted Valuation (FDV)", def: "Price × Total Supply (including locked tokens). Shows max potential market cap if all tokens were circulating." },
-      { term: "Price Per Token", def: "Meaningless without supply context. A $0.001 token with 1 trillion supply has a $1B market cap." },
-      { term: "Low Cap vs Large Cap", def: "Low cap tokens (<$10M) have more upside potential but far higher risk. Large caps (>$1B) are more stable but harder to 10x." },
+      { term: "Market Cap", def: "Price × Circulating Supply. The real size of a project." },
+      { term: "FDV", def: "Fully Diluted Valuation — Price × Total Supply including locked tokens." },
+      { term: "Price Per Token", def: "Meaningless without supply context." },
+      { term: "Low Cap vs Large Cap", def: "Low cap (<$10M) = more upside, more risk. Large cap (>$1B) = more stable, harder to 10x." },
+      { term: "Liquidity vs Market Cap", def: "A $10M market cap token with $50K liquidity can't absorb large buys without massive price impact." },
     ],
     questions: [
-      { q: "Token A: $0.001 price, 1 trillion supply. Token B: $100 price, 100,000 supply. Which has the higher market cap?", options: ["Token A  -  lower price means cheaper", "Token B  -  higher price means more valuable", "Token A  -  $1B market cap vs Token B's $10M", "They are the same"], correct: 2, explanation: "Token A: $0.001 × 1,000,000,000,000 = $1,000,000,000 (1 billion). Token B: $100 × 100,000 = $10,000,000 (10 million). Token A is 100x 'bigger' despite its tiny price." },
-      { q: "What does Fully Diluted Valuation (FDV) tell you?", options: ["Current market cap only", "What the market cap would be if all tokens were in circulation", "The project's revenue", "How many people hold the token"], correct: 1, explanation: "FDV uses total supply  -  including locked, vesting, and unreleased tokens. If FDV is 10x the current market cap, there's a lot of potential sell pressure ahead as those tokens unlock." },
-      { q: "For a $1M investment to 100x into $100M, what does the project's market cap need to do?", options: ["Go from any size to $100M", "Grow by $100M from its current market cap", "The market cap must also 100x", "Only the price needs to 100x"], correct: 2, explanation: "Your return is tied to market cap growth, not just price. If a project is already at $500M market cap, getting to a 100x means a $50B cap  -  that's harder than a $1M cap growing to $100M." },
+      { q: "Token A: $0.001 price, 1 trillion supply. Token B: $100 price, 100,000 supply. Which has the higher market cap?", options: ["Token A — lower price means cheaper", "Token B — higher price means more valuable", "Token A — $1B market cap vs Token B's $10M", "They are the same"], correct: 2, explanation: "Token A: $0.001 × 1T = $1B. Token B: $100 × 100K = $10M. Price per token is meaningless." },
+      { q: "What does FDV tell you?", options: ["Current market cap only", "What market cap would be if all tokens were in circulation", "The project's revenue", "How many people hold the token"], correct: 1, explanation: "FDV uses total supply including locked tokens. High FDV vs market cap = lots of potential sell pressure ahead." },
+      { q: "For a $1M investment to 100x, what must happen?", options: ["Go from any size to $100M", "Grow by $100M from current market cap", "The market cap must also 100x", "Only price needs to 100x"], correct: 2, explanation: "Your return is tied to market cap growth. A project at $500M market cap needs $50B to 100x — much harder." },
+      { q: "A token has a $1M market cap but only $10K in liquidity. What does this mean?", options: ["It's a great low cap opportunity", "Even a small buy will cause massive price impact — very risky", "The token is about to moon", "Liquidity doesn't matter"], correct: 1, explanation: "Low liquidity means your buy moves the price dramatically — and selling is even harder. You could buy in easily but be trapped when trying to exit." },
+      { q: "Why is FDV often higher than market cap?", options: ["Because the project is overvalued", "Because many tokens are locked, vesting, or not yet released", "Because of trading fees", "FDV is always equal to market cap"], correct: 1, explanation: "FDV accounts for ALL tokens that will ever exist. Locked team tokens, vesting allocations, and unreleased supply all count toward FDV but not market cap." },
+      { q: "A project has $100M market cap and $1B FDV. What does this signal?", options: ["Strong project worth buying", "90% of tokens are still locked — massive future sell pressure likely", "The project is undervalued", "FDV doesn't matter for small tokens"], correct: 1, explanation: "When FDV is 10x market cap, it means 90% of tokens haven't hit the market yet. As they unlock, sustained sell pressure can suppress price for years." },
     ],
   },
+
   {
     id: "dex", belt: "HEADMASTER", icon: "⚔️", title: "DEX vs CEX",
     quote: "CEX asks permission. DEX asks no one. Cluck Norris chooses wisely.",
     color: "#8B5CF6", glow: "rgba(139,92,246,0.4)",
-    intro: "Two ways to trade crypto. CEX is the on-ramp  -  easy, regulated, ID required. DEX is the frontier  -  permissionless, self-custody, always open. Knowing when to use each is the move.",
+    intro: "Two ways to trade crypto. CEX is the on-ramp — easy, regulated, ID required. DEX is the frontier — permissionless, self-custody, always open.",
     concepts: [
       { term: "CEX", def: "Centralized Exchange (Coinbase, Binance). Requires ID. Holds your keys. Regulated." },
       { term: "DEX", def: "Decentralized Exchange (Jupiter, Raydium). No ID. You keep your keys. Always on." },
-      { term: "KYC", def: "Know Your Customer  -  identity verification required by CEXs to comply with regulations." },
-      { term: "Slippage", def: "The difference between expected and actual trade price. High on illiquid pairs." },
+      { term: "KYC", def: "Know Your Customer — identity verification required by CEXs." },
+      { term: "Order Book", def: "A CEX feature matching buyers and sellers at specific prices." },
+      { term: "Self-Custody", def: "You control your own keys. No third party can freeze or seize your funds." },
     ],
     questions: [
-      { q: "What does a CEX require that a DEX does not?", options: ["A crypto wallet", "SOL for gas fees", "Identity verification (KYC)", "A liquidity pool deposit"], correct: 2, explanation: "CEXs are regulated businesses  -  they require ID. DEXs are permissionless smart contracts. No ID, no account." },
+      { q: "What does a CEX require that a DEX does not?", options: ["A crypto wallet", "SOL for gas fees", "Identity verification (KYC)", "A liquidity pool deposit"], correct: 2, explanation: "CEXs are regulated businesses — they require ID. DEXs are permissionless smart contracts. No ID, no account." },
       { q: "What is slippage on a DEX?", options: ["Accidentally sending to the wrong wallet", "The difference between expected and actual trade price", "A fee charged by the DEX team", "When your wallet disconnects mid-trade"], correct: 1, explanation: "Low liquidity = high slippage. For small-cap tokens, even a modest trade can move the price significantly." },
-      { q: "Which is always available 24/7 with no downtime?", options: ["CEX  -  they have server farms", "Both are always on", "DEX  -  it's a smart contract on the blockchain", "Neither"], correct: 2, explanation: "Smart contracts don't have maintenance windows. A DEX runs as long as the blockchain does  -  which is always." },
+      { q: "Which is always available 24/7 with no downtime?", options: ["CEX — they have server farms", "Both are always on", "DEX — it's a smart contract on the blockchain", "Neither"], correct: 2, explanation: "Smart contracts don't have maintenance windows. A DEX runs as long as the blockchain does." },
+      { q: "What is the biggest risk of keeping funds on a CEX?", options: ["High trading fees", "The CEX can freeze withdrawals, get hacked, or go bankrupt", "Slow transaction speeds", "Limited token selection"], correct: 1, explanation: "FTX, Celsius, and many others showed the risk — when a CEX fails, user funds can disappear overnight. Not your keys, not your coins." },
+      { q: "What does self-custody mean?", options: ["Keeping crypto in a safe at home", "Controlling your own private keys with no third party involvement", "Using a regulated custodian", "Storing crypto on a CEX for safety"], correct: 1, explanation: "Self-custody means you hold your own keys. No exchange, no bank, no government can freeze or seize your funds without physical access to your device." },
+    ],
+  },
+
+  // ── NEW LESSONS ────────────────────────────────────────────
+
+  {
+    id: "onchain", belt: "PROFESSOR", icon: "🔍", title: "On-Chain Analysis",
+    quote: "The blockchain never lies. Cluck Norris reads it like a book.",
+    color: "#14B8A6", glow: "rgba(20,184,166,0.4)",
+    intro: "Every transaction on Solana is public and permanent. On-chain analysis means reading this data to understand who is buying, who is selling, where the smart money is going, and whether a project is healthy or dying. This is the edge most retail traders never develop.",
+    concepts: [
+      { term: "Wallet Tracking", def: "Monitoring specific wallet addresses to see when whales buy, sell, or move tokens." },
+      { term: "Transaction History", def: "Every swap, transfer, and interaction a wallet has ever made — all public on-chain." },
+      { term: "Solscan / Solana Explorer", def: "Block explorers that let you read Solana transaction data in human-readable form." },
+      { term: "Whale Wallet", def: "A wallet holding a large amount of a token. When whales move, price often follows." },
+      { term: "Smart Money", def: "Wallets consistently making profitable trades — often early VCs, insiders, or skilled traders." },
+    ],
+    questions: [
+      { q: "What can on-chain analysis reveal that price charts cannot?", options: ["Future price predictions", "Who is actually buying and selling, and in what size", "The dev team's identity", "When the next bull market starts"], correct: 1, explanation: "Price charts show the result of trading activity. On-chain data shows who is doing it — whether whales are accumulating, insiders are dumping, or smart money is entering." },
+      { q: "What is a block explorer?", options: ["A tool to find new tokens", "A website that lets you read all blockchain transaction data", "A crypto price tracker", "A wallet recovery tool"], correct: 1, explanation: "Solscan and Solana Explorer let you look up any wallet address, transaction, or token on Solana. Everything is public — no account needed." },
+      { q: "A whale wallet you track just bought $500K of a token you've never heard of. What should you do?", options: ["Immediately buy as much as possible", "Research the token and understand why before making any decision", "Short the token — whales always dump", "Ignore it — whale wallets are always wrong"], correct: 1, explanation: "Whale activity is a signal worth investigating — but not a guaranteed buy signal. Research what the token is first. Whales can also be wrong, or already planning to exit." },
+      { q: "What does it mean when multiple new wallets buy a token right before a major price spike?", options: ["Pure coincidence", "Possible insider trading or coordinated buying", "The token is about to rug", "Healthy organic growth"], correct: 1, explanation: "When fresh wallets with no history suddenly appear right before a pump, it often suggests insider knowledge or coordinated activity. This is a yellow flag worth noting." },
+      { q: "On Solana, all transactions are:", options: ["Private unless you share them", "Public and permanently visible to anyone", "Only visible to wallet owners", "Deleted after 30 days"], correct: 1, explanation: "The blockchain is a public ledger. Every transaction you've ever made is permanently visible to anyone with a block explorer. There is no privacy on-chain without specific privacy tools." },
+      { q: "What is 'smart money' in crypto?", options: ["Stablecoins only", "Wallets that consistently make profitable early trades — often insiders or skilled traders", "Money held on regulated exchanges", "Any wallet with over $1M in holdings"], correct: 1, explanation: "Smart money wallets consistently buy early and exit before crashes. Tracking them doesn't guarantee copying their success — they have information advantages you don't — but it's valuable signal." },
+      { q: "A token's top 10 wallets hold 80% of supply. Is this a red flag?", options: ["No — concentration is normal", "Yes — extreme concentration means a few wallets can crash the price at will", "Only if one wallet holds it all", "No — it means strong conviction holders"], correct: 1, explanation: "Highly concentrated supply is a major risk. If the top 10 holders decide to sell simultaneously, no amount of buying pressure can stop the crash. Always check token distribution." },
+    ],
+  },
+
+  {
+    id: "staking", belt: "DEAN", icon: "🌾", title: "Staking & Yield Farming",
+    quote: "Cluck Norris doesn't just hold. He puts his bags to work.",
+    color: "#84CC16", glow: "rgba(132,204,22,0.4)",
+    intro: "Staking and yield farming let your crypto work for you while you hold. But high APY comes with real risks that most beginners ignore. Understanding what you're actually earning — and what you're risking — is the difference between growing wealth and losing it.",
+    concepts: [
+      { term: "Staking", def: "Locking tokens to support a network or protocol in exchange for rewards." },
+      { term: "APY", def: "Annual Percentage Yield — the yearly return on your staked or farmed assets." },
+      { term: "Yield Farming", def: "Providing liquidity to DeFi protocols in exchange for token rewards, often at high APY." },
+      { term: "Inflationary Rewards", def: "When staking rewards are paid by minting new tokens — diluting all existing holders." },
+      { term: "Lock-up Period", def: "Time you must wait before unstaking. You can't sell during this period." },
+    ],
+    questions: [
+      { q: "What does staking mean?", options: ["Selling tokens for a profit", "Locking tokens to support a network in exchange for rewards", "Providing liquidity to a DEX", "Holding tokens in a cold wallet"], correct: 1, explanation: "Staking involves locking your tokens in a protocol — either to validate transactions (proof of stake) or to earn protocol rewards. In return you receive staking rewards." },
+      { q: "A protocol offers 500% APY. What is the most likely explanation?", options: ["The protocol is extremely profitable", "The rewards are paid in new tokens being minted — heavily inflationary", "It's a guaranteed safe investment", "The team is giving away their own money"], correct: 1, explanation: "Extremely high APY is almost always funded by token inflation. The protocol mints new tokens to pay you — but this dilutes the token's value. Your 500% APY might be worth very little if the token crashes." },
+      { q: "What is impermanent loss in yield farming?", options: ["Losing your farming equipment", "Value loss compared to just holding when token prices diverge in an LP", "A penalty for early unstaking", "Taxes on farming rewards"], correct: 1, explanation: "When you provide liquidity and token prices diverge, the AMM rebalances your position. You end up with less of the token that went up. This loss is 'impermanent' but can become permanent if you exit." },
+      { q: "What is a lock-up period?", options: ["When a token is frozen by regulators", "The time you must wait before you can unstake and access your tokens", "A security feature on hardware wallets", "When trading is paused on a DEX"], correct: 1, explanation: "Many staking protocols require you to lock your tokens for days, weeks, or months. During a crash, you cannot sell — this is a critical risk to understand before staking." },
+      { q: "What does APY stand for?", options: ["Annual Protocol Yield", "Average Price Yesterday", "Annual Percentage Yield", "Asset Price Value"], correct: 2, explanation: "APY is Annual Percentage Yield — your projected return over a full year including compounding. Compare this to APR (Annual Percentage Rate) which doesn't include compounding." },
+      { q: "You stake a token earning 100% APY. The token loses 80% of its value over the year. What happened?", options: ["You doubled your money", "You lost money — token price decline exceeded your staking rewards", "You broke even", "You earned 20% net profit"], correct: 1, explanation: "APY is denominated in the token you're earning. If that token crashes 80%, your 100% APY in tokens is worth only 20% of what you started with in dollar terms. Always consider token price risk alongside yield." },
+      { q: "What is the safest type of yield in DeFi?", options: ["The highest APY available", "Yield from real protocol fees (not token emissions)", "Yield from newly launched protocols", "Yield paid in governance tokens"], correct: 1, explanation: "Real yield — paid from actual protocol fee revenue rather than token inflation — is the most sustainable. It's usually lower APY but backed by real economic activity, not just token printing." },
+    ],
+  },
+
+  {
+    id: "bags", belt: "CHANCELLOR", icon: "🎒", title: "How Bags.fm Works",
+    quote: "Cluck Norris was born on Bags.fm. He knows the rules.",
+    color: "#D97706", glow: "rgba(217,119,6,0.4)",
+    intro: "Bags.fm is a Solana token launchpad where creators earn 1% of all trading volume forever. Understanding how it works — from launch to graduation to fee claiming — gives you an edge when evaluating any Bags.fm token.",
+    concepts: [
+      { term: "DBC (Dynamic Bonding Curve)", def: "The initial launch mechanism. Price increases as more tokens are bought along a curve." },
+      { term: "Graduation", def: "When a token raises enough SOL on the bonding curve to migrate to a full Meteora DAMM V2 liquidity pool." },
+      { term: "Creator Fees", def: "1% of all trading volume goes to the token creator — forever, whether they're active or not." },
+      { term: "Partner Ref Code", def: "A referral code that earns a % of platform fees when users trade through your link." },
+      { term: "Meteora DAMM V2", def: "The graduated liquidity pool — deeper liquidity, tighter spreads, more professional trading environment." },
+    ],
+    questions: [
+      { q: "What is the DBC phase on Bags.fm?", options: ["A special governance vote", "The initial bonding curve launch phase where price rises with each buy", "A decentralized exchange listing", "A bug bounty program"], correct: 1, explanation: "DBC stands for Dynamic Bonding Curve. When a token launches on Bags.fm, it starts on a bonding curve — each buy raises the price slightly. Once enough SOL is raised, it graduates to a full liquidity pool." },
+      { q: "What does graduation mean on Bags.fm?", options: ["The dev team leaves the project", "The token migrates from bonding curve to a full Meteora liquidity pool", "The token gets listed on Coinbase", "Trading is permanently locked"], correct: 1, explanation: "Graduation is a milestone — it means the token raised enough initial liquidity to move to Meteora DAMM V2, a professional AMM pool. Graduated tokens have deeper liquidity and more stable trading." },
+      { q: "How much do Bags.fm creators earn from trading volume?", options: ["0.1%", "0.5%", "1%", "5%"], correct: 2, explanation: "Creators earn 1% of all trading volume on their token — forever. This means the more people trade your token, the more you earn, even if you never touch the project again." },
+      { q: "What is a partner ref code on Bags.fm?", options: ["A discount code for launching tokens", "A referral code that earns you a % of platform fees when users trade through your link", "A verification badge", "An API access code"], correct: 1, explanation: "Partner ref codes let you earn a percentage of platform fees when users trade through your referral link. The CLKN trade link uses ref=firechicken007 — every trade through that link earns fees back to the FireChicken ecosystem." },
+      { q: "What is Meteora DAMM V2?", options: ["A Solana validator", "A graduated liquidity pool providing deeper, more stable trading", "A token burning mechanism", "A CEX listing"], correct: 1, explanation: "Meteora DAMM V2 is where Bags.fm tokens go after graduation. It's a more sophisticated AMM with concentrated liquidity, tighter spreads, and better trading conditions than the initial bonding curve." },
+      { q: "If a Bags.fm token never graduates, what happens?", options: ["It automatically lists on Raydium", "It stays on the bonding curve indefinitely or fails with low trading activity", "The dev gets their SOL back", "It becomes a stable coin"], correct: 1, explanation: "Not every Bags.fm token graduates. If a token doesn't attract enough buying pressure to fill the bonding curve, it stays there indefinitely. Many tokens fail at this stage — research is critical." },
+      { q: "CLKN uses ref code firechicken007. What does this mean for the FireChicken ecosystem?", options: ["Nothing — it's just a username", "Every CLKN trade through that link generates fees that flow back to the FireChicken community", "It gives discounts to buyers", "It locks trading to only FireChicken holders"], correct: 1, explanation: "The firechicken007 partner ref code means a percentage of platform fees from every CLKN trade flows back to the FireChicken ecosystem. The education app, the community, and token holders all benefit from trading activity." },
+    ],
+  },
+
+  {
+    id: "memecoins", belt: "EMERITUS", icon: "🐸", title: "Memecoins & Culture",
+    quote: "Cluck Norris IS a memecoin. He respects the game.",
+    color: "#A855F7", glow: "rgba(168,85,247,0.4)",
+    intro: "Memecoins are the most volatile, most dangerous, and most exciting corner of crypto. They have no utility — their value is entirely driven by community, narrative, and timing. Understanding how they work is how you survive them.",
+    concepts: [
+      { term: "Memecoin", def: "A token with no inherent utility — value is driven purely by community, narrative, and speculation." },
+      { term: "Narrative", def: "The story or theme driving a memecoin's momentum. Dog coins, political figures, viral memes." },
+      { term: "Community", def: "The single most important factor in a memecoin's success. A strong community creates buying pressure and holds through dips." },
+      { term: "Pump and Dump", def: "Coordinated buying to raise price followed by coordinated selling — leaving late buyers holding worthless bags." },
+      { term: "Degen Trading", def: "High-risk, high-reward trading strategy focused on early memecoin entries with small position sizes." },
+    ],
+    questions: [
+      { q: "What gives a memecoin its value?", options: ["Real-world utility and revenue", "Community belief, narrative, and speculation", "Developer credentials", "Smart contract complexity"], correct: 1, explanation: "Memecoins have no fundamental value — no product, no revenue, no utility. Their value is entirely narrative-driven. The meme, the community, and the timing determine everything." },
+      { q: "What is the most important factor in a memecoin's long-term survival?", options: ["The initial price", "A strong, engaged community that believes in the narrative", "CEX listings", "The dev team's coding ability"], correct: 1, explanation: "Memecoins that survive are held together by community. When the community believes and holds through dips, the token has a chance. When community leaves, it's over — no fundamentals to fall back on." },
+      { q: "What is a pump and dump scheme?", options: ["A legitimate trading strategy", "Coordinated buying to raise price, then coordinated selling leaving late buyers with losses", "A type of yield farming", "How all crypto tokens work"], correct: 1, explanation: "Pump and dump groups coordinate buying to create artificial price spikes, then exit simultaneously. Late buyers — usually retail — are left holding worthless tokens. This is illegal in traditional markets but common in crypto." },
+      { q: "What does degen trading mean?", options: ["Trading with insider information", "High-risk early entries into speculative tokens with small position sizes", "Day trading on CEXs", "Trading without doing any research"], correct: 1, explanation: "Degen (degenerate) trading is high-risk speculation — usually early entries into memecoins or new launches. Experienced degens use small position sizes, take profits early, and accept that most bets will fail." },
+      { q: "You find a brand new memecoin at a $10K market cap with a funny meme. What is the correct risk management approach?", options: ["Put in everything — small cap = maximum upside", "Only invest what you can completely afford to lose — treat it like a lottery ticket", "Avoid it entirely — small caps are always scams", "Wait until it reaches $1M market cap to confirm legitimacy"], correct: 1, explanation: "Ultra small cap memecoins are essentially lottery tickets. The upside can be enormous but the probability of failure is very high. Only ever invest what you can afford to completely lose — because you probably will." },
+      { q: "What is narrative in memecoin culture?", options: ["The project's technical whitepaper", "The story or theme driving community excitement and buying pressure", "The dev team's public statement", "The token's smart contract code"], correct: 1, explanation: "Narrative is everything in memecoin culture. 'Dog with hat', political figures, AI themes, animal coins — when a narrative captures the zeitgeist, it drives viral spread and buying pressure. Without narrative, there's nothing." },
+      { q: "CLKN is a memecoin built on Bags.fm. What makes it different from a typical memecoin?", options: ["It has a working DeFi product", "It combines meme culture with a real education platform and fee-sharing ecosystem", "It has a fixed supply", "It's backed by real assets"], correct: 1, explanation: "CLKN is unique because it has an actual utility layer — the School of Crypto Hard Knocks — plus a fee-sharing mechanism where creator and partner fees flow back to the community. Most memecoins have nothing backing them." },
     ],
   },
 ];
 
-const BELT_BG   = { "FRESHMAN":"#F0F0F0","SOPHOMORE":"#FCD34D","JUNIOR":"#F97316","SENIOR":"#10B981","GRADUATE":"#06B6D4","POST-GRAD":"#92400E","TENURED":"#DC2626","HEADMASTER":"#111" };
-const BELT_TEXT = { "FRESHMAN":"#111","SOPHOMORE":"#111","JUNIOR":"#fff","SENIOR":"#fff","GRADUATE":"#fff","POST-GRAD":"#fff","TENURED":"#fff","HEADMASTER":"#D4AF37" };
+const BELT_BG   = { "FRESHMAN":"#F0F0F0","SOPHOMORE":"#FCD34D","JUNIOR":"#F97316","SENIOR":"#10B981","GRADUATE":"#06B6D4","POST-GRAD":"#92400E","TENURED":"#DC2626","HEADMASTER":"#111","PROFESSOR":"#14B8A6","DEAN":"#84CC16","CHANCELLOR":"#D97706","EMERITUS":"#A855F7" };
+const BELT_TEXT = { "FRESHMAN":"#111","SOPHOMORE":"#111","JUNIOR":"#fff","SENIOR":"#fff","GRADUATE":"#fff","POST-GRAD":"#fff","TENURED":"#fff","HEADMASTER":"#D4AF37","PROFESSOR":"#fff","DEAN":"#111","CHANCELLOR":"#fff","EMERITUS":"#fff" };
 function Belt({belt,small}){return(<span style={{display:"inline-block",background:BELT_BG[belt],color:BELT_TEXT[belt],fontFamily:"'Oswald',sans-serif",fontSize:small?9:10,fontWeight:700,letterSpacing:1.5,padding:small?"2px 6px":"3px 10px",borderRadius:3,border:belt==="BLACK BELT"?"1px solid #D4AF37":"none",textTransform:"uppercase"}}>{belt}</span>);}
 
 // ── APP ICON SVG (School of Crypto Hard Knocks) ──
@@ -161,18 +290,11 @@ function CLKNTicker() {
     async function fetchFees() {
       try {
         const res = await fetch(
-          `/api/bags-proxy?type=fees&mint=${CLKN_MINT}`,
+          `/api/bags-proxy?endpoint=analytics/token-lifetime-fees&tokenMint=${CLKN_MINT}`,
           {}
         );
         const data = await res.json();
-        if (data.success) {
-          const r = data.response;
-          if (r.feesSOL !== undefined) {
-            setFees({ totalFeesSol: r.feesSOL });
-          } else {
-            setFees(r);
-          }
-        }
+        if (data.success) setFees(data.response);
       } catch (e) {}
       finally { setLoading(false); }
     }
@@ -221,19 +343,11 @@ function CLKNWidget() {
       setApiStatus("connecting");
       const [poolRes, feesRes] = await Promise.all([
         fetch(`/api/bags-proxy?endpoint=solana/bags/pools/token-mint&tokenMint=${CLKN_MINT}`),
-        fetch(`/api/bags-proxy?type=fees&mint=${CLKN_MINT}`),
+        fetch(`/api/bags-proxy?endpoint=analytics/token-lifetime-fees&tokenMint=${CLKN_MINT}`),
       ]);
       const [poolData, feesData] = await Promise.all([poolRes.json(), feesRes.json()]);
       if (poolData.success) setPool(poolData.response);
-      if (feesData.success) {
-        // Handle both SDK format (feesSOL) and REST format (totalFeesSol)
-        const r = feesData.response;
-        if (r.feesSOL !== undefined) {
-          setFees({ totalFeesSol: r.feesSOL, claimedFeesSol: null, unclaimedFeesSol: null });
-        } else {
-          setFees(r);
-        }
-      }
+      if (feesData.success) setFees(feesData.response);
       setLastUpdated(new Date());
       setDebugInfo({
         pool: JSON.stringify(poolData).slice(0, 200),
@@ -671,7 +785,7 @@ function Complete({onRestart}){
         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D97706",letterSpacing:2}}> -  PROFESSOR NORRIS</div>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:24}}>
-        {[["8","CLASSES"],["24","EXAMS"],["0","EXTRA CREDIT"]].map(([n,lb])=>(
+        {[["12","CLASSES"],["72","EXAMS"],["0","EXTRA CREDIT"]].map(([n,lb])=>(
           <div key={lb} style={{background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"10px 6px",border:"1px solid rgba(255,255,255,0.07)"}}>
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:22,color:"#FCD34D"}}>{n}</div>
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,letterSpacing:2,color:"#6B7280"}}>{lb}</div>
