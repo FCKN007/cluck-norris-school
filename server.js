@@ -11,10 +11,6 @@ const PORT = process.env.PORT || 3000;
 const BAGS_BASE = "https://public-api-v2.bags.fm/api/v1/";
 const JUPITER_LOCK_PROGRAM = "LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1MaluFw55K";
 
-function getHeliusUrl() {
-  return `https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}`;
-}
-
 // ── Bags API Proxy ──
 app.get("/api/bags-proxy", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -25,12 +21,12 @@ app.get("/api/bags-proxy", async (req, res) => {
   try {
     const queryString = new URLSearchParams(params).toString();
     const url = `${BAGS_BASE}${endpoint}${queryString ? `?${queryString}` : ""}`;
-    console.log("→ Bags API:", url);
+    console.log("→ Bags:", url);
     const response = await fetch(url, { headers: { "x-api-key": API_KEY } });
     const text = await response.text();
-    console.log("← Bags:", response.status, text.slice(0, 200));
+    console.log("← Bags:", response.status, text.slice(0, 150));
     try { return res.status(200).json(JSON.parse(text)); }
-    catch (e) { return res.status(500).json({ success: false, error: "Invalid JSON", raw: text.slice(0, 200) }); }
+    catch (e) { return res.status(500).json({ success: false, error: "Invalid JSON" }); }
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
@@ -40,39 +36,35 @@ app.get("/api/bags-proxy", async (req, res) => {
 app.get("/api/holders", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   const { mint } = req.query;
+  const HELIUS_KEY = process.env.HELIUS_API_KEY;
+  console.log("→ Holders request for mint:", mint);
+  console.log("→ Helius key present:", !!HELIUS_KEY);
   if (!mint) return res.status(400).json({ success: false, error: "Missing mint" });
-  if (!process.env.HELIUS_API_KEY) return res.status(500).json({ success: false, error: "Missing HELIUS_API_KEY" });
-
+  if (!HELIUS_KEY) return res.status(500).json({ success: false, error: "Missing HELIUS_API_KEY" });
+  const HELIUS_URL = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
   try {
     let page = 1;
     const owners = new Set();
     while (true) {
-      const response = await fetch(getHeliusUrl(), {
+      const response = await fetch(HELIUS_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           jsonrpc: "2.0",
-          id: "holders-" + page,
+          id: `holders-${page}`,
           method: "getTokenAccounts",
-          params: {
-            page,
-            limit: 1000,
-            mint,
-            displayOptions: { showZeroBalance: false }
-          }
+          params: { page, limit: 1000, mint, displayOptions: { showZeroBalance: false } }
         })
       });
       const data = await response.json();
-      console.log("Helius holders page", page, "status:", response.status);
-      if (!data.result || !data.result.token_accounts || data.result.token_accounts.length === 0) break;
-      data.result.token_accounts.forEach(a => {
-        if (a.amount > 0) owners.add(a.owner);
-      });
+      console.log(`← Helius holders page ${page} status:`, response.status, "accounts:", data.result?.token_accounts?.length);
+      if (!data.result?.token_accounts?.length) break;
+      data.result.token_accounts.forEach(a => { if (parseInt(a.amount) > 0) owners.add(a.owner); });
       if (data.result.token_accounts.length < 1000) break;
       page++;
-      if (page > 20) break; // safety cap
+      if (page > 20) break;
     }
-    console.log("Total unique holders:", owners.size);
+    console.log("Total holders:", owners.size);
     return res.status(200).json({ success: true, holderCount: owners.size });
   } catch (err) {
     console.error("Holders error:", err.message);
@@ -84,36 +76,28 @@ app.get("/api/holders", async (req, res) => {
 app.get("/api/locks", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   const { mint } = req.query;
+  const HELIUS_KEY = process.env.HELIUS_API_KEY;
+  console.log("→ Locks request for mint:", mint);
+  console.log("→ Helius key present:", !!HELIUS_KEY);
   if (!mint) return res.status(400).json({ success: false, error: "Missing mint" });
-  if (!process.env.HELIUS_API_KEY) return res.status(500).json({ success: false, error: "Missing HELIUS_API_KEY" });
-
+  if (!HELIUS_KEY) return res.status(500).json({ success: false, error: "Missing HELIUS_API_KEY" });
+  const HELIUS_URL = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
   try {
-    const response = await fetch(getHeliusUrl(), {
+    const response = await fetch(HELIUS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         jsonrpc: "2.0",
         id: "locks",
         method: "getTokenAccounts",
-        params: {
-          page: 1,
-          limit: 1000,
-          mint,
-          owner: JUPITER_LOCK_PROGRAM,
-          displayOptions: { showZeroBalance: false }
-        }
+        params: { page: 1, limit: 1000, mint, owner: JUPITER_LOCK_PROGRAM, displayOptions: { showZeroBalance: false } }
       })
     });
     const data = await response.json();
-    console.log("Helius locks status:", response.status, JSON.stringify(data).slice(0, 200));
+    console.log("← Helius locks status:", response.status, JSON.stringify(data).slice(0, 300));
     const accounts = data.result?.token_accounts || [];
     const totalLocked = accounts.reduce((sum, a) => sum + (parseInt(a.amount) || 0), 0);
-    return res.status(200).json({
-      success: true,
-      lockCount: accounts.length,
-      totalLocked,
-      locks: accounts.slice(0, 10)
-    });
+    return res.status(200).json({ success: true, lockCount: accounts.length, totalLocked, locks: accounts.slice(0, 10) });
   } catch (err) {
     console.error("Locks error:", err.message);
     return res.status(500).json({ success: false, error: err.message });
@@ -128,4 +112,6 @@ app.get("*", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🐔 Cluck Norris server running on port ${PORT}`);
+  console.log(`BAGS_API_KEY present: ${!!process.env.BAGS_API_KEY}`);
+  console.log(`HELIUS_API_KEY present: ${!!process.env.HELIUS_API_KEY}`);
 });
