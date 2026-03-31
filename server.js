@@ -107,11 +107,34 @@ app.get("/api/locks", async (req, res) => {
     const data = await response.json();
     console.log("Helius locks status:", response.status, JSON.stringify(data).slice(0, 200));
     const accounts = data.result?.token_accounts || [];
-    const totalLocked = accounts.reduce((sum, a) => sum + (parseInt(a.amount) || 0), 0);
+
+    // a.amount may arrive as a string or BigInt-style large number — parse carefully
+    const DECIMALS = 6; // standard for most Solana tokens (e.g. USDC, CLKN)
+    let totalLockedRaw = BigInt(0);
+    accounts.forEach((a, i) => {
+      const raw = String(a.amount ?? "0").trim();
+      console.log(`Lock account[${i}] owner=${a.owner} amount_raw="${raw}"`);
+      try {
+        totalLockedRaw += BigInt(raw);
+      } catch (e) {
+        console.warn(`Lock account[${i}] could not parse amount "${raw}":`, e.message);
+      }
+    });
+
+    // Convert from raw units to human-readable (divide by 10^DECIMALS)
+    const divisor = BigInt(10 ** DECIMALS);
+    const wholePart = totalLockedRaw / divisor;
+    const fracPart  = totalLockedRaw % divisor;
+    const totalLocked = Number(wholePart) + Number(fracPart) / (10 ** DECIMALS);
+
+    console.log(`Locks: ${accounts.length} accounts, raw total=${totalLockedRaw.toString()}, human=${totalLocked}`);
+
     return res.status(200).json({
       success: true,
       lockCount: accounts.length,
-      totalLocked,
+      totalLockedRaw: totalLockedRaw.toString(), // raw lamports as string (avoids JS precision loss)
+      totalLocked,                               // decimal-adjusted human-readable amount
+      decimals: DECIMALS,
       locks: accounts.slice(0, 10)
     });
   } catch (err) {
