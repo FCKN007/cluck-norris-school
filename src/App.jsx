@@ -689,7 +689,7 @@ function Landing({onStart,completed}){
       <button onClick={onStart} style={{background:"linear-gradient(135deg,#D97706,#EF4444)",border:"none",borderRadius:10,padding:"14px 44px",fontFamily:"'Oswald',sans-serif",fontSize:16,fontWeight:700,color:"#fff",letterSpacing:3,textTransform:"uppercase",cursor:"pointer",boxShadow:"0 0 28px rgba(217,119,6,0.5)"}}>
         {completed.length===0?"📋 Enroll Now":"📚 Back to Class"}
       </button>
-      <p style={{marginTop:12,fontSize:10,color:"#4B5563",fontFamily:"'Oswald',sans-serif",letterSpacing:1}}>8 CLASSES • 24 EXAMS • NO EXTRA CREDIT</p>
+      <p style={{marginTop:12,fontSize:10,color:"#4B5563",fontFamily:"'Oswald',sans-serif",letterSpacing:1}}>12 CLASSES • 72 EXAMS • NO EXTRA CREDIT</p>
       <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{
         display:"inline-block",marginTop:16,
         background:"rgba(217,119,6,0.1)",border:"1px solid rgba(217,119,6,0.35)",
