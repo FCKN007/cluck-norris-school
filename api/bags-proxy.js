@@ -65,6 +65,30 @@ export default async function handler(req, res) {
     // 🌐 REST ROUTES (SAFE)
     // =============================
     if (endpoint) {
+      // Intercept the broken REST endpoint and serve it via the SDK instead
+      if (endpoint === "analytics/token-lifetime-fees") {
+        const tokenMint = rest.tokenMint || mint;
+        try {
+          const sdk = getSDK();
+          const fees = await sdk.state.getTokenLifetimeFees(new PublicKey(tokenMint));
+
+          return res.status(200).json({
+            success: true,
+            response: {
+              totalFeesSol: fees / 1_000_000_000,
+              claimedFeesSol: null,
+              unclaimedFeesSol: null,
+            },
+          });
+        } catch (err) {
+          console.error("SDK LIFETIME FEES ERROR:", err);
+          return res.status(500).json({
+            success: false,
+            error: "Lifetime fees fetch failed",
+          });
+        }
+      }
+
       try {
         const queryString = new URLSearchParams(rest).toString();
         const fullUrl = `${BASE_URL}${endpoint}${queryString ? `?${queryString}` : ""}`;
