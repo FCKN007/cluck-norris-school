@@ -9,8 +9,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const BAGS_BASE = "https://public-api-v2.bags.fm/api/v1/";
-const HELIUS_URL = `https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}`;
 const JUPITER_LOCK_PROGRAM = "LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1MaluFw55K";
+
+function getHeliusUrl() {
+  return `https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}`;
+}
 
 // ── Bags API Proxy ──
 app.get("/api/bags-proxy", async (req, res) => {
@@ -44,24 +47,35 @@ app.get("/api/holders", async (req, res) => {
     let page = 1;
     const owners = new Set();
     while (true) {
-      const response = await fetch(HELIUS_URL, {
+      const response = await fetch(getHeliusUrl(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          jsonrpc: "2.0", id: "holders", method: "getTokenAccounts",
-          params: { page, limit: 1000, mint, displayOptions: {} }
+          jsonrpc: "2.0",
+          id: "holders-" + page,
+          method: "getTokenAccounts",
+          params: {
+            page,
+            limit: 1000,
+            mint,
+            displayOptions: { showZeroBalance: false }
+          }
         })
       });
       const data = await response.json();
-      if (!data.result || data.result.token_accounts.length === 0) break;
+      console.log("Helius holders page", page, "status:", response.status);
+      if (!data.result || !data.result.token_accounts || data.result.token_accounts.length === 0) break;
       data.result.token_accounts.forEach(a => {
         if (a.amount > 0) owners.add(a.owner);
       });
       if (data.result.token_accounts.length < 1000) break;
       page++;
+      if (page > 20) break; // safety cap
     }
+    console.log("Total unique holders:", owners.size);
     return res.status(200).json({ success: true, holderCount: owners.size });
   } catch (err) {
+    console.error("Holders error:", err.message);
     return res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -74,25 +88,34 @@ app.get("/api/locks", async (req, res) => {
   if (!process.env.HELIUS_API_KEY) return res.status(500).json({ success: false, error: "Missing HELIUS_API_KEY" });
 
   try {
-    // Get all token accounts owned by Jupiter Lock program for this mint
-    const response = await fetch(HELIUS_URL, {
+    const response = await fetch(getHeliusUrl(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        jsonrpc: "2.0", id: "locks", method: "getTokenAccounts",
-        params: { page: 1, limit: 1000, mint, displayOptions: {}, owner: JUPITER_LOCK_PROGRAM }
+        jsonrpc: "2.0",
+        id: "locks",
+        method: "getTokenAccounts",
+        params: {
+          page: 1,
+          limit: 1000,
+          mint,
+          owner: JUPITER_LOCK_PROGRAM,
+          displayOptions: { showZeroBalance: false }
+        }
       })
     });
     const data = await response.json();
-    const locks = data.result?.token_accounts || [];
-    const totalLocked = locks.reduce((sum, a) => sum + (a.amount || 0), 0);
+    console.log("Helius locks status:", response.status, JSON.stringify(data).slice(0, 200));
+    const accounts = data.result?.token_accounts || [];
+    const totalLocked = accounts.reduce((sum, a) => sum + (parseInt(a.amount) || 0), 0);
     return res.status(200).json({
       success: true,
-      lockCount: locks.length,
+      lockCount: accounts.length,
       totalLocked,
-      locks: locks.slice(0, 10) // return top 10
+      locks: accounts.slice(0, 10)
     });
   } catch (err) {
+    console.error("Locks error:", err.message);
     return res.status(500).json({ success: false, error: err.message });
   }
 });
