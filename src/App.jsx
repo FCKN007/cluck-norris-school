@@ -314,10 +314,20 @@ function CLKNWidget() {
 
   async function fetchMeteora(dammKey) {
     try {
+      // Try Meteora datapi
       const res = await fetch(`https://damm-v2.datapi.meteora.ag/pools?address=${dammKey}`);
       const data = await res.json();
-      if (data && data.data && data.data.length > 0) setMeteorPool(data.data[0]);
-    } catch (e) {}
+      if (data && data.data && data.data.length > 0) {
+        setMeteorPool(data.data[0]);
+        return;
+      }
+      // Fallback — try pool directly
+      const res2 = await fetch(`https://damm-v2.datapi.meteora.ag/pool/${dammKey}`);
+      const data2 = await res2.json();
+      if (data2) setMeteorPool(data2);
+    } catch (e) {
+      console.log("Meteora fetch error:", e.message);
+    }
   }
 
   async function fetchDex() {
@@ -474,18 +484,18 @@ function CLKNWidget() {
           </div>
         )}
 
-        {/* Meteora Pool — after graduation */}
+        {/* Graduated Pool — uses DexScreener data */}
         {isGraduated && (
           <div>
-            {meteoraPool ? (
+            {dexData ? (
               <div style={{display:"flex",flexDirection:"column",gap:6}}>
                 {[
                   {label:"POOL ADDRESS",value:shortKey(pool.dammV2PoolKey),color:"#D4AF37"},
-                  {label:"TOKEN A (CLKN)",value:meteoraPool.token_a_amount ? fmtNum(meteoraPool.token_a_amount/Math.pow(10,6),0) + " CLKN" : "—",color:"#FCD34D"},
-                  {label:"TOKEN B (SOL)",value:meteoraPool.token_b_amount ? fmtSol(meteoraPool.token_b_amount/LAMPORTS_PER_SOL) : "—",color:"#06B6D4"},
-                  {label:"TVL",value:meteoraPool.pool_tvl ? "$" + fmtNum(meteoraPool.pool_tvl,0) : "—",color:"#10B981"},
-                  {label:"24H VOLUME",value:meteoraPool.trade_volume_24h ? "$" + fmtNum(meteoraPool.trade_volume_24h,0) : "—",color:"#8B5CF6"},
-                  {label:"24H FEES",value:meteoraPool.fees_24h ? "$" + fmtNum(meteoraPool.fees_24h,2) : "—",color:"#F59E0B"},
+                  {label:"PRICE",value:dexData.priceUsd ? `$${parseFloat(dexData.priceUsd).toFixed(8)}` : "—",color:"#FCD34D"},
+                  {label:"LIQUIDITY",value:dexData.liquidity?.usd ? `$${fmtNum(dexData.liquidity.usd,0)}` : "—",color:"#06B6D4"},
+                  {label:"MARKET CAP",value:dexData.marketCap ? `$${fmtNum(dexData.marketCap,0)}` : "—",color:"#10B981"},
+                  {label:"24H VOLUME",value:dexData.volume?.h24 ? `$${fmtNum(dexData.volume.h24,0)}` : "—",color:"#8B5CF6"},
+                  {label:"24H CHANGE",value:dexData.priceChange?.h24 ? `${dexData.priceChange.h24 > 0 ? "+" : ""}${parseFloat(dexData.priceChange.h24).toFixed(2)}%` : "—",color:dexData.priceChange?.h24 > 0 ? "#10B981" : "#EF4444"},
                 ].map(r=>(
                   <div key={r.label} style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"8px 12px",display:"flex",justifyContent:"space-between"}}>
                     <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:2,color:"#4B5563"}}>{r.label}</span>
@@ -495,7 +505,7 @@ function CLKNWidget() {
               </div>
             ) : (
               <div style={{height:120,background:"rgba(255,255,255,0.03)",borderRadius:10,animation:"pulse 1.5s infinite",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:2}}>LOADING METEORA DATA...</span>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:2}}>LOADING POOL DATA...</span>
               </div>
             )}
           </div>
