@@ -65,6 +65,15 @@ export default async function handler(req, res) {
     // 🌐 REST ROUTES (SAFE)
     // =============================
     if (endpoint) {
+      console.log("[bags-proxy] raw endpoint value:", JSON.stringify(endpoint));
+      console.log("[bags-proxy] rest params:", JSON.stringify(rest));
+      console.log(
+        "[bags-proxy] intercept match:",
+        endpoint === "analytics/token-lifetime-fees"
+          ? "YES — serving via SDK"
+          : `NO — '${endpoint}' !== 'analytics/token-lifetime-fees'`
+      );
+
       // Intercept the broken REST endpoint and serve it via the SDK instead
       if (endpoint === "analytics/token-lifetime-fees") {
         const tokenMint = rest.tokenMint || mint;
