@@ -412,13 +412,13 @@ function CLKNWidget() {
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#3B82F6"}}>📈 BONDING CURVE PROGRESS</div>
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,color:"#FCD34D"}}>
-              {dexData && dexData.marketCap ? `${Math.min(Math.round((dexData.marketCap / 69000) * 100), 99)}%` : "..."}
+              {dexData && dexData.marketCap ? `${Math.min(Math.round((dexData.marketCap / 34500) * 100), 99)}%` : "..."}
             </div>
           </div>
           <div style={{height:10,background:"rgba(255,255,255,0.08)",borderRadius:20,overflow:"hidden",marginBottom:10}}>
             <div style={{
               height:"100%",
-              width: dexData && dexData.marketCap ? `${Math.min(Math.round((dexData.marketCap / 69000) * 100), 99)}%` : "0%",
+              width: dexData && dexData.marketCap ? `${Math.min(Math.round((dexData.marketCap / 34500) * 100), 99)}%` : "0%",
               background:"linear-gradient(90deg,#3B82F6,#06B6D4,#FCD34D)",
               borderRadius:20,
               boxShadow:"0 0 10px rgba(6,182,212,0.5)",
