@@ -487,15 +487,15 @@ function CLKNWidget() {
           </div>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:7,color:"#4B5563",letterSpacing:1,marginTop:2}}>VIA HELIUS</div>
         </div>
-        <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:10,padding:"12px",textAlign:"center"}}>
+        <a href="https://lock.jup.ag/token/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS" target="_blank" rel="noreferrer" style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:10,padding:"12px",textAlign:"center",textDecoration:"none",display:"block"}}>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,letterSpacing:2,color:"#10B981",marginBottom:4}}>🔒 LOCKED</div>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:22,fontWeight:700,color:"#10B981"}}>
-            {locks ? fmtNum(locks.totalLocked / Math.pow(10,6), 0) : "—"}
+            60,000,000
           </div>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:7,color:"#4B5563",letterSpacing:1,marginTop:2}}>
-            {locks ? `${locks.lockCount} JUPITER LOCK${locks.lockCount !== 1 ? "S" : ""}` : "VIA JUPITER"}
+            4 JUPITER LOCKS
           </div>
-        </div>
+        </a>
       </div>
 
       {/* Pool Info — switches between DBC and Meteora */}
