@@ -472,8 +472,7 @@ function BagsPage() {
                           {feedPrices[p.tokenMint].change24h>0?"+":""}{parseFloat(feedPrices[p.tokenMint].change24h).toFixed(1)}%
                         </div>
                       )}
-                      {p.website && <div style={{fontSize:13}}>🌐</div>}
-                      {p.twitter && <div style={{fontSize:13}}>🐦</div>}
+
                     </div>
                   </div>
                 </div>
