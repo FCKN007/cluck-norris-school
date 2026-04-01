@@ -294,23 +294,10 @@ function BagsPage() {
   useEffect(() => {
     async function fetchFeed() {
       try {
-        const res = await fetch("/api/bags-proxy?endpoint=solana/bags/pools&onlyMigrated=false");
+        const res = await fetch("/api/bags-proxy?endpoint=token-launch/feed");
         const data = await res.json();
         if (data.success && data.response) {
-          const pools = data.response.slice(0, 10);
-          // Enrich with DexScreener data for names and prices
-          const enriched = await Promise.all(pools.map(async (p) => {
-            try {
-              const dexRes = await fetch(`https://api.dexscreener.com/token-pairs/v1/solana/${p.tokenMint}`);
-              const dexData = await dexRes.json();
-              if (dexData && dexData.length > 0) {
-                const pair = dexData.sort((a,b) => (b.liquidity?.usd||0) - (a.liquidity?.usd||0))[0];
-                return { ...p, name: pair.baseToken?.name, symbol: pair.baseToken?.symbol, priceUsd: pair.priceUsd, marketCap: pair.marketCap };
-              }
-            } catch(e) {}
-            return p;
-          }));
-          setFeed(enriched);
+          setFeed(data.response.slice(0, 12));
         }
       } catch(e) {} finally { setFeedLoading(false); }
     }
@@ -406,17 +393,28 @@ function BagsPage() {
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
             {feed.map((p,i)=>(
               <a key={i} href={`https://bags.fm/${p.tokenMint}?ref=firechicken007`} target="_blank" rel="noreferrer" style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"10px 12px",textDecoration:"none",border:"1px solid rgba(255,255,255,0.05)"}}>
-                <div>
-                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#F9FAFB"}}>
-                    {p.name || `${p.tokenMint.slice(0,6)}...`} {p.symbol ? `(${p.symbol})` : ""}
-                  </div>
-                  <div style={{display:"flex",gap:8,alignItems:"center",marginTop:2}}>
-                    <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:p.dammV2PoolKey?"#10B981":"#D97706",letterSpacing:1}}>{p.dammV2PoolKey?"🎓 GRADUATED":"📈 BONDING"}</div>
-                    {p.priceUsd && <div style={{fontFamily:"monospace",fontSize:8,color:"#6B7280"}}>${parseFloat(p.priceUsd).toFixed(6)}</div>}
-                    {p.marketCap && <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#8B5CF6"}}>MC: ${parseInt(p.marketCap).toLocaleString()}</div>}
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  {p.image && <img src={p.image} alt={p.name} style={{width:32,height:32,borderRadius:"50%",objectFit:"cover",flexShrink:0}} onError={e=>e.target.style.display="none"}/>}
+                  <div>
+                    <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#F9FAFB"}}>
+                      {p.name} <span style={{color:"#6B7280",fontSize:11}}>({p.symbol})</span>
+                    </div>
+                    <div style={{display:"flex",gap:6,alignItems:"center",marginTop:2}}>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,letterSpacing:1,color:
+                        p.status==="MIGRATED"?"#10B981":
+                        p.status==="MIGRATING"?"#F59E0B":
+                        p.status==="PRE_GRAD"?"#D97706":"#6B7280"
+                      }}>
+                        {p.status==="MIGRATED"?"🎓 GRADUATED":
+                         p.status==="MIGRATING"?"⏳ MIGRATING":
+                         p.status==="PRE_GRAD"?"🔥 NEAR GRAD":"📈 BONDING"}
+                      </div>
+                      {p.website && <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563"}}>🌐</div>}
+                      {p.twitter && <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563"}}>🐦</div>}
+                    </div>
                   </div>
                 </div>
-                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#D97706",letterSpacing:1}}>TRADE →</div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#D97706",letterSpacing:1,flexShrink:0}}>TRADE →</div>
               </a>
             ))}
           </div>
