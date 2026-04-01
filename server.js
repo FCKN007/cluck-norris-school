@@ -106,6 +106,25 @@ app.get("/api/locks", async (req, res) => {
   }
 });
 
+// ── Fee Share Wallet ──
+app.get("/api/fees", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  const API_KEY = process.env.BAGS_API_KEY;
+  if (!API_KEY) return res.status(500).json({ success: false, error: "Missing BAGS_API_KEY" });
+  try {
+    const url = `${BAGS_BASE}analytics/token-lifetime-fees?tokenMint=DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS`;
+    console.log("→ Fees:", url);
+    const response = await fetch(url, { headers: { "x-api-key": API_KEY } });
+    const text = await response.text();
+    console.log("← Fees:", response.status, text.slice(0, 200));
+    try { return res.status(200).json(JSON.parse(text)); }
+    catch (e) { return res.status(500).json({ success: false, error: "Invalid JSON" }); }
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ── Partner Stats ──
 app.get("/api/partner-stats", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
