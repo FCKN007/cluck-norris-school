@@ -4,6 +4,10 @@ const SOL_MINT = "So11111111111111111111111111111111111111112";
 const LAMPORTS_PER_SOL = 1_000_000_000;
 const CLKN_TRADE_LINK = "https://bags.fm/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS?ref=firechicken007";
 const PARTNER_LINK = "https://bags.fm/?ref=firechicken007";
+const BAGS_SIGNUP = "https://bags.fm/?ref=firechicken007";
+const BAGS_DEV = "https://dev.bags.fm";
+const BAGS_APP_IOS = "https://apps.apple.com/app/bags-fm/id6743534707";
+const BAGS_APP_ANDROID = "https://play.google.com/store/apps/details?id=fm.bags.app";
 
 
 const LOGO_B64 = "/cluck-norris.png";
@@ -279,6 +283,134 @@ const LESSONS = [
 const BELT_BG   = { "FRESHMAN":"#F0F0F0","SOPHOMORE":"#FCD34D","JUNIOR":"#F97316","SENIOR":"#10B981","GRADUATE":"#06B6D4","POST-GRAD":"#92400E","TENURED":"#DC2626","HEADMASTER":"#111","PROFESSOR":"#14B8A6","DEAN":"#84CC16","CHANCELLOR":"#D97706","EMERITUS":"#A855F7" };
 const BELT_TEXT = { "FRESHMAN":"#111","SOPHOMORE":"#111","JUNIOR":"#fff","SENIOR":"#fff","GRADUATE":"#fff","POST-GRAD":"#fff","TENURED":"#fff","HEADMASTER":"#D4AF37","PROFESSOR":"#fff","DEAN":"#111","CHANCELLOR":"#fff","EMERITUS":"#fff" };
 function Belt({belt,small}){return(<span style={{display:"inline-block",background:BELT_BG[belt],color:BELT_TEXT[belt],fontFamily:"'Oswald',sans-serif",fontSize:small?9:10,fontWeight:700,letterSpacing:1.5,padding:small?"2px 6px":"3px 10px",borderRadius:3,border:belt==="BLACK BELT"?"1px solid #D4AF37":"none",textTransform:"uppercase"}}>{belt}</span>);}
+
+
+// ── BAGS PAGE ──
+function BagsPage() {
+  const [feed, setFeed] = useState(null);
+  const [partnerStats, setPartnerStats] = useState(null);
+  const [feedLoading, setFeedLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchFeed() {
+      try {
+        const res = await fetch("/api/bags-proxy?endpoint=solana/bags/pools&onlyMigrated=false");
+        const data = await res.json();
+        if (data.success && data.response) {
+          setFeed(data.response.slice(0, 10));
+        }
+      } catch(e) {} finally { setFeedLoading(false); }
+    }
+    async function fetchPartner() {
+      try {
+        const res = await fetch("/api/partner-stats");
+        const data = await res.json();
+        if (data.success) setPartnerStats(data.response);
+      } catch(e) {}
+    }
+    fetchFeed();
+    fetchPartner();
+  }, []);
+
+  const fmtNum = (n, dec=2) => n ? parseFloat(n).toLocaleString(undefined,{maximumFractionDigits:dec}) : "—";
+
+  return (
+    <div style={{padding:"0 16px 40px", maxWidth:520, margin:"0 auto"}}>
+      {/* Hero */}
+      <div style={{textAlign:"center", marginBottom:24}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:4,color:"#D97706",marginBottom:4}}>POWERED BY</div>
+        <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:32,fontWeight:900,color:"#F9FAFB",margin:"0 0 8px",letterSpacing:2}}>BAGS.FM</h2>
+        <p style={{color:"#9CA3AF",fontSize:14,lineHeight:1.7,margin:"0 0 16px"}}>
+          Bags.fm is Solana's premier token launch platform — built for creators, traders, and communities. Launch a token, earn fees forever, and graduate to Meteora liquidity automatically.
+        </p>
+      </div>
+
+      {/* Partner Stats */}
+      {partnerStats && (
+        <div style={{background:"rgba(217,119,6,0.08)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:12,padding:16,marginBottom:16}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706",marginBottom:12}}>🤝 FIRECHICKEN007 PARTNER STATS</div>
+          <div style={{display:"flex",gap:8}}>
+            {[
+              {label:"VOLUME",value:partnerStats.totalVolumeSol ? fmtNum(partnerStats.totalVolumeSol,2)+" SOL" : "—",color:"#FCD34D"},
+              {label:"EARNED",value:partnerStats.totalEarnedSol ? fmtNum(partnerStats.totalEarnedSol,4)+" SOL" : "—",color:"#10B981"},
+              {label:"TRADES",value:partnerStats.totalTrades ? partnerStats.totalTrades.toLocaleString() : "—",color:"#8B5CF6"},
+            ].map(s=>(
+              <div key={s.label} style={{flex:1,background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"10px 6px",textAlign:"center"}}>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,letterSpacing:1,color:"#6B7280",marginBottom:4}}>{s.label}</div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:s.color}}>{s.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* What is Bags */}
+      <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:16,marginBottom:16}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706",marginBottom:12}}>🎒 WHAT IS BAGS.FM?</div>
+        {[
+          {icon:"🚀",title:"Launch Any Token",desc:"Create and launch a token in minutes. No code required. Just a name, symbol, and image."},
+          {icon:"💰",title:"Earn Fees Forever",desc:"Token creators earn 1% of all trading volume on their token — forever. Add collaborators to your fee split."},
+          {icon:"📈",title:"Dynamic Bonding Curve",desc:"Tokens launch on a bonding curve and automatically graduate to a Meteora DAMM V2 liquidity pool when they hit the graduation threshold."},
+          {icon:"🤝",title:"Partner Ref Program",desc:"Earn 25% of platform fees when users trade through your referral link. The firechicken007 ref code powers this app."},
+          {icon:"🔑",title:"Developer API",desc:"Full REST API for pools, trading, analytics, and more. Build apps on top of Bags.fm with your own API key."},
+        ].map(f=>(
+          <div key={f.title} style={{display:"flex",gap:12,marginBottom:14,alignItems:"flex-start"}}>
+            <div style={{fontSize:20,flexShrink:0}}>{f.icon}</div>
+            <div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#F9FAFB",marginBottom:2}}>{f.title}</div>
+              <div style={{fontSize:12,color:"#9CA3AF",lineHeight:1.6}}>{f.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA Buttons */}
+      <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:16}}>
+        <a href={BAGS_SIGNUP} target="_blank" rel="noreferrer" style={{display:"block",background:"linear-gradient(135deg,#D97706,#EF4444)",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#fff",letterSpacing:3,textDecoration:"none",textAlign:"center",boxShadow:"0 0 28px rgba(217,119,6,0.4)"}}>
+          🎒 SIGN UP ON BAGS.FM
+        </a>
+        <div style={{display:"flex",gap:10}}>
+          <a href={BAGS_APP_IOS} target="_blank" rel="noreferrer" style={{flex:1,display:"block",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"12px",fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,color:"#F9FAFB",letterSpacing:2,textDecoration:"none",textAlign:"center"}}>
+            🍎 IOS APP
+          </a>
+          <a href={BAGS_APP_ANDROID} target="_blank" rel="noreferrer" style={{flex:1,display:"block",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"12px",fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,color:"#F9FAFB",letterSpacing:2,textDecoration:"none",textAlign:"center"}}>
+            🤖 ANDROID
+          </a>
+        </div>
+        <a href={BAGS_DEV} target="_blank" rel="noreferrer" style={{display:"block",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"12px",fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:2,textDecoration:"none",textAlign:"center"}}>
+          🔑 GET API ACCESS → DEV.BAGS.FM
+        </a>
+      </div>
+
+      {/* Recent Launches Feed */}
+      <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:16}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706",marginBottom:12}}>📡 RECENT BAGS.FM LAUNCHES</div>
+        {feedLoading ? (
+          <div style={{height:80,background:"rgba(255,255,255,0.03)",borderRadius:8,animation:"pulse 1.5s infinite",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:2}}>LOADING FEED...</span>
+          </div>
+        ) : feed && feed.length > 0 ? (
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {feed.map((p,i)=>(
+              <a key={i} href={`https://bags.fm/${p.tokenMint}?ref=firechicken007`} target="_blank" rel="noreferrer" style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"10px 12px",textDecoration:"none",border:"1px solid rgba(255,255,255,0.05)"}}>
+                <div>
+                  <div style={{fontFamily:"monospace",fontSize:10,color:"#F9FAFB"}}>{p.tokenMint.slice(0,8)}...{p.tokenMint.slice(-4)}</div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:p.dammV2PoolKey?"#10B981":"#D97706",letterSpacing:1,marginTop:2}}>{p.dammV2PoolKey?"🎓 GRADUATED":"📈 BONDING"}</div>
+                </div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>TRADE →</div>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div style={{textAlign:"center",padding:"20px 0",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#4B5563",letterSpacing:2}}>NO FEED DATA</div>
+        )}
+        <div style={{marginTop:10,textAlign:"center"}}>
+          <a href="https://bags.fm?ref=firechicken007" target="_blank" rel="noreferrer" style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#D97706",letterSpacing:2,textDecoration:"none"}}>VIEW ALL ON BAGS.FM →</a>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ── APP ICON SVG (School of Crypto Hard Knocks) ──
 
@@ -887,8 +1019,16 @@ function Complete({onRestart}){
 export default function App(){
   const [screen,setScreen]=useState("landing");
   const [lessonId,setLessonId]=useState(null);
-  const [completed,setCompleted]=useState([]);
+  const [completed,setCompleted]=useState(()=>{
+    try { const s=localStorage.getItem("clkn_completed"); return s?JSON.parse(s):[]; }
+    catch(e){ return []; }
+  });
   const lesson=LESSONS.find(l=>l.id===lessonId);
+
+  useEffect(()=>{
+    try { localStorage.setItem("clkn_completed",JSON.stringify(completed)); }
+    catch(e){}
+  },[completed]);
 
   function finish(id,passed){
     if(passed&&!completed.includes(id)){
@@ -936,26 +1076,24 @@ export default function App(){
           >
             📊 LIVE TOKEN DATA
           </button>
-          <a
-            href={CLKN_TRADE_LINK}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            onClick={()=>setScreen(screen==="bags"?"landing":"bags")}
             style={{
-              flex:1, background:"rgba(255,255,255,0.05)",
-              border:"1px solid rgba(255,255,255,0.12)",
+              flex:1, background:screen==="bags"?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.05)",
+              border:`1px solid ${screen==="bags"?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.1)"}`,
               borderRadius:8, padding:"8px 0",
               fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,
               color:"#9CA3AF",letterSpacing:2,cursor:"pointer",
-              textDecoration:"none",textAlign:"center",display:"block",
             }}
           >
-            🌐 BAGS WEBSITE
-          </a>
+            🎒 BAGS.FM
+          </button>
         </div>
       </div>
       <div style={{paddingTop:28}}>
         {screen==="landing"&&<Landing onStart={()=>setScreen("select")} completed={completed}/>}
         {screen==="clkn"&&<CLKNWidget/>}
+        {screen==="bags"&&<BagsPage/>}
         {screen==="select"&&<Select onSelect={id=>{setLessonId(id);setScreen("lesson");}} completed={completed}/>}
         {screen==="lesson"&&lesson&&<Lesson lesson={lesson} onComplete={finish} onBack={()=>setScreen("select")}/>}
         {screen==="complete"&&<Complete onRestart={()=>{setCompleted([]);setScreen("landing");}}/>}
