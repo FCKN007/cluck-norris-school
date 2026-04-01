@@ -461,7 +461,7 @@ function CLKNWidget() {
   const [meteoraPool, setMeteorPool] = useState(null);
   const [dexData, setDexData] = useState(null);
   const [holderCount, setHolderCount] = useState(null);
-  const [locks, setLocks] = useState(null);
+  const [fees, setFees] = useState(null);
   const [debugInfo, setDebugInfo] = useState(null);
 
   const isGraduated = pool && pool.dammV2PoolKey;
@@ -503,10 +503,10 @@ function CLKNWidget() {
       if (holdersData.success) setHolderCount(holdersData.holderCount);
     } catch (e) { console.log("Holders error:", e.message); }
     try {
-      const locksRes = await fetch(`/api/locks?mint=${CLKN_MINT}`);
-      const locksData = await locksRes.json();
-      if (locksData.success) setLocks(locksData);
-    } catch (e) { console.log("Locks error:", e.message); }
+      const feesRes = await fetch(`/api/fees`);
+      const feesData = await feesRes.json();
+      if (feesData.success) setFees(feesData);
+    } catch (e) { console.log("Fees error:", e.message); }
   }
 
   async function fetchData() {
@@ -640,15 +640,16 @@ function CLKNWidget() {
           </div>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginTop:6}}>VIA HELIUS</div>
         </div>
-        <a href="https://lock.jup.ag/token/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS" target="_blank" rel="noreferrer" style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:10,padding:"16px",textAlign:"center",textDecoration:"none",display:"block"}}>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,color:"#10B981",marginBottom:6}}>🔒 LOCKED</div>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:32,fontWeight:700,color:"#10B981",lineHeight:1}}>
-            {locks ? fmtNum(locks.totalLocked, 0) : "—"}
+        <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:10,padding:"16px",textAlign:"center"}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,color:"#D97706",marginBottom:6}}>💰 FEES EARNED</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:28,fontWeight:700,color:"#FCD34D",lineHeight:1}}>
+            {fees?.lifetime ? `${parseFloat(fees.lifetime.totalFeesSol || fees.lifetime.accumulatedFeesSol || 0).toFixed(3)}` : "—"}
           </div>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginTop:6}}>
-            {locks ? `${locks.lockCount} JUPITER LOCK${locks.lockCount !== 1 ? "S" : ""}` : "VIA JUPITER"}
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginTop:4}}>SOL</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563",letterSpacing:1,marginTop:4}}>
+            {fees?.claimable ? `${parseFloat(fees.claimable.claimableAmountSol || fees.claimable.unclaimedSol || 0).toFixed(4)} CLAIMABLE` : "VIA BAGS API"}
           </div>
-        </a>
+        </div>
       </div>
 
       {/* Pool Info — switches between DBC and Meteora */}
