@@ -295,46 +295,47 @@ function BagsPage() {
   const [feedLoading, setFeedLoading] = useState(true);
   const [pageError, setPageError] = useState(null);
 
-  useEffect(() => {
-    async function fetchFeed() {
-      setFeedRefreshing(true);
+  async function fetchFeed() {
+    setFeedRefreshing(true);
+    try {
+      const res = await fetch("/api/bags-proxy?endpoint=token-launch/feed");
+      const data = await res.json();
+      if (data.success && data.response) {
+        const tokens = data.response.slice(0, 12);
+        setFeed(tokens);
+        tokens.forEach(async (p) => {
+          try {
+            const dexRes = await fetch(`https://api.dexscreener.com/token-pairs/v1/solana/${p.tokenMint}`);
+            const dexData = await dexRes.json();
+            if (dexData && dexData.length > 0) {
+              const pair = dexData.sort((a,b) => (b.liquidity?.usd||0) - (a.liquidity?.usd||0))[0];
+              setFeedPrices(prev => ({
+                ...prev,
+                [p.tokenMint]: {
+                  priceUsd: pair.priceUsd,
+                  marketCap: pair.marketCap,
+                  change24h: pair.priceChange?.h24,
+                }
+              }));
+            }
+          } catch(e) {}
+        });
+      }
+    } catch(e) {} finally { setFeedLoading(false); setFeedRefreshing(false); setFeedLastUpdated(new Date()); }
+  }
+
+  async function fetchPartner() {
+    try {
+      const res = await fetch("/api/partner-stats");
+      const text = await res.text();
       try {
-        const res = await fetch("/api/bags-proxy?endpoint=token-launch/feed");
-        const data = await res.json();
-        if (data.success && data.response) {
-          const tokens = data.response.slice(0, 12);
-          setFeed(tokens);
-          // Lazily enrich with prices in background
-          tokens.forEach(async (p) => {
-            try {
-              const dexRes = await fetch(`https://api.dexscreener.com/token-pairs/v1/solana/${p.tokenMint}`);
-              const dexData = await dexRes.json();
-              if (dexData && dexData.length > 0) {
-                const pair = dexData.sort((a,b) => (b.liquidity?.usd||0) - (a.liquidity?.usd||0))[0];
-                setFeedPrices(prev => ({
-                  ...prev,
-                  [p.tokenMint]: {
-                    priceUsd: pair.priceUsd,
-                    marketCap: pair.marketCap,
-                    change24h: pair.priceChange?.h24,
-                  }
-                }));
-              }
-            } catch(e) {}
-          });
-        }
-      } catch(e) {} finally { setFeedLoading(false); setFeedRefreshing(false); setFeedLastUpdated(new Date()); }
-    }
-    async function fetchPartner() {
-      try {
-        const res = await fetch("/api/partner-stats");
-        const text = await res.text();
-        try {
-          const data = JSON.parse(text);
-          if (data.success && data.response) setPartnerStats(data.response);
-        } catch(e) {}
+        const data = JSON.parse(text);
+        if (data.success && data.response) setPartnerStats(data.response);
       } catch(e) {}
-    }
+    } catch(e) {}
+  }
+
+  useEffect(() => {
     fetchFeed();
     fetchPartner();
     const feedInterval = setInterval(fetchFeed, 60000);
