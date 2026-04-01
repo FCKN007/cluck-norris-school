@@ -555,7 +555,7 @@ function CLKNWidget() {
     try {
       const feesRes = await fetch(`/api/fees`);
       const feesData = await feesRes.json();
-      if (feesData.success) setFees(feesData);
+      if (feesData.success) setFees(feesData.response);
     } catch (e) { console.log("Fees error:", e.message); }
   }
 
