@@ -79,16 +79,50 @@ app.get("/api/holders", async (req, res) => {
 app.get("/api/locks", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-  // Hardcoded CLKN locks from lock.jup.ag
-  const locks = [
-    { title: "Team 1", recipient: "3VEL...n4eb", amount: 15000000, unlockDate: "Apr 30, 2026", schedule: "1,250,000 CLKN/month" },
-    { title: "Chuck 1", recipient: "97SV...Ribk", amount: 15000000, unlockDate: "May 2, 2027", schedule: "625,000 CLKN/month" },
-    { title: "Team 2 - Full Year Lock", recipient: "3VEL...n4eb", amount: 15000000, unlockDate: "Mar 31, 2028", schedule: "15,000,000 CLKN/year" },
-    { title: "Chuck 2", recipient: "97SV...Ribk", amount: 15000000, unlockDate: "May 2, 2026", schedule: "625,000 CLKN/month" },
-  ];
-  const totalLocked = locks.reduce((sum, l) => sum + l.amount, 0);
-  console.log("← Locks: returning", locks.length, "locks, total:", totalLocked);
-  return res.status(200).json({ success: true, lockCount: locks.length, totalLocked, locks });
+  res.setHeader("Pragma", "no-cache");
+  const { mint } = req.query;
+  const HELIUS_KEY = process.env.HELIUS_API_KEY;
+  if (!mint) return res.status(400).json({ success: false, error: "Missing mint" });
+  if (!HELIUS_KEY) return res.status(500).json({ success: false, error: "Missing HELIUS_API_KEY" });
+  const HELIUS_URL = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
+  try {
+    const response = await fetch(HELIUS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0", id: "locks",
+        method: "getTokenAccounts",
+        params: { page: 1, limit: 1000, mint, owner: JUPITER_LOCK_PROGRAM, displayOptions: { showZeroBalance: false } }
+      })
+    });
+    const data = await response.json();
+    console.log("← Helius locks status:", response.status, JSON.stringify(data).slice(0, 300));
+    const accounts = data.result?.token_accounts || [];
+    const totalLocked = accounts.reduce((sum, a) => sum + (parseInt(a.amount) || 0), 0);
+    return res.status(200).json({ success: true, lockCount: accounts.length, totalLocked, locks: accounts.slice(0, 10) });
+  } catch (err) {
+    console.error("Locks error:", err.message);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ── Partner Stats ──
+app.get("/api/partner-stats", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  const API_KEY = process.env.BAGS_API_KEY;
+  if (!API_KEY) return res.status(500).json({ success: false, error: "Missing BAGS_API_KEY" });
+  try {
+    const url = `${BAGS_BASE}partner/stats?refCode=firechicken007`;
+    console.log("→ Partner stats:", url);
+    const response = await fetch(url, { headers: { "x-api-key": API_KEY } });
+    const text = await response.text();
+    console.log("← Partner stats:", response.status, text.slice(0, 200));
+    try { return res.status(200).json(JSON.parse(text)); }
+    catch (e) { return res.status(500).json({ success: false, error: "Invalid JSON" }); }
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // ── Serve React app ──
