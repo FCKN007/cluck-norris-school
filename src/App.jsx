@@ -297,7 +297,20 @@ function BagsPage() {
         const res = await fetch("/api/bags-proxy?endpoint=solana/bags/pools&onlyMigrated=false");
         const data = await res.json();
         if (data.success && data.response) {
-          setFeed(data.response.slice(0, 10));
+          const pools = data.response.slice(0, 10);
+          // Enrich with DexScreener data for names and prices
+          const enriched = await Promise.all(pools.map(async (p) => {
+            try {
+              const dexRes = await fetch(`https://api.dexscreener.com/token-pairs/v1/solana/${p.tokenMint}`);
+              const dexData = await dexRes.json();
+              if (dexData && dexData.length > 0) {
+                const pair = dexData.sort((a,b) => (b.liquidity?.usd||0) - (a.liquidity?.usd||0))[0];
+                return { ...p, name: pair.baseToken?.name, symbol: pair.baseToken?.symbol, priceUsd: pair.priceUsd, marketCap: pair.marketCap };
+              }
+            } catch(e) {}
+            return p;
+          }));
+          setFeed(enriched);
         }
       } catch(e) {} finally { setFeedLoading(false); }
     }
@@ -394,10 +407,16 @@ function BagsPage() {
             {feed.map((p,i)=>(
               <a key={i} href={`https://bags.fm/${p.tokenMint}?ref=firechicken007`} target="_blank" rel="noreferrer" style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"10px 12px",textDecoration:"none",border:"1px solid rgba(255,255,255,0.05)"}}>
                 <div>
-                  <div style={{fontFamily:"monospace",fontSize:10,color:"#F9FAFB"}}>{p.tokenMint.slice(0,8)}...{p.tokenMint.slice(-4)}</div>
-                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:p.dammV2PoolKey?"#10B981":"#D97706",letterSpacing:1,marginTop:2}}>{p.dammV2PoolKey?"🎓 GRADUATED":"📈 BONDING"}</div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#F9FAFB"}}>
+                    {p.name || `${p.tokenMint.slice(0,6)}...`} {p.symbol ? `(${p.symbol})` : ""}
+                  </div>
+                  <div style={{display:"flex",gap:8,alignItems:"center",marginTop:2}}>
+                    <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:p.dammV2PoolKey?"#10B981":"#D97706",letterSpacing:1}}>{p.dammV2PoolKey?"🎓 GRADUATED":"📈 BONDING"}</div>
+                    {p.priceUsd && <div style={{fontFamily:"monospace",fontSize:8,color:"#6B7280"}}>${parseFloat(p.priceUsd).toFixed(6)}</div>}
+                    {p.marketCap && <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#8B5CF6"}}>MC: ${parseInt(p.marketCap).toLocaleString()}</div>}
+                  </div>
                 </div>
-                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>TRADE →</div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#D97706",letterSpacing:1}}>TRADE →</div>
               </a>
             ))}
           </div>
@@ -1086,7 +1105,7 @@ export default function App(){
               color:"#9CA3AF",letterSpacing:2,cursor:"pointer",
             }}
           >
-            🎒 BAGS.FM
+            🎒 BAGS INFO
           </button>
         </div>
       </div>
