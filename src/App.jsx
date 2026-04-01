@@ -678,14 +678,23 @@ function CLKNWidget() {
           <div>
             {dexData ? (
               <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                {[
+                {(() => {
+                  const liqUsd = dexData.liquidity?.usd || 0;
+                  const solPriceUsd = dexData.priceNative ? parseFloat(dexData.priceUsd) / parseFloat(dexData.priceNative) : 0;
+                  const solInPool = solPriceUsd > 0 ? (liqUsd / 2) / solPriceUsd : 0;
+                  const clknPriceUsd = parseFloat(dexData.priceUsd) || 0;
+                  const clknInPool = clknPriceUsd > 0 ? (liqUsd / 2) / clknPriceUsd : 0;
+                  return [
                   {label:"POOL ADDRESS",value:shortKey(pool.dammV2PoolKey),color:"#D4AF37"},
                   {label:"PRICE",value:dexData.priceUsd ? `$${parseFloat(dexData.priceUsd).toFixed(8)}` : "—",color:"#FCD34D"},
-                  {label:"LIQUIDITY",value:dexData.liquidity?.usd ? `$${fmtNum(dexData.liquidity.usd,0)}` : "—",color:"#06B6D4"},
+                  {label:"SOL IN POOL",value:solInPool > 0 ? `${fmtNum(solInPool,2)} SOL` : "—",color:"#06B6D4"},
+                  {label:"CLKN IN POOL",value:clknInPool > 0 ? `${fmtNum(clknInPool,0)} CLKN` : "—",color:"#FCD34D"},
+                  {label:"TOTAL LIQUIDITY",value:liqUsd ? `$${fmtNum(liqUsd,0)}` : "—",color:"#10B981"},
                   {label:"MARKET CAP",value:dexData.marketCap ? `$${fmtNum(dexData.marketCap,0)}` : "—",color:"#10B981"},
                   {label:"24H VOLUME",value:dexData.volume?.h24 ? `$${fmtNum(dexData.volume.h24,0)}` : "—",color:"#8B5CF6"},
                   {label:"24H CHANGE",value:dexData.priceChange?.h24 ? `${dexData.priceChange.h24 > 0 ? "+" : ""}${parseFloat(dexData.priceChange.h24).toFixed(2)}%` : "—",color:dexData.priceChange?.h24 > 0 ? "#10B981" : "#EF4444"},
-                ].map(r=>(
+                  ];
+                })().map(r=>(
                   <div key={r.label} style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"8px 12px",display:"flex",justifyContent:"space-between"}}>
                     <span style={{fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:2,color:"#6B7280"}}>{r.label}</span>
                     <span style={{fontFamily:"monospace",fontSize:13,fontWeight:600,color:r.color}}>{r.value}</span>
@@ -724,19 +733,30 @@ function CLKNWidget() {
                 {parseInt(parseFloat(quote.outAmount) / Math.pow(10, 6)).toLocaleString()} CLKN
               </div>
               <div style={{marginTop:8,display:"flex",justifyContent:"center",gap:16,flexWrap:"wrap"}}>
-                {quote.priceImpactPct && (
-                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>
-                    IMPACT: {parseFloat(quote.priceImpactPct).toFixed(3)}%
-                  </div>
-                )}
-                {quote.otherAmountThreshold && (
-                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#F59E0B",letterSpacing:1}}>
-                    MIN: {parseInt(parseFloat(quote.otherAmountThreshold) / Math.pow(10,6)).toLocaleString()} CLKN
-                  </div>
-                )}
-                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>
-                  SLIP: {quote.slippageBps ? (quote.slippageBps/100).toFixed(1) : slippage}%
-                </div>
+                {(() => {
+                  const solPrice = dexData?.priceNative ? 1/parseFloat(dexData.priceNative) : 150;
+                  const tradeSizeUsd = parseFloat(solAmount||1) * solPrice;
+                  const liquidity = dexData?.liquidity?.usd || 0;
+                  const realImpact = liquidity > 0 ? (tradeSizeUsd / liquidity) * 100 : null;
+                  const impactColor = realImpact > 10 ? "#EF4444" : realImpact > 5 ? "#F59E0B" : "#10B981";
+                  return (
+                    <>
+                      {realImpact !== null && (
+                        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:impactColor,letterSpacing:1,fontWeight:700}}>
+                          IMPACT: ~{realImpact.toFixed(1)}%
+                        </div>
+                      )}
+                      {quote.otherAmountThreshold && (
+                        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#F59E0B",letterSpacing:1}}>
+                          MIN: {parseInt(parseFloat(quote.otherAmountThreshold) / Math.pow(10,6)).toLocaleString()} CLKN
+                        </div>
+                      )}
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>
+                        SLIP: {quote.slippageBps ? (quote.slippageBps/100).toFixed(1) : slippage}%
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           ) : quoteError ? (
