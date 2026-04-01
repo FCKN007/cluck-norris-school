@@ -545,7 +545,7 @@ function CLKNWidget() {
       setQuoteError(null);
       const lamports = Math.floor(num * LAMPORTS_PER_SOL);
       const slippageBps = Math.round(slippage * 100);
-      const url = `https://api.jup.ag/swap/v1/quote?inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageBps=${slippageBps}`;
+      const url = `https://lite-api.jup.ag/swap/v1/quote?inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageBps=${slippageBps}`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.outAmount) setQuote(data);
