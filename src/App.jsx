@@ -680,7 +680,7 @@ function CLKNWidget() {
               <div style={{display:"flex",flexDirection:"column",gap:6}}>
                 {(() => {
                   const liqUsd = dexData.liquidity?.usd || 0;
-                  const solPriceUsd = dexData.priceNative ? parseFloat(dexData.priceUsd) / parseFloat(dexData.priceNative) : 0;
+                  const solPriceUsd = dexData.priceUsd && dexData.priceNative ? parseFloat(dexData.priceUsd) / parseFloat(dexData.priceNative) : 150;
                   const solInPool = solPriceUsd > 0 ? (liqUsd / 2) / solPriceUsd : 0;
                   const clknPriceUsd = parseFloat(dexData.priceUsd) || 0;
                   const clknInPool = clknPriceUsd > 0 ? (liqUsd / 2) / clknPriceUsd : 0;
@@ -734,8 +734,8 @@ function CLKNWidget() {
               </div>
               <div style={{marginTop:8,display:"flex",justifyContent:"center",gap:16,flexWrap:"wrap"}}>
                 {(() => {
-                  const solPrice = dexData?.priceNative ? 1/parseFloat(dexData.priceNative) : 150;
-                  const tradeSizeUsd = parseFloat(solAmount||1) * solPrice;
+                  const SOL_PRICE_USD = dexData?.priceUsd && dexData?.priceNative ? parseFloat(dexData.priceUsd) / parseFloat(dexData.priceNative) : 150;
+                  const tradeSizeUsd = parseFloat(solAmount||1) * SOL_PRICE_USD;
                   const liquidity = dexData?.liquidity?.usd || 0;
                   const realImpact = liquidity > 0 ? (tradeSizeUsd / liquidity) * 100 : null;
                   const impactColor = realImpact > 10 ? "#EF4444" : realImpact > 5 ? "#F59E0B" : "#10B981";
