@@ -1108,7 +1108,7 @@ export default function App(){
               color:screen==="landing"?"#F9FAFB":"#6B7280",letterSpacing:1,cursor:"pointer",
             }}
           >
-            🏠 HOME
+            🏫 SCHOOL ENTRANCE
           </button>
           <button
             onClick={()=>setScreen(screen==="clkn"?"landing":"clkn")}
