@@ -456,6 +456,7 @@ function CLKNWidget() {
   const [quote, setQuote] = useState(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState(null);
+  const [slippage, setSlippage] = useState(1);
   const [apiStatus, setApiStatus] = useState("connecting");
   const [meteoraPool, setMeteorPool] = useState(null);
   const [dexData, setDexData] = useState(null);
@@ -543,10 +544,11 @@ function CLKNWidget() {
       setQuoteLoading(true);
       setQuoteError(null);
       const lamports = Math.floor(num * LAMPORTS_PER_SOL);
-      const url = `/api/bags-proxy?endpoint=trade/quote&inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageMode=auto`;
+      const slippageBps = Math.round(slippage * 100);
+      const url = `https://api.jup.ag/swap/v1/quote?inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageBps=${slippageBps}&autoSlippage=false`;
       const res = await fetch(url);
       const data = await res.json();
-      if (data.success) setQuote(data.response);
+      if (data.outAmount) setQuote(data);
       else setQuoteError("Quote unavailable");
     } catch (e) {
       setQuoteError("Could not fetch quote");
@@ -701,9 +703,19 @@ function CLKNWidget() {
 
       {/* Live Quote */}
       <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(217,119,6,0.25)",borderRadius:12,padding:16,marginBottom:12}}>
-        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706",marginBottom:12}}>💱 LIVE TRADE QUOTE</div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706"}}>💱 LIVE TRADE QUOTE</div>
+          <div style={{display:"flex",alignItems:"center",gap:6}}>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#6B7280",letterSpacing:1}}>SLIPPAGE</span>
+            {[0.5,1,2,5].map(s=>(
+              <button key={s} onClick={()=>setSlippage(s)} style={{background:slippage===s?"rgba(217,119,6,0.3)":"rgba(255,255,255,0.05)",border:`1px solid ${slippage===s?"rgba(217,119,6,0.6)":"rgba(255,255,255,0.1)"}`,borderRadius:4,padding:"2px 6px",color:slippage===s?"#D97706":"#6B7280",fontFamily:"'Oswald',sans-serif",fontSize:9,cursor:"pointer"}}>
+                {s}%
+              </button>
+            ))}
+          </div>
+        </div>
         <div style={{background:"rgba(217,119,6,0.08)",borderRadius:10,padding:"14px 16px",marginBottom:12,textAlign:"center",border:"1px solid rgba(217,119,6,0.2)"}}>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:2,marginBottom:6}}>1 SOL CURRENTLY BUYS</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:2,marginBottom:6}}>{parseFloat(solAmount)||1} SOL CURRENTLY BUYS</div>
           {quoteLoading && !quote ? (
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:24,color:"#4B5563"}}>...</div>
           ) : quote ? (
@@ -711,11 +723,21 @@ function CLKNWidget() {
               <div style={{fontFamily:"'Oswald',sans-serif",fontSize:28,fontWeight:900,color:"#FCD34D",lineHeight:1}}>
                 {parseInt(parseFloat(quote.outAmount) / Math.pow(10, 6)).toLocaleString()} CLKN
               </div>
-              {quote.priceImpactPct && (
-                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",marginTop:4,letterSpacing:1}}>
-                  PRICE IMPACT: {parseFloat(quote.priceImpactPct).toFixed(3)}%
+              <div style={{marginTop:8,display:"flex",justifyContent:"center",gap:16,flexWrap:"wrap"}}>
+                {quote.priceImpactPct && (
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>
+                    IMPACT: {parseFloat(quote.priceImpactPct).toFixed(3)}%
+                  </div>
+                )}
+                {quote.otherAmountThreshold && (
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#F59E0B",letterSpacing:1}}>
+                    MIN: {parseInt(parseFloat(quote.otherAmountThreshold) / Math.pow(10,6)).toLocaleString()} CLKN
+                  </div>
+                )}
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>
+                  SLIP: {quote.slippageBps ? (quote.slippageBps/100).toFixed(1) : slippage}%
                 </div>
-              )}
+              </div>
             </div>
           ) : quoteError ? (
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#EF4444"}}>{quoteError}</div>
@@ -735,13 +757,6 @@ function CLKNWidget() {
             GET QUOTE
           </button>
         </div>
-        {quote && parseFloat(solAmount) !== 1 && !quoteLoading && (
-          <div style={{marginTop:10,background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"10px 14px",textAlign:"center"}}>
-            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#FCD34D"}}>
-              {solAmount} SOL = {parseInt(parseFloat(quote.outAmount) / Math.pow(10, 6)).toLocaleString()} CLKN
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Trade Button */}
