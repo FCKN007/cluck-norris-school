@@ -293,6 +293,7 @@ function BagsPage() {
   const [feedRefreshing, setFeedRefreshing] = useState(false);
   const [partnerStats, setPartnerStats] = useState(null);
   const [feedLoading, setFeedLoading] = useState(true);
+  const [pageError, setPageError] = useState(null);
 
   useEffect(() => {
     async function fetchFeed() {
@@ -327,8 +328,11 @@ function BagsPage() {
     async function fetchPartner() {
       try {
         const res = await fetch("/api/partner-stats");
-        const data = await res.json();
-        if (data.success) setPartnerStats(data.response);
+        const text = await res.text();
+        try {
+          const data = JSON.parse(text);
+          if (data.success && data.response) setPartnerStats(data.response);
+        } catch(e) {}
       } catch(e) {}
     }
     fetchFeed();
@@ -338,6 +342,12 @@ function BagsPage() {
   }, []);
 
   const fmtNum = (n, dec=2) => n ? parseFloat(n).toLocaleString(undefined,{maximumFractionDigits:dec}) : "—";
+
+  if (pageError) return (
+    <div style={{padding:40,textAlign:"center",color:"#EF4444",fontFamily:"'Oswald',sans-serif"}}>
+      PAGE ERROR: {pageError}
+    </div>
+  );
 
   return (
     <div style={{padding:"0 16px 40px", maxWidth:520, margin:"0 auto"}}>
