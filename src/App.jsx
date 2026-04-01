@@ -289,11 +289,14 @@ function Belt({belt,small}){return(<span style={{display:"inline-block",backgrou
 function BagsPage() {
   const [feed, setFeed] = useState(null);
   const [feedPrices, setFeedPrices] = useState({});
+  const [feedLastUpdated, setFeedLastUpdated] = useState(null);
+  const [feedRefreshing, setFeedRefreshing] = useState(false);
   const [partnerStats, setPartnerStats] = useState(null);
   const [feedLoading, setFeedLoading] = useState(true);
 
   useEffect(() => {
     async function fetchFeed() {
+      setFeedRefreshing(true);
       try {
         const res = await fetch("/api/bags-proxy?endpoint=token-launch/feed");
         const data = await res.json();
@@ -319,7 +322,7 @@ function BagsPage() {
             } catch(e) {}
           });
         }
-      } catch(e) {} finally { setFeedLoading(false); }
+      } catch(e) {} finally { setFeedLoading(false); setFeedRefreshing(false); setFeedLastUpdated(new Date()); }
     }
     async function fetchPartner() {
       try {
@@ -330,6 +333,8 @@ function BagsPage() {
     }
     fetchFeed();
     fetchPartner();
+    const feedInterval = setInterval(fetchFeed, 60000);
+    return () => clearInterval(feedInterval);
   }, []);
 
   const fmtNum = (n, dec=2) => n ? parseFloat(n).toLocaleString(undefined,{maximumFractionDigits:dec}) : "—";
@@ -404,7 +409,19 @@ function BagsPage() {
 
       {/* Recent Launches Feed */}
       <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:16}}>
-        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706",marginBottom:12}}>📡 RECENT BAGS.FM LAUNCHES</div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706"}}>📡 RECENT BAGS.FM LAUNCHES</div>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            {feedLastUpdated && (
+              <span style={{fontFamily:"'Oswald',sans-serif",fontSize:7,color:"#4B5563",letterSpacing:1}}>
+                {feedLastUpdated.toLocaleTimeString()}
+              </span>
+            )}
+            <button onClick={fetchFeed} style={{background:"none",border:"none",color:"#D97706",fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:1,cursor:"pointer",padding:"2px 6px"}}>
+              {feedRefreshing ? "..." : "↻"}
+            </button>
+          </div>
+        </div>
         {feedLoading ? (
           <div style={{height:80,background:"rgba(255,255,255,0.03)",borderRadius:8,animation:"pulse 1.5s infinite",display:"flex",alignItems:"center",justifyContent:"center"}}>
             <span style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:2}}>LOADING FEED...</span>
