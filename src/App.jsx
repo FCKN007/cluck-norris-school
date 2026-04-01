@@ -545,7 +545,7 @@ function CLKNWidget() {
       setQuoteError(null);
       const lamports = Math.floor(num * LAMPORTS_PER_SOL);
       const slippageBps = Math.round(slippage * 100);
-      const url = `https://api.jup.ag/swap/v1/quote?inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageBps=${slippageBps}&autoSlippage=false`;
+      const url = `https://api.jup.ag/swap/v1/quote?inputMint=${SOL_MINT}&outputMint=${CLKN_MINT}&amount=${lamports}&slippageBps=${slippageBps}`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.outAmount) setQuote(data);
@@ -1096,28 +1096,40 @@ export default function App(){
             {LESSONS.map(l=><div key={l.id} style={{width:7,height:7,borderRadius:"50%",background:completed.includes(l.id)?l.color:"rgba(255,255,255,0.1)"}}/>)}
           </div>
         </div>
-        {/* Bottom row — two buttons */}
-        <div style={{display:"flex",gap:8}}>
+        {/* Bottom row — three buttons */}
+        <div style={{display:"flex",gap:6}}>
+          <button
+            onClick={()=>setScreen("landing")}
+            style={{
+              flex:1, background:screen==="landing"?"rgba(255,255,255,0.12)":"rgba(255,255,255,0.04)",
+              border:`1px solid ${screen==="landing"?"rgba(255,255,255,0.25)":"rgba(255,255,255,0.08)"}`,
+              borderRadius:8, padding:"8px 0",
+              fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,
+              color:screen==="landing"?"#F9FAFB":"#6B7280",letterSpacing:1,cursor:"pointer",
+            }}
+          >
+            🏠 HOME
+          </button>
           <button
             onClick={()=>setScreen(screen==="clkn"?"landing":"clkn")}
             style={{
-              flex:1, background:screen==="clkn"?"rgba(217,119,6,0.25)":"rgba(217,119,6,0.1)",
-              border:`1px solid ${screen==="clkn"?"rgba(217,119,6,0.6)":"rgba(217,119,6,0.3)"}`,
+              flex:1, background:screen==="clkn"?"rgba(217,119,6,0.25)":"rgba(217,119,6,0.08)",
+              border:`1px solid ${screen==="clkn"?"rgba(217,119,6,0.6)":"rgba(217,119,6,0.2)"}`,
               borderRadius:8, padding:"8px 0",
-              fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,
-              color:"#D97706",letterSpacing:2,cursor:"pointer",
+              fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,
+              color:"#D97706",letterSpacing:1,cursor:"pointer",
             }}
           >
-            📊 LIVE TOKEN DATA
+            📊 TOKEN DATA
           </button>
           <button
             onClick={()=>setScreen(screen==="bags"?"landing":"bags")}
             style={{
-              flex:1, background:screen==="bags"?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.05)",
-              border:`1px solid ${screen==="bags"?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.1)"}`,
+              flex:1, background:screen==="bags"?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.04)",
+              border:`1px solid ${screen==="bags"?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.08)"}`,
               borderRadius:8, padding:"8px 0",
-              fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,
-              color:"#9CA3AF",letterSpacing:2,cursor:"pointer",
+              fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,
+              color:"#9CA3AF",letterSpacing:1,cursor:"pointer",
             }}
           >
             🎒 BAGS INFO
