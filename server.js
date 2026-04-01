@@ -145,7 +145,7 @@ app.get("/api/partner-stats", async (req, res) => {
   const API_KEY = process.env.BAGS_API_KEY;
   if (!API_KEY) return res.status(500).json({ success: false, error: "Missing BAGS_API_KEY" });
   try {
-    const url = `${BAGS_BASE}partner/stats?refCode=firechicken007`;
+    const url = `${BAGS_BASE}partner/v2/stats?refCode=firechicken007`;
     console.log("→ Partner stats:", url);
     const response = await fetch(url, { headers: { "x-api-key": API_KEY } });
     const text = await response.text();
