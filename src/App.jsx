@@ -641,11 +641,11 @@ function CLKNWidget() {
         <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:10,padding:"16px",textAlign:"center"}}>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,color:"#D97706",marginBottom:6}}>💰 FEES EARNED</div>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:28,fontWeight:700,color:"#FCD34D",lineHeight:1}}>
-            {fees?.lifetime ? `${parseFloat(fees.lifetime.totalFeesSol || fees.lifetime.accumulatedFeesSol || 0).toFixed(3)}` : "—"}
+            {fees ? (parseInt(fees) / 1_000_000_000).toFixed(3) : "—"}
           </div>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginTop:4}}>SOL</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginTop:4}}>SOL LIFETIME</div>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563",letterSpacing:1,marginTop:4}}>
-            {fees?.claimable ? `${parseFloat(fees.claimable.claimableAmountSol || fees.claimable.unclaimedSol || 0).toFixed(4)} CLAIMABLE` : "VIA BAGS API"}
+            VIA BAGS API
           </div>
         </div>
       </div>
