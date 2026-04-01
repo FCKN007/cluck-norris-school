@@ -288,6 +288,7 @@ function Belt({belt,small}){return(<span style={{display:"inline-block",backgrou
 // ── BAGS PAGE ──
 function BagsPage() {
   const [feed, setFeed] = useState(null);
+  const [feedPrices, setFeedPrices] = useState({});
   const [partnerStats, setPartnerStats] = useState(null);
   const [feedLoading, setFeedLoading] = useState(true);
 
@@ -297,7 +298,26 @@ function BagsPage() {
         const res = await fetch("/api/bags-proxy?endpoint=token-launch/feed");
         const data = await res.json();
         if (data.success && data.response) {
-          setFeed(data.response.slice(0, 12));
+          const tokens = data.response.slice(0, 12);
+          setFeed(tokens);
+          // Lazily enrich with prices in background
+          tokens.forEach(async (p) => {
+            try {
+              const dexRes = await fetch(`https://api.dexscreener.com/token-pairs/v1/solana/${p.tokenMint}`);
+              const dexData = await dexRes.json();
+              if (dexData && dexData.length > 0) {
+                const pair = dexData.sort((a,b) => (b.liquidity?.usd||0) - (a.liquidity?.usd||0))[0];
+                setFeedPrices(prev => ({
+                  ...prev,
+                  [p.tokenMint]: {
+                    priceUsd: pair.priceUsd,
+                    marketCap: pair.marketCap,
+                    change24h: pair.priceChange?.h24,
+                  }
+                }));
+              }
+            } catch(e) {}
+          });
         }
       } catch(e) {} finally { setFeedLoading(false); }
     }
@@ -399,7 +419,7 @@ function BagsPage() {
                     <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#F9FAFB"}}>
                       {p.name} <span style={{color:"#6B7280",fontSize:11}}>({p.symbol})</span>
                     </div>
-                    <div style={{display:"flex",gap:6,alignItems:"center",marginTop:2}}>
+                    <div style={{display:"flex",gap:6,alignItems:"center",marginTop:2,flexWrap:"wrap"}}>
                       <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,letterSpacing:1,color:
                         p.status==="MIGRATED"?"#10B981":
                         p.status==="MIGRATING"?"#F59E0B":
@@ -409,8 +429,23 @@ function BagsPage() {
                          p.status==="MIGRATING"?"⏳ MIGRATING":
                          p.status==="PRE_GRAD"?"🔥 NEAR GRAD":"📈 BONDING"}
                       </div>
-                      {p.website && <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563"}}>🌐</div>}
-                      {p.twitter && <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563"}}>🐦</div>}
+                      {feedPrices[p.tokenMint]?.priceUsd && (
+                        <div style={{fontFamily:"monospace",fontSize:8,color:"#FCD34D"}}>
+                          ${parseFloat(feedPrices[p.tokenMint].priceUsd).toFixed(6)}
+                        </div>
+                      )}
+                      {feedPrices[p.tokenMint]?.marketCap && (
+                        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#8B5CF6"}}>
+                          MC ${parseInt(feedPrices[p.tokenMint].marketCap).toLocaleString()}
+                        </div>
+                      )}
+                      {feedPrices[p.tokenMint]?.change24h !== undefined && (
+                        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:feedPrices[p.tokenMint].change24h>0?"#10B981":"#EF4444"}}>
+                          {feedPrices[p.tokenMint].change24h>0?"+":""}{parseFloat(feedPrices[p.tokenMint].change24h).toFixed(1)}%
+                        </div>
+                      )}
+                      {p.website && <div style={{fontSize:8}}>🌐</div>}
+                      {p.twitter && <div style={{fontSize:8}}>🐦</div>}
                     </div>
                   </div>
                 </div>
