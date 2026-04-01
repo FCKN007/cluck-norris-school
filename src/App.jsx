@@ -440,15 +440,15 @@ function BagsPage() {
         ) : feed && feed.length > 0 ? (
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
             {feed.map((p,i)=>(
-              <a key={i} href={`https://bags.fm/${p.tokenMint}?ref=firechicken007`} target="_blank" rel="noreferrer" style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"10px 12px",textDecoration:"none",border:"1px solid rgba(255,255,255,0.05)"}}>
-                <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  {p.image && <img src={p.image} alt={p.name} style={{width:32,height:32,borderRadius:"50%",objectFit:"cover",flexShrink:0}} onError={e=>e.target.style.display="none"}/>}
-                  <div>
-                    <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#F9FAFB"}}>
-                      {p.name} <span style={{color:"#6B7280",fontSize:11}}>({p.symbol})</span>
+              <a key={i} href={`https://bags.fm/${p.tokenMint}?ref=firechicken007`} target="_blank" rel="noreferrer" style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"14px 16px",textDecoration:"none",border:"1px solid rgba(255,255,255,0.07)",width:"100%",boxSizing:"border-box"}}>
+                <div style={{display:"flex",alignItems:"center",gap:14,flex:1,minWidth:0}}>
+                  {p.image && <img src={p.image} alt={p.name} style={{width:52,height:52,borderRadius:"50%",objectFit:"cover",flexShrink:0}} onError={e=>e.target.style.display="none"}/>}
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontFamily:"'Oswald',sans-serif",fontSize:20,fontWeight:700,color:"#F9FAFB",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+                      {p.name} <span style={{color:"#6B7280",fontSize:15}}>({p.symbol})</span>
                     </div>
-                    <div style={{display:"flex",gap:6,alignItems:"center",marginTop:2,flexWrap:"wrap"}}>
-                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,letterSpacing:1,color:
+                    <div style={{display:"flex",gap:10,alignItems:"center",marginTop:5,flexWrap:"wrap"}}>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,letterSpacing:1,color:
                         p.status==="MIGRATED"?"#10B981":
                         p.status==="MIGRATING"?"#F59E0B":
                         p.status==="PRE_GRAD"?"#D97706":"#6B7280"
@@ -458,26 +458,26 @@ function BagsPage() {
                          p.status==="PRE_GRAD"?"🔥 NEAR GRAD":"📈 BONDING"}
                       </div>
                       {feedPrices[p.tokenMint]?.priceUsd && (
-                        <div style={{fontFamily:"monospace",fontSize:8,color:"#FCD34D"}}>
+                        <div style={{fontFamily:"monospace",fontSize:13,color:"#FCD34D"}}>
                           ${parseFloat(feedPrices[p.tokenMint].priceUsd).toFixed(6)}
                         </div>
                       )}
                       {feedPrices[p.tokenMint]?.marketCap && (
-                        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#8B5CF6"}}>
+                        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#8B5CF6"}}>
                           MC ${parseInt(feedPrices[p.tokenMint].marketCap).toLocaleString()}
                         </div>
                       )}
                       {feedPrices[p.tokenMint]?.change24h !== undefined && (
-                        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:feedPrices[p.tokenMint].change24h>0?"#10B981":"#EF4444"}}>
+                        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,color:feedPrices[p.tokenMint].change24h>0?"#10B981":"#EF4444"}}>
                           {feedPrices[p.tokenMint].change24h>0?"+":""}{parseFloat(feedPrices[p.tokenMint].change24h).toFixed(1)}%
                         </div>
                       )}
-                      {p.website && <div style={{fontSize:8}}>🌐</div>}
-                      {p.twitter && <div style={{fontSize:8}}>🐦</div>}
+                      {p.website && <div style={{fontSize:13}}>🌐</div>}
+                      {p.twitter && <div style={{fontSize:13}}>🐦</div>}
                     </div>
                   </div>
                 </div>
-                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#D97706",letterSpacing:1,flexShrink:0}}>TRADE →</div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#D97706",letterSpacing:1,flexShrink:0,marginLeft:10}}>TRADE →</div>
               </a>
             ))}
           </div>
@@ -1029,7 +1029,7 @@ function Lesson({lesson:l,onComplete,onBack}){
         ))}
       </div>
       <button onClick={()=>setPhase("quiz")} style={{width:"100%",background:l.color,border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#fff",letterSpacing:3,cursor:"pointer",boxShadow:`0 0 20px ${l.glow}`}}>
-        📚 HIT THE BOOKS
+        📝 TAKE THE EXAM
       </button>
     </div>
   );
@@ -1066,7 +1066,7 @@ function Lesson({lesson:l,onComplete,onBack}){
           <p style={{margin:0,color:"#D1D5DB",fontSize:13,lineHeight:1.6}}>{q.explanation}</p>
         </div>
         <button onClick={next} style={{width:"100%",background:l.color,border:"none",borderRadius:10,padding:"13px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#fff",letterSpacing:2,cursor:"pointer"}}>
-          {qi+1<l.questions.length?"NEXT EXAM →":"SEE REPORT CARD →"}
+          {qi+1<l.questions.length?"NEXT QUESTION →":"SEE REPORT CARD →"}
         </button>
       </>)}
     </div>
