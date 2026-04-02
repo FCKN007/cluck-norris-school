@@ -285,6 +285,192 @@ const BELT_TEXT = { "FRESHMAN":"#111","SOPHOMORE":"#111","JUNIOR":"#fff","SENIOR
 function Belt({belt,small}){return(<span style={{display:"inline-block",background:BELT_BG[belt],color:BELT_TEXT[belt],fontFamily:"'Oswald',sans-serif",fontSize:small?9:10,fontWeight:700,letterSpacing:1.5,padding:small?"2px 6px":"3px 10px",borderRadius:3,border:belt==="BLACK BELT"?"1px solid #D4AF37":"none",textTransform:"uppercase"}}>{belt}</span>);}
 
 
+
+// ── ULTIMATE CHALLENGE QUESTIONS (never seen in lessons) ──
+const CHALLENGE_QUESTIONS = [
+  { q: "What is a flash loan?", options: ["A loan that charges high interest", "An uncollateralized loan borrowed and repaid in a single transaction block", "A fast bank wire transfer", "A short-term margin loan on a CEX"], correct: 1, explanation: "Flash loans are unique to DeFi — you borrow any amount with zero collateral as long as you repay it within the same transaction. Used for arbitrage, liquidations, and collateral swaps." },
+  { q: "What does TVL stand for in DeFi?", options: ["Total Value Locked", "Token Velocity Limit", "Timed Vesting Ledger", "Total Volume Listed"], correct: 0, explanation: "TVL (Total Value Locked) measures the total value of crypto assets deposited in a DeFi protocol. It's the primary metric for gauging a protocol's size and adoption." },
+  { q: "What is a reentrancy attack?", options: ["A bot that front-runs your transactions", "An exploit where a malicious contract repeatedly calls back into a vulnerable contract before the first call finishes", "A phishing attack targeting wallet seed phrases", "A sandwich attack on a DEX"], correct: 1, explanation: "Reentrancy attacks drained The DAO in 2016. A malicious contract calls back into the target before the balance is updated, allowing repeated withdrawals. The fix is to update state before external calls." },
+  { q: "What is the difference between APR and APY?", options: ["APR includes compound interest, APY does not", "APY includes compound interest, APR does not", "They are identical metrics", "APR is for lending, APY is for staking only"], correct: 1, explanation: "APR (Annual Percentage Rate) is simple interest. APY (Annual Percentage Yield) accounts for compounding. A 100% APR compounded daily becomes ~271% APY. Always compare APY to APY." },
+  { q: "What is a multisig wallet?", options: ["A wallet that holds multiple tokens", "A wallet requiring multiple private key signatures to authorize a transaction", "A wallet with multiple recovery phrases", "A shared exchange account"], correct: 1, explanation: "Multisig wallets require M-of-N signatures to execute transactions. A 2-of-3 multisig needs 2 out of 3 keyholders to sign. Used by DAOs and projects to prevent single points of failure." },
+  { q: "What happens during a short squeeze in crypto?", options: ["Short sellers profit as price drops", "Forced buying by short sellers drives prices rapidly higher", "Liquidity dries up and spreads widen", "A token's supply is permanently reduced"], correct: 1, explanation: "When a shorted asset rises, short sellers face losses and must buy to cover positions. This buying pressure drives prices even higher, forcing more shorts to close — a self-reinforcing squeeze." },
+  { q: "What is a Merkle tree in blockchain?", options: ["A data structure that allows efficient verification of large data sets", "A type of consensus algorithm", "A governance voting mechanism", "A cross-chain bridge protocol"], correct: 0, explanation: "Merkle trees hash pairs of data recursively until a single root hash represents all the data. Blockchains use them to efficiently verify transaction inclusion without downloading the entire chain." },
+  { q: "What is the purpose of a nonce in Ethereum/Solana transactions?", options: ["To encrypt the transaction data", "To ensure each transaction is unique and prevent replay attacks", "To calculate gas fees", "To identify the receiving wallet"], correct: 1, explanation: "A nonce is a sequential number assigned to each transaction from a wallet. It prevents the same transaction from being submitted twice and ensures transactions are processed in order." },
+  { q: "What is delta-neutral in DeFi?", options: ["A strategy with equal long and short exposure that profits regardless of price direction", "A token with zero price movement", "A pool with perfectly balanced reserves", "A zero-fee trading pair"], correct: 0, explanation: "Delta-neutral strategies eliminate directional price exposure. A trader might hold a token while shorting it on a perp exchange, earning yield without caring if price goes up or down." },
+  { q: "What is EIP-1559 and why does it matter?", options: ["An Ethereum upgrade that introduced burning of base fees, reducing ETH supply", "An Ethereum upgrade that increased block size", "A proposal to merge Ethereum with Bitcoin", "An Ethereum upgrade that reduced validator rewards"], correct: 0, explanation: "EIP-1559 introduced a base fee that gets burned with every transaction plus an optional priority tip. This made ETH deflationary during high usage periods and improved fee predictability." },
+  { q: "What is the Oracle problem in DeFi?", options: ["Smart contracts cannot natively access real-world data — oracles bridge this gap but introduce trust and manipulation risks", "Oracles are too slow for DeFi", "DeFi protocols cannot verify oracle identities", "Oracles charge fees that erode yields"], correct: 0, explanation: "Smart contracts are deterministic and isolated — they can't call external APIs. Oracles feed in external data (prices, events), but a manipulated oracle can drain an entire protocol." },
+  { q: "What is a vampire attack in DeFi?", options: ["A protocol that offers better incentives to migrate liquidity from a competitor", "A rug pull disguised as a legitimate project", "A flash loan exploit targeting AMMs", "A bot that drains unclaimed airdrops"], correct: 0, explanation: "Vampire attacks lure liquidity providers away from established protocols with higher rewards. SushiSwap famously drained $1B+ from Uniswap v2 in 2020 by offering SUSHI rewards to migrating LPs." },
+  { q: "What is the significance of a token's fully diluted valuation (FDV)?", options: ["It shows current market cap based on circulating supply", "It shows market cap if all tokens including unlocked future supply were in circulation", "It measures total liquidity in all pools", "It calculates the token's all-time-high valuation"], correct: 1, explanation: "FDV = current price × max supply. If FDV is 100x market cap, most tokens haven't entered circulation yet. Large FDV-to-mcap ratios signal heavy future sell pressure from unlocks." },
+  { q: "What is concentrated liquidity in AMMs?", options: ["All liquidity concentrated in one wallet", "LPs specify a price range for their liquidity, earning more fees per dollar when price is in range", "A pool with only one token", "Liquidity locked permanently in a protocol"], correct: 1, explanation: "Uniswap v3 introduced concentrated liquidity. LPs choose a price range — their capital only earns fees when the token trades within that range, but it's more capital-efficient than full-range LPs." },
+  { q: "What is a bonding curve used for beyond token launches?", options: ["Only for memecoins", "Continuous token models, NFT pricing, DAO treasury management, and automated market making", "Calculating staking yields", "Determining validator rewards"], correct: 1, explanation: "Bonding curves automate price discovery in many contexts — DAOs use them for continuous token issuance, NFT projects use them for dynamic pricing, and AMMs are essentially bonding curves." },
+  { q: "What is a governance attack?", options: ["Hacking a DAO's frontend website", "Accumulating enough governance tokens to pass malicious proposals", "Spamming a DAO's forum", "Forking a protocol to steal its brand"], correct: 1, explanation: "In 2022, Beanstalk lost $182M to a governance attack. The attacker took a flash loan to get 67% of voting power, passed a malicious proposal in the same transaction, and drained the treasury." },
+  { q: "What does it mean when a token has mint authority revoked?", options: ["The token can no longer be traded", "No new tokens can ever be created — supply is permanently fixed", "The token creator lost access to their wallet", "The token's metadata cannot be updated"], correct: 1, explanation: "Revoking mint authority means nobody — including the creator — can ever mint new tokens. It's a major trust signal. Without it, devs could inflate supply at will and dump on holders." },
+  { q: "What is the role of a sequencer in Layer 2 networks?", options: ["It validates blocks on the L1 chain", "It orders and batches L2 transactions before posting them to L1", "It bridges tokens between chains", "It generates zero-knowledge proofs"], correct: 1, explanation: "Sequencers order transactions and batch them efficiently before submitting to L1. Most L2s today use centralized sequencers — a trust assumption that's a known decentralization risk." },
+  { q: "What is the difference between a hot wallet and a cold wallet?", options: ["Hot wallets hold more tokens", "Hot wallets are connected to the internet, cold wallets are offline — cold is significantly more secure", "Cold wallets are faster for transactions", "Hot wallets require KYC"], correct: 1, explanation: "Hot wallets (Phantom, MetaMask) are online and convenient but exposed to attacks. Cold wallets (Ledger, Trezor) store keys offline — to sign a transaction, you physically approve it on the device." },
+  { q: "What is a liquidity bootstrapping pool (LBP)?", options: ["A pool that borrows liquidity from other protocols", "A token launch mechanism using dynamic weights to start high and drop price, discouraging bots and whales", "A pool that rewards LPs with governance tokens", "A fixed-price token sale mechanism"], correct: 1, explanation: "LBPs start with a high token weight (e.g., 96% token / 4% USDC) that shifts over time. Price starts high and drops unless buyers push it up — naturally discouraging front-running bots and whale snipers." },
+];
+
+// ── ULTIMATE CHALLENGE COMPONENT ──
+function UltimateChallenge({ onBack }) {
+  const [started, setStarted] = useState(false);
+  const [questions, setQuestions] = useState([]);
+  const [qi, setQi] = useState(0);
+  const [answers, setAnswers] = useState([]);
+  const [sel, setSel] = useState(null);
+  const [showExp, setShowExp] = useState(false);
+  const [finished, setFinished] = useState(false);
+
+  function startChallenge() {
+    // Pull all questions from lessons + challenge bank, shuffle, take 50
+    const allLessonQs = LESSONS.flatMap(l => l.questions.map(q => ({...q, source: l.title})));
+    const allQs = [...allLessonQs, ...CHALLENGE_QUESTIONS.map(q => ({...q, source: "ULTIMATE"}))];
+    const shuffled = allQs.sort(() => Math.random() - 0.5).slice(0, 50);
+    setQuestions(shuffled);
+    setStarted(true);
+  }
+
+  function pick(i) {
+    if (sel !== null) return;
+    setSel(i);
+    setShowExp(true);
+    setAnswers(prev => [...prev, i === questions[qi].correct]);
+  }
+
+  function next() {
+    if (qi + 1 >= questions.length) {
+      setFinished(true);
+    } else {
+      setQi(qi + 1);
+      setSel(null);
+      setShowExp(false);
+    }
+  }
+
+  const score = answers.filter(Boolean).length;
+  const pct = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
+
+  function getTier() {
+    if (pct >= 95) return { label: "YOU ARE CLUCK NORRIS", sub: "LEGENDARY STATUS", color: "#D4AF37", icon: "👑" };
+    if (pct >= 94) return { label: "CHALLENGER DEFEATED", sub: "Cluck Norris respects you.", color: "#10B981", icon: "🏆" };
+    if (pct >= 86) return { label: "WORTHY OPPONENT", sub: "...but still inferior. Cluck Norris doesn't lose.", color: "#F59E0B", icon: "⚔️" };
+    if (pct >= 70) return { label: "EMBARRASSING", sub: "Cluck Norris is embarrassed FOR you.", color: "#EF4444", icon: "😤" };
+    return { label: "GET OUT OF HIS DOJO", sub: "Come back when you've read a whitepaper.", color: "#6B7280", icon: "💀" };
+  }
+
+  // Intro screen
+  if (!started) return (
+    <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto",textAlign:"center"}}>
+      <div style={{marginBottom:24}}>
+        <img src={LOGO_B64} alt="Cluck Norris" style={{width:120,height:120,borderRadius:"50%",border:"3px solid #EF4444",objectFit:"cover",boxShadow:"0 0 30px rgba(239,68,68,0.6)"}}/>
+      </div>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:4,color:"#EF4444",marginBottom:6}}>THINK YOU'RE A CRYPTO GENIUS?</div>
+      <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:32,fontWeight:900,color:"#F9FAFB",margin:"0 0 8px",lineHeight:1}}>THE ULTIMATE<br/>CHALLENGE</h2>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#6B7280",letterSpacing:2,marginBottom:24}}>CLUCK NORRIS ONE ON ONE</div>
+      <div style={{background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:12,padding:20,marginBottom:24,textAlign:"left"}}>
+        <p style={{fontFamily:"'Oswald',sans-serif",fontSize:14,color:"#9CA3AF",margin:"0 0 16px",lineHeight:1.7,fontStyle:"italic"}}>
+          "Step into my dojo. 50 questions. No study guide. No second chances. All or nothing."
+        </p>
+        {[
+          {icon:"❓",text:"50 questions — drawn from across the entire curriculum and beyond"},
+          {icon:"📵",text:"No study section — straight into the exam"},
+          {icon:"🎯",text:"94% to pass — 47 out of 50 correct minimum"},
+          {icon:"💀",text:"Anything less and Cluck Norris is embarrassed FOR you"},
+        ].map(r=>(
+          <div key={r.text} style={{display:"flex",gap:12,marginBottom:10,alignItems:"flex-start"}}>
+            <span style={{fontSize:16,flexShrink:0}}>{r.icon}</span>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#D1D5DB",lineHeight:1.5}}>{r.text}</span>
+          </div>
+        ))}
+      </div>
+      <button onClick={startChallenge} style={{width:"100%",background:"linear-gradient(135deg,#EF4444,#DC2626)",border:"none",borderRadius:10,padding:"16px",fontFamily:"'Oswald',sans-serif",fontSize:16,fontWeight:700,color:"#fff",letterSpacing:3,cursor:"pointer",boxShadow:"0 0 30px rgba(239,68,68,0.5)",marginBottom:12}}>
+        🥊 STEP INTO THE DOJO
+      </button>
+      <button onClick={onBack} style={{background:"none",border:"none",color:"#6B7280",fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,cursor:"pointer"}}>
+        ← BACK TO SCHOOL
+      </button>
+    </div>
+  );
+
+  // Results screen
+  if (finished) {
+    const tier = getTier();
+    return (
+      <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto",textAlign:"center"}}>
+        <div style={{fontSize:60,marginBottom:16}}>{tier.icon}</div>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:3,color:tier.color,marginBottom:8}}>FINAL VERDICT</div>
+        <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:28,fontWeight:900,color:tier.color,margin:"0 0 8px",lineHeight:1}}>{tier.label}</h2>
+        <p style={{fontFamily:"'Oswald',sans-serif",fontSize:14,color:"#9CA3AF",marginBottom:24,fontStyle:"italic"}}>"{tier.sub}"</p>
+        <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${tier.color}40`,borderRadius:12,padding:24,marginBottom:24}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:60,fontWeight:900,color:tier.color,lineHeight:1}}>{pct}%</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:14,color:"#6B7280",marginTop:8,letterSpacing:2}}>{score} / {questions.length} CORRECT</div>
+          <div style={{marginTop:16,height:8,background:"rgba(255,255,255,0.08)",borderRadius:20,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,#EF4444,${tier.color})`,borderRadius:20,transition:"width 1s ease"}}/>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",marginTop:6}}>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563"}}>0%</span>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#10B981"}}>94% PASS</span>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#D4AF37"}}>100%</span>
+          </div>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <button onClick={()=>{setStarted(false);setFinished(false);setQi(0);setAnswers([]);setSel(null);setShowExp(false);}} style={{background:"linear-gradient(135deg,#EF4444,#DC2626)",border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#fff",letterSpacing:3,cursor:"pointer"}}>
+            🥊 FIGHT AGAIN
+          </button>
+          <button onClick={onBack} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"12px",fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#9CA3AF",letterSpacing:2,cursor:"pointer"}}>
+            ← BACK TO SCHOOL
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Quiz screen
+  const q = questions[qi];
+  return (
+    <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto"}}>
+      <div style={{marginBottom:16}}>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#6B7280",fontFamily:"'Oswald',sans-serif",letterSpacing:1,marginBottom:5}}>
+          <span style={{color:"#EF4444",fontWeight:700}}>🥊 ULTIMATE CHALLENGE</span>
+          <span>Q {qi+1} OF {questions.length} • {answers.filter(Boolean).length} CORRECT</span>
+        </div>
+        <div style={{height:6,background:"rgba(255,255,255,0.08)",borderRadius:3,overflow:"hidden"}}>
+          <div style={{height:"100%",width:`${((qi)/questions.length)*100}%`,background:"linear-gradient(90deg,#EF4444,#D4AF37)",borderRadius:3}}/>
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563"}}>START</span>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#10B981"}}>NEED 47+ TO PASS</span>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#D4AF37"}}>50</span>
+        </div>
+      </div>
+      <div style={{background:"rgba(239,68,68,0.05)",border:"1px solid rgba(239,68,68,0.2)",borderRadius:12,padding:20,marginBottom:14}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#EF4444",letterSpacing:2,marginBottom:8}}>QUESTION {qi+1}</div>
+        <p style={{fontFamily:"'Oswald',sans-serif",fontSize:18,color:"#F9FAFB",margin:0,lineHeight:1.4}}>{q.q}</p>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:16}}>
+        {q.options.map((opt,i)=>{
+          let bg="rgba(255,255,255,0.03)",border="1px solid rgba(255,255,255,0.08)",color="#D1D5DB";
+          if(sel!==null){
+            if(i===q.correct){bg="rgba(16,185,129,0.15)";border="1px solid #10B981";color="#10B981";}
+            else if(i===sel){bg="rgba(239,68,68,0.15)";border="1px solid #EF4444";color="#EF4444";}
+          }
+          return(<button key={i} onClick={()=>pick(i)} style={{background:bg,border,borderRadius:10,padding:"12px 14px",color,cursor:sel!==null?"default":"pointer",textAlign:"left",fontSize:14,display:"flex",gap:10,alignItems:"center"}}>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:11,opacity:0.6,minWidth:18}}>{String.fromCharCode(65+i)}</span>{opt}
+          </button>);
+        })}
+      </div>
+      {showExp&&(<>
+        <div style={{background:sel===q.correct?"rgba(16,185,129,0.08)":"rgba(239,68,68,0.08)",border:`1px solid ${sel===q.correct?"#10B981":"#EF4444"}`,borderRadius:10,padding:14,marginBottom:12}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:1,color:sel===q.correct?"#10B981":"#EF4444",marginBottom:5}}>{sel===q.correct?"✓ CORRECT — CLUCK NORRIS NODS":"✗ WRONG — CLUCK NORRIS SIGHS"}</div>
+          <p style={{margin:0,color:"#D1D5DB",fontSize:13,lineHeight:1.6}}>{q.explanation}</p>
+        </div>
+        <button onClick={next} style={{width:"100%",background:"linear-gradient(135deg,#EF4444,#DC2626)",border:"none",borderRadius:10,padding:"13px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#fff",letterSpacing:2,cursor:"pointer"}}>
+          {qi+1<questions.length?"NEXT QUESTION →":"SEE FINAL VERDICT →"}
+        </button>
+      </>)}
+    </div>
+  );
+}
+
 // ── BAGS PAGE ──
 function BagsPage() {
   const [feed, setFeed] = useState(null);
@@ -911,7 +1097,7 @@ function AppIcon({size=64}){
   );
 }
 
-function Landing({onStart,completed}){
+function Landing({onStart,onChallenge,completed}){
   const pct=Math.round((completed.length/LESSONS.length)*100);
   return(
     <div style={{textAlign:"center",padding:"0 20px 40px",maxWidth:520,margin:"0 auto"}}>
@@ -934,9 +1120,15 @@ function Landing({onStart,completed}){
         </div>
       )}
       <button onClick={onStart} style={{background:"linear-gradient(135deg,#D97706,#EF4444)",border:"none",borderRadius:10,padding:"14px 44px",fontFamily:"'Oswald',sans-serif",fontSize:16,fontWeight:700,color:"#fff",letterSpacing:3,textTransform:"uppercase",cursor:"pointer",boxShadow:"0 0 28px rgba(217,119,6,0.5)"}}>
-        {completed.length===0?"📋 Enroll Now":"📚 Back to Class"}
+        {completed.length===0?"🏫 Start School":"📚 Back to Class"}
       </button>
       <p style={{marginTop:14,fontSize:13,color:"#6B7280",fontFamily:"'Oswald',sans-serif",letterSpacing:2}}>12 CLASSES • 72 EXAMS • NO EXTRA CREDIT</p>
+      <div style={{marginTop:16,borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:16}}>
+        <button onClick={onChallenge} style={{width:"100%",background:"rgba(239,68,68,0.12)",border:"2px solid rgba(239,68,68,0.5)",borderRadius:10,padding:"16px",fontFamily:"'Oswald',sans-serif",fontSize:18,fontWeight:700,color:"#EF4444",letterSpacing:3,cursor:"pointer",boxShadow:"0 0 28px rgba(239,68,68,0.3)"}}>
+          🥊 ULTIMATE CHALLENGE
+        </button>
+        <p style={{marginTop:8,fontSize:12,color:"#6B7280",fontFamily:"'Oswald',sans-serif",letterSpacing:1}}>50 QUESTIONS • NO STUDY GUIDE • 94% TO PASS</p>
+      </div>
       <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{
         display:"inline-block",marginTop:16,
         background:"rgba(217,119,6,0.1)",border:"1px solid rgba(217,119,6,0.35)",
@@ -1218,7 +1410,8 @@ export default function App(){
         </div>
       </div>
       <div style={{paddingTop:28}}>
-        {screen==="landing"&&<Landing onStart={()=>setScreen("select")} completed={completed}/>}
+        {screen==="landing"&&<Landing onStart={()=>setScreen("select")} onChallenge={()=>setScreen("challenge")} completed={completed}/>}
+        {screen==="challenge"&&<UltimateChallenge onBack={()=>setScreen("landing")}/>}
         {screen==="clkn"&&<CLKNWidget/>}
         {screen==="bags"&&<BagsPage/>}
         {screen==="select"&&<Select onSelect={id=>{setLessonId(id);setScreen("lesson");}} completed={completed}/>}
