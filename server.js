@@ -138,26 +138,6 @@ app.get("/api/fees", async (req, res) => {
   }
 });
 
-// ── Claimable SOL ──
-app.get("/api/claimable", async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-  const API_KEY = process.env.BAGS_API_KEY;
-  if (!API_KEY) return res.status(500).json({ success: false, error: "Missing BAGS_API_KEY" });
-  try {
-    // Try fee-share/wallet endpoint
-    const url = `${BAGS_BASE}fee-share/wallet?wallet=${FEE_CLAIMER_WALLET}&feeShareConfig=${FEE_SHARE_CONFIG}`;
-    console.log("→ Claimable:", url);
-    const response = await fetch(url, { headers: { "x-api-key": API_KEY } });
-    const text = await response.text();
-    console.log("← Claimable:", response.status, text.slice(0, 300));
-    try { return res.status(200).json(JSON.parse(text)); }
-    catch (e) { return res.status(500).json({ success: false, error: "Invalid JSON", raw: text.slice(0,200) }); }
-  } catch (err) {
-    return res.status(500).json({ success: false, error: err.message });
-  }
-});
-
 // ── Partner Stats ──
 app.get("/api/partner-stats", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
