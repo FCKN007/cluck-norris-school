@@ -634,15 +634,16 @@ function BagsPage() {
                       {p.name} <span style={{color:"#6B7280",fontSize:15}}>({p.symbol})</span>
                     </div>
                     <div style={{display:"flex",gap:10,alignItems:"center",marginTop:5,flexWrap:"wrap"}}>
-                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,letterSpacing:1,color:
-                        p.status==="MIGRATED"?"#10B981":
-                        p.status==="MIGRATING"?"#F59E0B":
-                        p.status==="PRE_GRAD"?"#D97706":"#6B7280"
-                      }}>
-                        {p.status==="MIGRATED"?"🎓 GRADUATED":
-                         p.status==="MIGRATING"?"⏳ MIGRATING":
-                         p.status==="PRE_GRAD"?"🔥 NEAR GRAD":"📈 BONDING"}
-                      </div>
+                      {(() => {
+                        const mc = feedPrices[p.tokenMint]?.marketCap || 0;
+                        let label, color;
+                        if (p.status==="MIGRATED") { label="🎓 GRADUATED"; color="#10B981"; }
+                        else if (p.status==="MIGRATING") { label="⏳ MIGRATING"; color="#F59E0B"; }
+                        else if (mc >= 30000) { label="⚡ NEAR GRAD"; color="#D97706"; }
+                        else if (mc >= 5000) { label="🔥 GAINING"; color="#F97316"; }
+                        else { label="📈 EARLY"; color="#6B7280"; }
+                        return <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,letterSpacing:1,color}}>{label}</div>;
+                      })()}
                       {feedPrices[p.tokenMint]?.priceUsd && (
                         <div style={{fontFamily:"monospace",fontSize:13,color:"#FCD34D"}}>
                           ${parseFloat(feedPrices[p.tokenMint].priceUsd).toFixed(6)}
