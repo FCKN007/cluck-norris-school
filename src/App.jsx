@@ -606,17 +606,20 @@ function BagsPage() {
 
       {/* Recent Launches Feed */}
       <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:16}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:3,color:"#D97706"}}>📡 RECENT BAGS.FM LAUNCHES</div>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
+        <div style={{marginBottom:14}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:16,fontWeight:700,letterSpacing:2,color:"#F9FAFB"}}>📡 RECENT BAGS.FM LAUNCHES</div>
+            <button onClick={fetchFeed} style={{background:"rgba(217,119,6,0.15)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:8,color:"#D97706",fontFamily:"'Oswald',sans-serif",fontSize:18,cursor:"pointer",padding:"4px 12px",lineHeight:1}}>
+              {feedRefreshing ? "..." : "↻"}
+            </button>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:1}}>Sorted by market cap • Auto-refreshes every 60s</div>
             {feedLastUpdated && (
-              <span style={{fontFamily:"'Oswald',sans-serif",fontSize:7,color:"#4B5563",letterSpacing:1}}>
+              <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#4B5563",letterSpacing:1}}>
                 {feedLastUpdated.toLocaleTimeString()}
               </span>
             )}
-            <button onClick={fetchFeed} style={{background:"none",border:"none",color:"#D97706",fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:1,cursor:"pointer",padding:"2px 6px"}}>
-              {feedRefreshing ? "..." : "↻"}
-            </button>
           </div>
         </div>
         {feedLoading ? (
