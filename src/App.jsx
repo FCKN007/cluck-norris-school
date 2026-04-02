@@ -712,7 +712,6 @@ function CLKNWidget() {
   const [dexData, setDexData] = useState(null);
   const [holderCount, setHolderCount] = useState(null);
   const [fees, setFees] = useState(null);
-  const [claimable, setClaimable] = useState(null);
   const [debugInfo, setDebugInfo] = useState(null);
 
   const isGraduated = pool && pool.dammV2PoolKey;
@@ -897,16 +896,7 @@ function CLKNWidget() {
             {fees ? (parseInt(fees) / 1_000_000_000).toFixed(3) : "—"}
           </div>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginTop:4}}>SOL LIFETIME</div>
-          {claimable !== null && (
-            <div style={{marginTop:6,background:"rgba(16,185,129,0.08)",borderRadius:6,padding:"4px 8px"}}>
-              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#10B981",letterSpacing:1}}>
-                {(() => {
-                  const amt = claimable?.claimableAmount || claimable?.unclaimedSol || claimable?.amount || 0;
-                  return `${(parseInt(amt) / 1_000_000_000).toFixed(4)} SOL CLAIMABLE`;
-                })()}
-              </div>
-            </div>
-          )}
+
         </div>
       </div>
 
