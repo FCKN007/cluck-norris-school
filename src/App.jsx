@@ -286,6 +286,261 @@ function Belt({belt,small}){return(<span style={{display:"inline-block",backgrou
 
 
 
+
+// ── CLKN INCUBATOR ──
+const INCUBATOR_LESSONS = [
+  {
+    id: "wallet",
+    icon: "🥚",
+    title: "What is a Wallet?",
+    color: "#60A5FA",
+    intro: "In crypto, a wallet doesn't hold money — it holds KEYS. Your wallet is basically a password manager for your crypto. There are two keys you need to know about.",
+    concepts: [
+      { term: "Public Key", def: "Like your home address — you can share it with anyone so they can send you crypto. It's safe to show." },
+      { term: "Private Key / Seed Phrase", def: "Like the key to your front door. NEVER share this with anyone. Whoever has it owns your crypto." },
+      { term: "Non-Custodial Wallet", def: "A wallet where YOU control the keys. Examples: Phantom, MetaMask. You are your own bank." },
+      { term: "Custodial Wallet", def: "A wallet controlled by a company (like Coinbase). They hold your keys — if they go down, you could lose access." },
+    ],
+    questions: [
+      { q: "Your public key is like your home address — safe to share so people can send you crypto.", options: ["True", "False"], correct: 0, explanation: "Correct! Your public key is safe to share. It's how others send crypto to you. Never confuse it with your private key or seed phrase." },
+      { q: "You should share your seed phrase with customer support if they ask for it.", options: ["True", "False"], correct: 1, explanation: "NEVER share your seed phrase with anyone — ever. Legitimate support teams will never ask for it. Anyone asking is trying to steal your crypto." },
+      { q: "With a non-custodial wallet, who controls your crypto?", options: ["The wallet company", "You do"], correct: 1, explanation: "Non-custodial means YOU hold the keys. No company can freeze or take your funds. With great power comes great responsibility — back up your seed phrase!" },
+    ],
+  },
+  {
+    id: "tokens",
+    icon: "🐣",
+    title: "What is a Token?",
+    color: "#34D399",
+    intro: "You've probably heard 'coin' and 'token' used interchangeably — but they're different. Understanding this helps you know what you're actually buying.",
+    concepts: [
+      { term: "Coin", def: "A native cryptocurrency that powers its own blockchain. Examples: SOL (Solana), ETH (Ethereum), BTC (Bitcoin)." },
+      { term: "Token", def: "A crypto asset built ON TOP of an existing blockchain. CLKN is a token built on Solana. Tokens don't have their own blockchain." },
+      { term: "Mint Address", def: "The unique ID of a token on Solana — like a social security number for the token. Used to identify the exact token you're buying." },
+      { term: "Supply", def: "The total number of tokens that exist. A fixed supply means no more can ever be created." },
+    ],
+    questions: [
+      { q: "SOL is a token built on the Ethereum blockchain.", options: ["True", "False"], correct: 1, explanation: "SOL is actually the native coin of the Solana blockchain — not Ethereum. Tokens are built ON a blockchain, while coins ARE the blockchain's currency." },
+      { q: "What is CLKN?", options: ["A coin with its own blockchain", "A token built on Solana"], correct: 1, explanation: "CLKN is a Solana token — it lives on the Solana blockchain and uses SOL for transactions. It doesn't have its own blockchain." },
+      { q: "Why does a token's mint address matter?", options: ["It shows how much the token is worth", "It uniquely identifies the exact token so you don't buy a fake copy"], correct: 1, explanation: "Scammers create fake tokens with similar names. The mint address is the only guaranteed way to confirm you have the right token. Always verify!" },
+    ],
+  },
+  {
+    id: "dex",
+    icon: "🌱",
+    title: "What is a DEX?",
+    color: "#FBBF24",
+    intro: "A DEX (Decentralized Exchange) lets you trade crypto directly from your wallet — no account, no ID, no bank. Think of it as a vending machine instead of a cashier.",
+    concepts: [
+      { term: "DEX", def: "Decentralized Exchange. A platform where you trade directly from your wallet using smart contracts. No company controls it." },
+      { term: "CEX", def: "Centralized Exchange. A company (like Coinbase or Binance) that holds your crypto and processes trades. Requires an account and ID." },
+      { term: "Smart Contract", def: "A self-executing program on the blockchain. When you trade on a DEX, a smart contract handles the swap automatically — no middleman." },
+      { term: "Permissionless", def: "Anyone can use a DEX without approval. No application, no waiting, no ID required. Just connect your wallet and trade." },
+    ],
+    questions: [
+      { q: "To use a DEX you need to create an account and verify your identity.", options: ["True", "False"], correct: 1, explanation: "DEXs are permissionless — just connect your wallet and trade. No signup, no ID, no approval needed. That's the beauty of DeFi." },
+      { q: "On a DEX, who processes your trade?", options: ["A company employee", "A smart contract on the blockchain"], correct: 1, explanation: "Smart contracts automatically execute trades based on code. No human is involved — which means no one can stop your trade or freeze your funds." },
+      { q: "Which is safer from company bankruptcy?", options: ["CEX (Centralized Exchange)", "DEX (Decentralized Exchange)"], correct: 1, explanation: "FTX, Celsius, and others showed the risk of CEXs — when they fail, user funds disappear. A DEX can't go bankrupt because no company holds your funds." },
+    ],
+  },
+  {
+    id: "liquidity",
+    icon: "💧",
+    title: "What is Liquidity?",
+    color: "#06B6D4",
+    intro: "Liquidity is basically how easy it is to buy or sell something without moving the price. More liquidity = smoother trades. Less liquidity = bigger price swings.",
+    concepts: [
+      { term: "Liquidity", def: "The amount of crypto available for trading. High liquidity = easy to buy/sell at stable prices. Low liquidity = prices jump around a lot." },
+      { term: "Liquidity Pool", def: "A pot of two tokens locked in a smart contract that traders swap against. LP providers deposit tokens and earn fees from every trade." },
+      { term: "Slippage", def: "When you actually pay more (or get less) than the displayed price because the trade moved the market. Common with low liquidity tokens." },
+      { term: "Price Impact", def: "How much YOUR trade moves the price. A big buy in a small pool pushes the price up significantly." },
+    ],
+    questions: [
+      { q: "A token with $500 in liquidity is easier to trade without price impact than one with $500,000.", options: ["True", "False"], correct: 1, explanation: "More liquidity means your trade is a smaller percentage of the pool, causing less price impact. Low liquidity tokens can move dramatically on even small trades." },
+      { q: "What is slippage?", options: ["A fee charged by the DEX", "The difference between expected price and actual price you receive"], correct: 1, explanation: "Slippage happens because prices change between when you submit a trade and when it executes. High slippage tolerance protects against failed transactions but exposes you to worse prices." },
+      { q: "You want to buy a token. Which pool is safer to trade in?", options: ["Pool with $1,000 liquidity", "Pool with $100,000 liquidity"], correct: 1, explanation: "More liquidity means less price impact on your trade. A $1,000 pool could move dramatically on a $100 buy. Always check liquidity before trading." },
+    ],
+  },
+  {
+    id: "marketcap",
+    icon: "📈",
+    title: "What is Market Cap?",
+    color: "#A78BFA",
+    intro: "Price alone doesn't tell you how big a project is. A token at $0.000001 could be worth more overall than one at $100. Market cap is the real measure.",
+    concepts: [
+      { term: "Market Cap", def: "Price × Circulating Supply. This is the true size of a project. A $0.00001 token with 1 trillion supply has a $10M market cap." },
+      { term: "Circulating Supply", def: "The number of tokens actually available to trade right now. Locked or unvested tokens don't count." },
+      { term: "FDV (Fully Diluted Valuation)", def: "Price × Total Supply (including tokens not yet released). Shows what the market cap would be if all tokens existed today." },
+      { term: "Price vs Value", def: "A cheap price doesn't mean a good deal. Always check market cap. A $0.001 token with $1B market cap has less room to grow than a $10 token with $1M market cap." },
+    ],
+    questions: [
+      { q: "Token A costs $100 and Token B costs $0.001. Token A is definitely the bigger project.", options: ["True", "False"], correct: 1, explanation: "Price means nothing without supply context. Token B could have a trillion tokens in supply making it worth far more overall. Always check market cap, not just price." },
+      { q: "What is market cap?", options: ["The highest price a token has ever reached", "Price multiplied by circulating supply"], correct: 1, explanation: "Market cap = price × circulating supply. It's the most important metric for comparing project sizes. Two tokens at the same price can have wildly different market caps." },
+      { q: "A token has a $500K market cap. What does that mean?", options: ["The project raised $500K", "The total value of all circulating tokens is $500K"], correct: 1, explanation: "Market cap represents the current total value of all tokens in circulation at today's price. It's not money raised — it's market valuation." },
+    ],
+  },
+  {
+    id: "safety",
+    icon: "🔑",
+    title: "Staying Safe in Crypto",
+    color: "#F87171",
+    intro: "Crypto has no customer service hotline. No chargebacks. No refunds. Once your crypto is gone, it's gone. These basics will protect you from the most common traps.",
+    concepts: [
+      { term: "Rug Pull", def: "When developers abandon a project and take all the liquidity, leaving holders with worthless tokens. Research the team and check if liquidity is locked." },
+      { term: "Phishing", def: "Fake websites or DMs designed to steal your seed phrase or private key. Always verify URLs. Never click links from strangers." },
+      { term: "DYOR", def: "Do Your Own Research. Never invest based on hype or someone else's advice alone. Read, verify, think critically." },
+      { term: "Mint Authority", def: "If a token's mint authority isn't revoked, the creator can print unlimited new tokens and crash the price. Check this before buying." },
+    ],
+    questions: [
+      { q: "Someone DMs you on Telegram offering to help recover your wallet — you should share your seed phrase with them.", options: ["True", "False"], correct: 1, explanation: "NEVER. This is the most common scam in crypto. No legitimate person will ever need your seed phrase. Anyone asking for it is trying to steal everything in your wallet." },
+      { q: "Locked liquidity on a token means:", options: ["The token can't be traded", "Developers can't remove the trading liquidity for a set period — reducing rug pull risk"], correct: 1, explanation: "Locked liquidity is a major trust signal. It means devs physically cannot drain the pool during the lock period. Always check if liquidity is locked before buying." },
+      { q: "What does DYOR mean?", options: ["Do Your Own Research", "Don't Yield On Returns"], correct: 0, explanation: "Do Your Own Research. In crypto, you are your own bank and your own analyst. Never rely solely on influencers, Telegram groups, or random advice. Verify everything yourself." },
+    ],
+  },
+];
+
+function Incubator({ onComplete, onBack }) {
+  const [lessonIdx, setLessonIdx] = useState(0);
+  const [phase, setPhase] = useState("intro"); // intro | quiz
+  const [qi, setQi] = useState(0);
+  const [sel, setSel] = useState(null);
+  const [showExp, setShowExp] = useState(false);
+  const [completed, setCompleted] = useState([]);
+
+  const lesson = INCUBATOR_LESSONS[lessonIdx];
+  const q = lesson?.questions[qi];
+  const allDone = completed.length === INCUBATOR_LESSONS.length;
+
+  function pick(i) {
+    if (sel !== null) return;
+    setSel(i);
+    setShowExp(true);
+  }
+
+  function next() {
+    if (qi + 1 < lesson.questions.length) {
+      setQi(qi + 1);
+      setSel(null);
+      setShowExp(false);
+    } else {
+      // Lesson complete
+      const newCompleted = [...completed, lesson.id];
+      setCompleted(newCompleted);
+      if (lessonIdx + 1 < INCUBATOR_LESSONS.length) {
+        setLessonIdx(lessonIdx + 1);
+        setPhase("intro");
+        setQi(0);
+        setSel(null);
+        setShowExp(false);
+      } else {
+        setPhase("complete");
+      }
+    }
+  }
+
+  // Completion screen
+  if (phase === "complete") return (
+    <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto",textAlign:"center"}}>
+      <div style={{fontSize:60,marginBottom:16}}>🐔</div>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:4,color:"#60A5FA",marginBottom:8}}>INCUBATOR COMPLETE</div>
+      <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:28,fontWeight:900,color:"#F9FAFB",margin:"0 0 8px",lineHeight:1}}>YOU'VE HATCHED!</h2>
+      <p style={{fontFamily:"'Oswald',sans-serif",fontSize:14,color:"#9CA3AF",marginBottom:24,fontStyle:"italic",lineHeight:1.6}}>
+        "Every legend started somewhere. Now step into the real Hard Knocks."
+      </p>
+      <div style={{background:"rgba(96,165,250,0.08)",border:"1px solid rgba(96,165,250,0.3)",borderRadius:12,padding:20,marginBottom:24}}>
+        <div style={{display:"flex",justifyContent:"center",gap:12,flexWrap:"wrap"}}>
+          {INCUBATOR_LESSONS.map(l=>(
+            <div key={l.id} style={{textAlign:"center"}}>
+              <div style={{fontSize:24}}>{l.icon}</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#60A5FA",letterSpacing:1,marginTop:2}}>✓</div>
+            </div>
+          ))}
+        </div>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#9CA3AF",marginTop:12,letterSpacing:1}}>{INCUBATOR_LESSONS.length} LESSONS COMPLETED</div>
+      </div>
+      <button onClick={onComplete} style={{width:"100%",background:"linear-gradient(135deg,#60A5FA,#3B82F6)",border:"none",borderRadius:10,padding:"16px",fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#fff",letterSpacing:3,cursor:"pointer",boxShadow:"0 0 28px rgba(96,165,250,0.4)",marginBottom:10}}>
+        🏫 ENTER THE SCHOOL OF HARD KNOCKS
+      </button>
+      <button onClick={onBack} style={{background:"none",border:"none",color:"#6B7280",fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,cursor:"pointer"}}>
+        ← BACK
+      </button>
+    </div>
+  );
+
+  // Intro/concept screen
+  if (phase === "intro") return (
+    <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto"}}>
+      {/* Progress dots */}
+      <div style={{display:"flex",gap:6,justifyContent:"center",marginBottom:20}}>
+        {INCUBATOR_LESSONS.map((l,i)=>(
+          <div key={l.id} style={{width:28,height:28,borderRadius:"50%",background:completed.includes(l.id)?"rgba(96,165,250,0.3)":i===lessonIdx?lesson.color:"rgba(255,255,255,0.08)",border:`2px solid ${completed.includes(l.id)?"#60A5FA":i===lessonIdx?lesson.color:"rgba(255,255,255,0.1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12}}>
+            {completed.includes(l.id) ? "✓" : l.icon}
+          </div>
+        ))}
+      </div>
+      <div style={{textAlign:"center",marginBottom:20}}>
+        <div style={{fontSize:40,marginBottom:8}}>{lesson.icon}</div>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:3,color:lesson.color,marginBottom:4}}>LESSON {lessonIdx+1} OF {INCUBATOR_LESSONS.length}</div>
+        <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:26,fontWeight:900,color:"#F9FAFB",margin:"0 0 12px"}}>{lesson.title}</h2>
+        <p style={{color:"#9CA3AF",fontSize:14,lineHeight:1.7,margin:0}}>{lesson.intro}</p>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:20}}>
+        {lesson.concepts.map(c=>(
+          <div key={c.term} style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${lesson.color}30`,borderRadius:10,padding:"12px 14px"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:lesson.color,marginBottom:4}}>{c.term}</div>
+            <div style={{fontSize:13,color:"#9CA3AF",lineHeight:1.6}}>{c.def}</div>
+          </div>
+        ))}
+      </div>
+      <button onClick={()=>setPhase("quiz")} style={{width:"100%",background:lesson.color,border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#fff",letterSpacing:3,cursor:"pointer"}}>
+        ✅ QUICK CHECK →
+      </button>
+      <button onClick={onBack} style={{display:"block",margin:"12px auto 0",background:"none",border:"none",color:"#6B7280",fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:2,cursor:"pointer"}}>
+        ← BACK TO ENTRANCE
+      </button>
+    </div>
+  );
+
+  // Quiz screen
+  return (
+    <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto"}}>
+      <div style={{marginBottom:16}}>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#6B7280",fontFamily:"'Oswald',sans-serif",letterSpacing:1,marginBottom:5}}>
+          <span style={{color:lesson.color}}>{lesson.icon} {lesson.title.toUpperCase()}</span>
+          <span>Q {qi+1} OF {lesson.questions.length}</span>
+        </div>
+        <div style={{height:4,background:"rgba(255,255,255,0.08)",borderRadius:2}}>
+          <div style={{height:"100%",width:`${(qi/lesson.questions.length)*100}%`,background:lesson.color,borderRadius:2}}/>
+        </div>
+      </div>
+      <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${lesson.color}40`,borderRadius:12,padding:20,marginBottom:14}}>
+        <p style={{fontFamily:"'Oswald',sans-serif",fontSize:18,color:"#F9FAFB",margin:0,lineHeight:1.4}}>{q.q}</p>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:16}}>
+        {q.options.map((opt,i)=>{
+          let bg="rgba(255,255,255,0.03)",border="1px solid rgba(255,255,255,0.08)",color="#D1D5DB";
+          if(sel!==null){
+            if(i===q.correct){bg="rgba(16,185,129,0.15)";border="1px solid #10B981";color="#10B981";}
+            else if(i===sel){bg="rgba(239,68,68,0.15)";border="1px solid #EF4444";color="#EF4444";}
+          }
+          return(<button key={i} onClick={()=>pick(i)} style={{background:bg,border,borderRadius:10,padding:"14px",color,cursor:sel!==null?"default":"pointer",textAlign:"left",fontSize:15,fontWeight:600}}>
+            {opt}
+          </button>);
+        })}
+      </div>
+      {showExp&&(<>
+        <div style={{background:sel===q.correct?"rgba(16,185,129,0.08)":"rgba(239,68,68,0.08)",border:`1px solid ${sel===q.correct?"#10B981":"#EF4444"}`,borderRadius:10,padding:14,marginBottom:12}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:1,color:sel===q.correct?"#10B981":"#EF4444",marginBottom:5}}>{sel===q.correct?"✓ CORRECT!":"✗ NOT QUITE — HERE'S WHY:"}</div>
+          <p style={{margin:0,color:"#D1D5DB",fontSize:13,lineHeight:1.6}}>{q.explanation}</p>
+        </div>
+        <button onClick={next} style={{width:"100%",background:lesson.color,border:"none",borderRadius:10,padding:"13px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#fff",letterSpacing:2,cursor:"pointer"}}>
+          {qi+1<lesson.questions.length?"NEXT QUESTION →":"NEXT LESSON →"}
+        </button>
+      </>)}
+    </div>
+  );
+}
+
 // ── ULTIMATE CHALLENGE QUESTIONS (never seen in lessons) ──
 const CHALLENGE_QUESTIONS = [
   { q: "What is a flash loan?", options: ["A loan that charges high interest", "An uncollateralized loan borrowed and repaid in a single transaction block", "A fast bank wire transfer", "A short-term margin loan on a CEX"], correct: 1, explanation: "Flash loans are unique to DeFi — you borrow any amount with zero collateral as long as you repay it within the same transaction. Used for arbitrage, liquidations, and collateral swaps." },
@@ -1099,7 +1354,7 @@ function AppIcon({size=64}){
   );
 }
 
-function Landing({onStart,onChallenge,completed}){
+function Landing({onStart,onChallenge,onIncubator,completed}){
   const pct=Math.round((completed.length/LESSONS.length)*100);
   return(
     <div style={{textAlign:"center",padding:"0 20px 40px",maxWidth:520,margin:"0 auto"}}>
@@ -1125,11 +1380,15 @@ function Landing({onStart,onChallenge,completed}){
         {completed.length===0?"🏫 Start School":"📚 Back to Class"}
       </button>
       <p style={{marginTop:14,fontSize:13,color:"#6B7280",fontFamily:"'Oswald',sans-serif",letterSpacing:2}}>12 CLASSES • 72 EXAMS • NO EXTRA CREDIT</p>
-      <div style={{marginTop:16,borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:16}}>
-        <button onClick={onChallenge} style={{width:"100%",background:"rgba(239,68,68,0.12)",border:"2px solid rgba(239,68,68,0.5)",borderRadius:10,padding:"16px",fontFamily:"'Oswald',sans-serif",fontSize:18,fontWeight:700,color:"#EF4444",letterSpacing:3,cursor:"pointer",boxShadow:"0 0 28px rgba(239,68,68,0.3)"}}>
+      <div style={{marginTop:16,borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:16,display:"flex",flexDirection:"column",gap:10}}>
+        <button onClick={onIncubator} style={{width:"100%",background:"rgba(96,165,250,0.1)",border:"2px solid rgba(96,165,250,0.4)",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:16,fontWeight:700,color:"#60A5FA",letterSpacing:3,cursor:"pointer",boxShadow:"0 0 20px rgba(96,165,250,0.2)"}}>
+          🥚 CLKN INCUBATOR
+        </button>
+        <p style={{marginTop:-4,fontSize:11,color:"#4B5563",fontFamily:"'Oswald',sans-serif",letterSpacing:1}}>CRYPTO NEWBIE? START HERE — 6 BEGINNER LESSONS</p>
+        <button onClick={onChallenge} style={{width:"100%",background:"rgba(239,68,68,0.12)",border:"2px solid rgba(239,68,68,0.5)",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:16,fontWeight:700,color:"#EF4444",letterSpacing:3,cursor:"pointer",boxShadow:"0 0 20px rgba(239,68,68,0.3)"}}>
           🥊 ULTIMATE CHALLENGE
         </button>
-        <p style={{marginTop:8,fontSize:12,color:"#6B7280",fontFamily:"'Oswald',sans-serif",letterSpacing:1}}>50 QUESTIONS • NO STUDY GUIDE • 94% TO PASS</p>
+        <p style={{marginTop:-4,fontSize:11,color:"#4B5563",fontFamily:"'Oswald',sans-serif",letterSpacing:1}}>50 QUESTIONS • NO STUDY GUIDE • 94% TO PASS</p>
       </div>
       <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{
         display:"inline-block",marginTop:16,
@@ -1371,49 +1630,35 @@ export default function App(){
             {LESSONS.map(l=><div key={l.id} style={{width:7,height:7,borderRadius:"50%",background:completed.includes(l.id)?l.color:"rgba(255,255,255,0.1)"}}/>)}
           </div>
         </div>
-        {/* Bottom row — three buttons */}
-        <div style={{display:"flex",gap:6}}>
-          <button
-            onClick={()=>setScreen("landing")}
-            style={{
-              flex:1, background:screen==="landing"?"rgba(255,255,255,0.12)":"rgba(255,255,255,0.04)",
-              border:`1px solid ${screen==="landing"?"rgba(255,255,255,0.25)":"rgba(255,255,255,0.08)"}`,
-              borderRadius:8, padding:"8px 0",
-              fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,
-              color:screen==="landing"?"#F9FAFB":"#6B7280",letterSpacing:1,cursor:"pointer",
-            }}
-          >
-            🏫 SCHOOL ENTRANCE
-          </button>
-          <button
-            onClick={()=>setScreen(screen==="clkn"?"landing":"clkn")}
-            style={{
-              flex:1, background:screen==="clkn"?"rgba(217,119,6,0.25)":"rgba(217,119,6,0.08)",
-              border:`1px solid ${screen==="clkn"?"rgba(217,119,6,0.6)":"rgba(217,119,6,0.2)"}`,
-              borderRadius:8, padding:"8px 0",
-              fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,
-              color:"#D97706",letterSpacing:1,cursor:"pointer",
-            }}
-          >
-            📊 TOKEN DATA
-          </button>
-          <button
-            onClick={()=>setScreen(screen==="bags"?"landing":"bags")}
-            style={{
-              flex:1, background:screen==="bags"?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.04)",
-              border:`1px solid ${screen==="bags"?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.08)"}`,
-              borderRadius:8, padding:"8px 0",
-              fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,
-              color:"#9CA3AF",letterSpacing:1,cursor:"pointer",
-            }}
-          >
-            🎒 BAGS INFO
-          </button>
+        {/* Nav tabs — two rows */}
+        <div style={{display:"flex",flexDirection:"column",gap:5}}>
+          {/* Row 1 — main navigation */}
+          <div style={{display:"flex",gap:5}}>
+            <button onClick={()=>setScreen("landing")} style={{flex:1,background:screen==="landing"?"rgba(255,255,255,0.12)":"rgba(255,255,255,0.04)",border:`1px solid ${screen==="landing"?"rgba(255,255,255,0.25)":"rgba(255,255,255,0.08)"}`,borderRadius:7,padding:"7px 0",fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:screen==="landing"?"#F9FAFB":"#6B7280",letterSpacing:1,cursor:"pointer"}}>
+              🏫 SCHOOL
+            </button>
+            <button onClick={()=>setScreen("incubator")} style={{flex:1,background:screen==="incubator"?"rgba(96,165,250,0.25)":"rgba(96,165,250,0.06)",border:`1px solid ${screen==="incubator"?"rgba(96,165,250,0.6)":"rgba(96,165,250,0.2)"}`,borderRadius:7,padding:"7px 0",fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:"#60A5FA",letterSpacing:1,cursor:"pointer"}}>
+              🥚 INCUBATOR
+            </button>
+            <button onClick={()=>setScreen("challenge")} style={{flex:1,background:screen==="challenge"?"rgba(239,68,68,0.25)":"rgba(239,68,68,0.06)",border:`1px solid ${screen==="challenge"?"rgba(239,68,68,0.6)":"rgba(239,68,68,0.2)"}`,borderRadius:7,padding:"7px 0",fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:"#EF4444",letterSpacing:1,cursor:"pointer"}}>
+              🥊 CHALLENGE
+            </button>
+          </div>
+          {/* Row 2 — data */}
+          <div style={{display:"flex",gap:5}}>
+            <button onClick={()=>setScreen(screen==="clkn"?"landing":"clkn")} style={{flex:1,background:screen==="clkn"?"rgba(217,119,6,0.25)":"rgba(217,119,6,0.08)",border:`1px solid ${screen==="clkn"?"rgba(217,119,6,0.6)":"rgba(217,119,6,0.2)"}`,borderRadius:7,padding:"7px 0",fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:"#D97706",letterSpacing:1,cursor:"pointer"}}>
+              📊 TOKEN DATA
+            </button>
+            <button onClick={()=>setScreen(screen==="bags"?"landing":"bags")} style={{flex:1,background:screen==="bags"?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.04)",border:`1px solid ${screen==="bags"?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.08)"}`,borderRadius:7,padding:"7px 0",fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:"#9CA3AF",letterSpacing:1,cursor:"pointer"}}>
+              🎒 BAGS INFO
+            </button>
+          </div>
         </div>
       </div>
       <div style={{paddingTop:28}}>
-        {screen==="landing"&&<Landing onStart={()=>setScreen("select")} onChallenge={()=>setScreen("challenge")} completed={completed}/>}
+        {screen==="landing"&&<Landing onStart={()=>setScreen("select")} onChallenge={()=>setScreen("challenge")} onIncubator={()=>setScreen("incubator")} completed={completed}/>}
         {screen==="challenge"&&<UltimateChallenge onBack={()=>setScreen("landing")}/>}
+        {screen==="incubator"&&<Incubator onComplete={()=>setScreen("select")} onBack={()=>setScreen("landing")}/>}
         {screen==="clkn"&&<CLKNWidget/>}
         {screen==="bags"&&<BagsPage/>}
         {screen==="select"&&<Select onSelect={id=>{setLessonId(id);setScreen("lesson");}} completed={completed}/>}
