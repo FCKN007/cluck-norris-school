@@ -726,6 +726,141 @@ function UltimateChallenge({ onBack }) {
   );
 }
 
+
+// ── FLOCK TALK ──
+const FLOCK_ENTRIES = [
+  {
+    id: "krypton",
+    type: "VIDEO",
+    status: "live",
+    title: "Krypton Calls",
+    description: "Krypton Calls covers CLKN and the School of Crypto Hard Knocks — breaking down the project, the app, and what makes it different.",
+    date: "April 2, 2026",
+    youtube: "https://youtu.be/Zv1VJETGc20",
+    channel: "https://www.youtube.com/@KryptonCalls",
+    twitter: "https://x.com/KryptonCalls",
+    color: "#A78BFA",
+    icon: "📺",
+  },
+  {
+    id: "luxxlounge",
+    type: "LIVE STREAM",
+    status: "upcoming",
+    title: "The Luxurious Lounge",
+    description: "Cluck Norris steps into The Luxurious Lounge for a live stream appearance. Tune in live on April 9th.",
+    date: "April 9, 2026",
+    youtube: "https://www.youtube.com/live/t2xyjn4TmIc",
+    twitter: "https://x.com/TheLuxxLounge",
+    color: "#FCD34D",
+    icon: "🎙️",
+  },
+  {
+    id: "moonordust",
+    type: "COMMUNITY",
+    status: "featured",
+    title: "CryptoTrend.ing / Moon or Dust",
+    description: "A community and media group we believe in. CryptoTrend.ing is a crypto trending platform and Moon or Dust is their game show. Big supporters of the flock.",
+    date: "Ongoing",
+    website: "https://cryptotrend.ing",
+    website2: "https://moonordust.media",
+    telegram: "https://t.me/MoonOrDustGameShow",
+    youtube: "https://www.youtube.com/@MoonOrDustMedia",
+    color: "#10B981",
+    icon: "🤝",
+  },
+];
+
+function FlockTalk() {
+  return (
+    <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto"}}>
+      {/* Header */}
+      <div style={{textAlign:"center",marginBottom:28}}>
+        <div style={{fontSize:40,marginBottom:8}}>🎙️</div>
+        <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:30,fontWeight:900,color:"#F9FAFB",margin:"0 0 6px",letterSpacing:2}}>FLOCK TALK</h2>
+        <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#6B7280",letterSpacing:3,margin:0}}>WHERE THE CLUCKS GET LOUD</p>
+        <div style={{marginTop:10,height:1,background:"linear-gradient(90deg,transparent,rgba(217,119,6,0.5),transparent)"}}/>
+      </div>
+
+      {/* Entries */}
+      <div style={{display:"flex",flexDirection:"column",gap:16}}>
+        {FLOCK_ENTRIES.map(entry=>(
+          <div key={entry.id} style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${entry.color}40`,borderRadius:14,padding:18,position:"relative",overflow:"hidden"}}>
+            {/* Glow accent */}
+            <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,transparent,${entry.color},transparent)`}}/>
+
+            {/* Status badge */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                <span style={{fontSize:18}}>{entry.icon}</span>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:2,color:entry.color,background:`${entry.color}15`,padding:"2px 8px",borderRadius:20,border:`1px solid ${entry.color}40`}}>
+                  {entry.type}
+                </span>
+              </div>
+              <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:1,color:
+                entry.status==="upcoming"?"#FCD34D":
+                entry.status==="live"?"#10B981":"#9CA3AF",
+                background:entry.status==="upcoming"?"rgba(252,211,77,0.1)":entry.status==="live"?"rgba(16,185,129,0.1)":"rgba(255,255,255,0.05)",
+                padding:"2px 8px",borderRadius:20,border:`1px solid ${entry.status==="upcoming"?"rgba(252,211,77,0.3)":entry.status==="live"?"rgba(16,185,129,0.3)":"rgba(255,255,255,0.1)"}`
+              }}>
+                {entry.status==="upcoming"?"⏰ UPCOMING":entry.status==="live"?"✅ LIVE":"⭐ FEATURED"}
+              </span>
+            </div>
+
+            {/* Title & date */}
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:20,fontWeight:700,color:"#F9FAFB",marginBottom:4}}>{entry.title}</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:1,marginBottom:10}}>{entry.date}</div>
+
+            {/* Description */}
+            <p style={{fontSize:13,color:"#9CA3AF",lineHeight:1.7,margin:"0 0 14px"}}>{entry.description}</p>
+
+            {/* Links */}
+            <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+              {entry.youtube && (
+                <a href={entry.youtube} target="_blank" rel="noreferrer" style={{display:"flex",alignItems:"center",gap:5,background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,padding:"6px 12px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#EF4444",letterSpacing:1}}>
+                  ▶ {entry.status==="upcoming"?"WATCH LIVE":"WATCH NOW"}
+                </a>
+              )}
+              {entry.channel && (
+                <a href={entry.channel} target="_blank" rel="noreferrer" style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 12px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#9CA3AF",letterSpacing:1}}>
+                  📺 CHANNEL
+                </a>
+              )}
+              {entry.twitter && (
+                <a href={entry.twitter} target="_blank" rel="noreferrer" style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 12px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#9CA3AF",letterSpacing:1}}>
+                  𝕏 FOLLOW
+                </a>
+              )}
+              {entry.website && (
+                <a href={entry.website} target="_blank" rel="noreferrer" style={{display:"flex",alignItems:"center",gap:5,background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:8,padding:"6px 12px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#10B981",letterSpacing:1}}>
+                  🌐 CRYPTOTREND.ING
+                </a>
+              )}
+              {entry.website2 && (
+                <a href={entry.website2} target="_blank" rel="noreferrer" style={{display:"flex",alignItems:"center",gap:5,background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:8,padding:"6px 12px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#10B981",letterSpacing:1}}>
+                  🌐 MOONORDUST.MEDIA
+                </a>
+              )}
+              {entry.telegram && (
+                <a href={entry.telegram} target="_blank" rel="noreferrer" style={{display:"flex",alignItems:"center",gap:5,background:"rgba(96,165,250,0.1)",border:"1px solid rgba(96,165,250,0.3)",borderRadius:8,padding:"6px 12px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#60A5FA",letterSpacing:1}}>
+                  ✈️ TELEGRAM
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer note */}
+      <div style={{marginTop:24,textAlign:"center"}}>
+        <p style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#4B5563",letterSpacing:1,lineHeight:1.8}}>
+          IF YOU'VE REPPED THE FLOCK, WE SEE YOU. 🐔<br/>
+          MORE APPEARANCES DROPPING SOON.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── BAGS PAGE ──
 function BagsPage() {
   const [feed, setFeed] = useState(null);
@@ -1652,6 +1787,9 @@ export default function App(){
             <button onClick={()=>setScreen(screen==="bags"?"landing":"bags")} style={{flex:1,background:screen==="bags"?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.04)",border:`1px solid ${screen==="bags"?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.08)"}`,borderRadius:7,padding:"7px 0",fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:"#9CA3AF",letterSpacing:1,cursor:"pointer"}}>
               🎒 BAGS INFO
             </button>
+            <button onClick={()=>setScreen(screen==="flock"?"landing":"flock")} style={{flex:1,background:screen==="flock"?"rgba(217,119,6,0.25)":"rgba(217,119,6,0.06)",border:`1px solid ${screen==="flock"?"rgba(252,211,77,0.6)":"rgba(252,211,77,0.2)"}`,borderRadius:7,padding:"7px 0",fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:"#FCD34D",letterSpacing:1,cursor:"pointer"}}>
+              🎙️ FLOCK TALK
+            </button>
           </div>
         </div>
       </div>
@@ -1661,6 +1799,7 @@ export default function App(){
         {screen==="incubator"&&<Incubator onComplete={()=>setScreen("select")} onBack={()=>setScreen("landing")}/>}
         {screen==="clkn"&&<CLKNWidget/>}
         {screen==="bags"&&<BagsPage/>}
+        {screen==="flock"&&<FlockTalk/>}
         {screen==="select"&&<Select onSelect={id=>{setLessonId(id);setScreen("lesson");}} completed={completed}/>}
         {screen==="lesson"&&lesson&&<Lesson lesson={lesson} onComplete={finish} onBack={()=>setScreen("select")}/>}
         {screen==="complete"&&<Complete onRestart={()=>{setCompleted([]);setScreen("landing");}}/>}
