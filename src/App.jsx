@@ -727,6 +727,388 @@ function UltimateChallenge({ onBack }) {
 }
 
 
+
+// ── THE LIBRARY ──
+const LIBRARY_LIQUIDITY = [
+  {
+    id: "what-is-liquidity",
+    title: "What is Liquidity?",
+    icon: "💧",
+    summary: "Liquidity is how easily an asset can be bought or sold without moving the price.",
+    content: `Liquidity refers to how much of an asset is available for trading at any given time. High liquidity means you can buy or sell large amounts without dramatically changing the price. Low liquidity means even small trades cause big price swings.
+
+In DeFi, liquidity lives in pools — smart contracts holding two tokens that traders swap against. The more tokens in the pool, the less your trade moves the price.
+
+Think of it like a swimming pool vs a bathtub. Jump into an Olympic pool and barely make a splash. Jump into a bathtub and everything overflows.
+
+WHY IT MATTERS: Before buying any token, always check the liquidity. A token with $500 in liquidity can be moved 50% by a $250 buy. A token with $500,000 in liquidity barely moves on the same trade.`,
+  },
+  {
+    id: "amm",
+    title: "How AMMs Work",
+    icon: "⚙️",
+    summary: "Automated Market Makers use a mathematical formula to set prices automatically.",
+    content: `An Automated Market Maker (AMM) is a smart contract that holds two tokens and automatically calculates their price based on supply and demand — no order book, no human market maker needed.
+
+The most common formula is the Constant Product Formula:
+
+x × y = k
+
+Where x = amount of Token A, y = amount of Token B, and k = a constant that never changes.
+
+When you buy Token A, you add Token B to the pool and remove Token A. Because k must stay constant, as Token A supply goes down, its price goes up. This is automatic — no one sets the price manually.
+
+EXAMPLE: A pool has 100 SOL and 1,000,000 CLKN. k = 100,000,000. You buy 10 SOL worth of CLKN. Now the pool has 110 SOL — to keep k constant, it must have ~909,090 CLKN. You received ~90,910 CLKN. The price moved because you changed the ratio.`,
+  },
+  {
+    id: "impermanent-loss",
+    title: "Impermanent Loss",
+    icon: "📉",
+    summary: "When token prices diverge, LP providers end up with less value than just holding.",
+    content: `Impermanent Loss (IL) happens when the price ratio of your two pooled tokens changes after you deposit. The AMM constantly rebalances the pool, which means you end up with more of the token that went down and less of the token that went up.
+
+It's called "impermanent" because if prices return to their original ratio, the loss disappears. But if you withdraw while prices are diverged, the loss becomes permanent.
+
+EXAMPLE: You deposit $1,000 into a SOL/USDC pool — $500 SOL and $500 USDC. SOL doubles in price. The AMM has rebalanced — you now have less SOL and more USDC than you started with. If you'd just held your SOL and USDC, you'd be worth more than your LP position.
+
+IL is the #1 risk for liquidity providers. It's why LP fees must exceed IL for the position to be profitable. Concentrated liquidity amplifies both earnings AND impermanent loss.`,
+  },
+  {
+    id: "concentrated-liquidity",
+    title: "Concentrated Liquidity",
+    icon: "🎯",
+    summary: "Provide liquidity in a specific price range and earn more fees per dollar.",
+    content: `Traditional AMMs spread your liquidity across all possible prices from zero to infinity. Most of that liquidity sits in price ranges that will never be traded — it's wasted capital.
+
+Concentrated liquidity (pioneered by Uniswap v3) lets you choose a specific price range for your liquidity. Your capital only earns fees when the token trades within your range — but it earns much more per dollar than a full-range position.
+
+EXAMPLE: Instead of providing liquidity from $0 to infinity, you provide between $0.000001 and $0.000002 for a token currently trading at $0.0000015. All your capital is actively earning fees within that tight range.
+
+THE TRADEOFF: If price moves outside your range, you stop earning fees entirely and your position becomes 100% one token. Concentrated liquidity requires active management. This is exactly what Meteora DAMM V2 — where CLKN trades — uses.`,
+  },
+  {
+    id: "dynamic-bonding-curve",
+    title: "Dynamic Bonding Curves",
+    icon: "📈",
+    summary: "A price mechanism that automatically increases price as more tokens are bought.",
+    content: `A bonding curve is a mathematical relationship between a token's price and its supply. As more tokens are purchased, the price automatically rises along the curve. As tokens are sold, the price falls.
+
+Bags.fm uses a Dynamic Bonding Curve (DBC) for token launches. When you're the first buyer, you get the lowest price. As more people buy, the curve pushes the price higher. This creates a fair launch where early supporters are rewarded.
+
+The curve has a graduation threshold — when enough SOL has been raised (typically $30K-$69K market cap depending on configuration), the bonding curve closes, the liquidity migrates automatically to a Meteora DAMM V2 pool, and the token becomes a permanent DEX pair.
+
+CLKN completed this journey — it launched on a Bags.fm bonding curve and graduated to Meteora DAMM V2. This is why the liquidity is permanent and can never be rugged by the creator.`,
+  },
+  {
+    id: "meteora-damm",
+    title: "Meteora DAMM V2",
+    icon: "🌊",
+    summary: "The liquidity pool where CLKN trades after graduating from Bags.fm.",
+    content: `Meteora's Dynamic AMM (DAMM) V2 is a next-generation liquidity pool on Solana designed to maximize fee earnings for liquidity providers while minimizing impermanent loss through dynamic fee adjustments.
+
+Key features of Meteora DAMM V2:
+
+DYNAMIC FEES: Fee tiers adjust based on market volatility. When the market is volatile, fees increase to compensate LPs for higher impermanent loss risk. When markets are calm, fees decrease to attract more volume.
+
+CONCENTRATED LIQUIDITY: Like Uniswap v3, DAMM V2 supports concentrated positions for capital efficiency.
+
+BAGS.FM INTEGRATION: When a Bags.fm token graduates, its liquidity migrates directly into a Meteora DAMM V2 pool. The migration is automatic, trustless, and permanent — no human interaction required.
+
+CLKN trades in pool: 64WXkHM4zyWUkYy32TfUeBV5wDAfdcUGDxe5ntM4xaTd`,
+  },
+  {
+    id: "price-impact",
+    title: "Price Impact & Slippage",
+    icon: "💥",
+    summary: "The difference between the expected price and what you actually pay.",
+    content: `Price impact and slippage are related but different concepts that every trader needs to understand.
+
+PRICE IMPACT is how much YOUR specific trade moves the market price. It's determined by the size of your trade relative to the pool's liquidity. A $1,000 buy in a $10,000 pool has 10% price impact — you're consuming 10% of available liquidity in one trade.
+
+SLIPPAGE is the acceptable difference between the price when you submit a transaction and the price when it executes. On Solana, transactions can take a few hundred milliseconds — the price can move during that time.
+
+SLIPPAGE TOLERANCE is how much movement you'll accept before your transaction fails automatically. Set it too low and your trades fail constantly. Set it too high and you're exposed to sandwich attacks.
+
+SANDWICH ATTACKS: MEV bots watch your pending transaction, buy before you (pushing price up), let your trade execute at a worse price, then sell immediately after (profiting from your slippage). This is why low slippage protects you — the sandwich becomes unprofitable.`,
+  },
+  {
+    id: "fee-sharing",
+    title: "Fee Sharing & LP Earnings",
+    icon: "💰",
+    summary: "How liquidity providers and token creators earn from trading activity.",
+    content: `Every trade on a DEX generates fees. These fees are the incentive that attracts liquidity providers to deposit their tokens into pools.
+
+HOW LP FEES WORK: When you trade in a pool, you pay a small percentage fee (typically 0.25%-1%). This fee is distributed proportionally to all liquidity providers in the pool based on their share of the total liquidity.
+
+BAGS.FM FEE STRUCTURE: Bags.fm adds a creator fee layer on top. When you launch a token on Bags.fm, you (the creator) earn a percentage of all trading fees forever — even after graduation to Meteora. This is the revolutionary part — creators have a permanent financial stake in their token's trading activity.
+
+PARTNER FEES: Bags.fm also has a partner program. Platforms and builders can register a referral code and earn 25% of platform fees on all trades that come through their link. The firechicken007 code in this app earns partner fees on CLKN trades.
+
+CLKN LIFETIME FEES: You can see the total SOL earned from CLKN trading activity live in the Token Data tab — powered by the Bags.fm API.`,
+  },
+  {
+    id: "reading-pool",
+    title: "How to Read a Liquidity Pool",
+    icon: "🔍",
+    summary: "Understand what the numbers in a liquidity pool actually mean.",
+    content: `When you look at a pool on DexScreener or Meteora, you'll see several key metrics. Here's what they all mean:
+
+LIQUIDITY / TVL: Total value locked in the pool. This is the combined dollar value of both tokens. Higher = more stable prices and less slippage.
+
+PRICE: The current exchange rate between the two tokens, derived from their ratio in the pool.
+
+VOLUME (24H): Total dollar value traded in the last 24 hours. High volume relative to liquidity = high fee earnings for LPs.
+
+VOLUME/LIQUIDITY RATIO: Divide 24H volume by liquidity. A ratio above 1.0 means the pool is earning more than its total value in fees every day — very attractive for LPs.
+
+PRICE CHANGE (24H): How much the token price moved in 24 hours. Expressed as a percentage.
+
+TRANSACTIONS (24H): Number of individual buy/sell transactions. Shows activity level.
+
+BUYS vs SELLS: Breakdown of transaction direction. More buys than sells = buying pressure.
+
+SOL IN POOL: For SOL pairs, this shows how much SOL backs the token. More SOL = stronger liquidity backing.`,
+  },
+  {
+    id: "lp-strategy",
+    title: "LP Strategy Basics",
+    icon: "♟️",
+    summary: "When to add liquidity, when to remove it, and how to think about LP positions.",
+    content: `Providing liquidity isn't just clicking a button — it's a strategy that requires understanding the tradeoffs.
+
+WHEN LP MAKES SENSE:
+- You plan to hold both tokens long-term anyway (IL doesn't matter if you'd hold both)
+- The pool generates high fees relative to IL risk
+- You believe the price ratio will stay relatively stable
+- You want passive income from your holdings
+
+WHEN LP DOESN'T MAKE SENSE:
+- You're strongly bullish on one token and bearish the other (just hold the one you like)
+- The pool has low volume and won't generate meaningful fees
+- You need your capital liquid for other opportunities
+
+FULL RANGE vs CONCENTRATED:
+Full range positions are set-and-forget. Concentrated positions earn more but require monitoring and rebalancing when price moves outside your range.
+
+IMPERMANENT LOSS CALCULATOR: Before adding to any pool, calculate your breakeven fee earnings vs potential IL. If you need 30 days of fees to break even on IL, make sure you're committed to that timeline.
+
+REMOVING LIQUIDITY: You can remove liquidity at any time — your position is not locked (unless you use a lock protocol). When you remove, you receive both tokens at their current ratio.`,
+  },
+];
+
+const LIBRARY_GLOSSARY = [
+  { term: "AMM", def: "Automated Market Maker. A smart contract that automatically prices tokens using a mathematical formula instead of an order book." },
+  { term: "APR", def: "Annual Percentage Rate. Simple interest rate over a year, not accounting for compounding." },
+  { term: "APY", def: "Annual Percentage Yield. Interest rate accounting for compounding. Always higher than APR for the same rate." },
+  { term: "Bonding Curve", def: "A mathematical price mechanism where buying increases price and selling decreases price automatically." },
+  { term: "CEX", def: "Centralized Exchange. A company-run trading platform (Coinbase, Binance) that holds your funds and requires KYC." },
+  { term: "Cold Wallet", def: "A hardware wallet that stores private keys offline. Much more secure than hot wallets for large amounts." },
+  { term: "Concentrated Liquidity", def: "Providing liquidity within a specific price range for higher capital efficiency and fee earnings." },
+  { term: "DAMM", def: "Dynamic Automated Market Maker. Meteora's AMM that adjusts fees based on volatility." },
+  { term: "DBC", def: "Dynamic Bonding Curve. The launch mechanism used by Bags.fm before graduation to Meteora." },
+  { term: "DeFi", def: "Decentralized Finance. Financial services built on blockchain smart contracts with no central authority." },
+  { term: "DEX", def: "Decentralized Exchange. A trading platform where swaps happen via smart contracts, not a company." },
+  { term: "DYOR", def: "Do Your Own Research. Never invest based solely on others' advice — verify everything yourself." },
+  { term: "FDV", def: "Fully Diluted Valuation. Price × total supply including all locked/unvested tokens." },
+  { term: "Fee Share", def: "A system where token creators earn a percentage of all trading fees forever." },
+  { term: "Flash Loan", def: "An uncollateralized loan borrowed and repaid within a single blockchain transaction." },
+  { term: "Floor Price", def: "The lowest current asking price for an asset." },
+  { term: "Gas Fee", def: "The cost to execute a transaction on a blockchain. On Solana these are fractions of a cent." },
+  { term: "Graduation", def: "When a Bags.fm bonding curve token raises enough SOL to migrate to a permanent Meteora liquidity pool." },
+  { term: "Hot Wallet", def: "A software wallet connected to the internet (Phantom, MetaMask). Convenient but less secure than cold storage." },
+  { term: "Impermanent Loss", def: "Value loss experienced by LP providers when the price ratio of pooled tokens changes from deposit time." },
+  { term: "Jupiter", def: "Solana's leading DEX aggregator and swap infrastructure. Finds the best price across all Solana DEXs." },
+  { term: "KYC", def: "Know Your Customer. Identity verification required by centralized exchanges and regulated platforms." },
+  { term: "Liquidity", def: "The amount of an asset available for trading. Higher liquidity = less price impact per trade." },
+  { term: "Liquidity Pool", def: "A smart contract holding two tokens that traders swap against. LP providers deposit tokens and earn fees." },
+  { term: "LP", def: "Liquidity Provider. Someone who deposits tokens into a liquidity pool to earn trading fees." },
+  { term: "Market Cap", def: "Price × circulating supply. The total current value of all tokens in circulation." },
+  { term: "MEV", def: "Maximal Extractable Value. Profit extracted by validators or bots by reordering transactions (includes sandwich attacks)." },
+  { term: "Meteora", def: "A leading Solana DEX and liquidity protocol. CLKN graduated to a Meteora DAMM V2 pool." },
+  { term: "Mint Address", def: "The unique identifier for a token on Solana. Used to verify you're buying the correct token." },
+  { term: "Mint Authority", def: "The right to create new tokens. Revoking mint authority means supply is permanently fixed." },
+  { term: "Multisig", def: "A wallet requiring multiple private key signatures to authorize transactions. Used for security." },
+  { term: "Non-Custodial", def: "A wallet where you control your own private keys. No company can freeze or access your funds." },
+  { term: "Oracle", def: "A service that feeds real-world data into smart contracts. Price oracles are critical and can be manipulated." },
+  { term: "Price Impact", def: "How much your individual trade moves the market price. Higher in low-liquidity pools." },
+  { term: "Private Key", def: "The secret key that proves ownership of a wallet. Never share it. Whoever has it controls the funds." },
+  { term: "Public Key", def: "Your wallet address. Safe to share. Others use it to send you tokens." },
+  { term: "Rug Pull", def: "When developers drain a project's liquidity and disappear, leaving holders with worthless tokens." },
+  { term: "Sandwich Attack", def: "An MEV attack where a bot buys before your trade and sells after, profiting from your slippage." },
+  { term: "Seed Phrase", def: "A 12-24 word backup phrase that recovers your wallet. Never share it — treat it like cash." },
+  { term: "Slippage", def: "The difference between expected and actual trade price. Set tolerance to protect against price movement." },
+  { term: "Smart Contract", def: "Self-executing code on a blockchain that automatically enforces agreements without a middleman." },
+  { term: "SOL", def: "The native coin of the Solana blockchain. Used for gas fees and as the base pair for most Solana tokens." },
+  { term: "Solana", def: "A high-speed, low-cost blockchain capable of 65,000+ transactions per second with sub-cent fees." },
+  { term: "Staking", def: "Locking tokens to earn rewards. Can mean validator staking (securing the network) or DeFi yield farming." },
+  { term: "TVL", def: "Total Value Locked. The total dollar value of crypto deposited in a DeFi protocol or pool." },
+  { term: "Token", def: "A crypto asset built on an existing blockchain (vs a coin which has its own blockchain)." },
+  { term: "Tokenomics", def: "The economic design of a token — supply, distribution, vesting, utility, and fee structure." },
+  { term: "Vesting", def: "A schedule that gradually unlocks tokens over time. Prevents insiders from dumping immediately." },
+  { term: "Wallet", def: "Software or hardware that stores your private keys and lets you interact with the blockchain." },
+  { term: "Yield Farming", def: "Earning rewards by providing liquidity or staking in DeFi protocols." },
+];
+
+const LIBRARY_RESOURCES = [
+  {
+    category: "🌊 Liquidity & Trading",
+    links: [
+      { name: "Meteora", url: "https://app.meteora.ag", desc: "Where CLKN trades — DAMM V2 pools" },
+      { name: "Bags.fm", url: "https://bags.fm?ref=firechicken007", desc: "Token launch & fee sharing platform" },
+      { name: "Jupiter", url: "https://jup.ag", desc: "Best swap rates on Solana" },
+      { name: "DexScreener", url: "https://dexscreener.com", desc: "Real-time pool & price data" },
+      { name: "GeckoTerminal", url: "https://geckoterminal.com", desc: "On-chain DEX analytics" },
+    ]
+  },
+  {
+    category: "🔍 Research Tools",
+    links: [
+      { name: "Solscan", url: "https://solscan.io", desc: "Solana block explorer — verify transactions" },
+      { name: "Birdeye", url: "https://birdeye.so", desc: "Solana token analytics & wallet tracking" },
+      { name: "Jupiter Lock", url: "https://lock.jup.ag", desc: "Verify token locks on Solana" },
+      { name: "Rugcheck", url: "https://rugcheck.xyz", desc: "Token safety checker — spot red flags" },
+      { name: "Bubblemaps", url: "https://bubblemaps.io", desc: "Visualize token holder distribution" },
+    ]
+  },
+  {
+    category: "👛 Wallets",
+    links: [
+      { name: "Phantom", url: "https://phantom.app", desc: "The most popular Solana wallet" },
+      { name: "Backpack", url: "https://backpack.app", desc: "Multi-chain Solana wallet" },
+      { name: "Solflare", url: "https://solflare.com", desc: "Feature-rich Solana wallet with hardware support" },
+    ]
+  },
+  {
+    category: "📚 Learn More",
+    links: [
+      { name: "Bags.fm Docs", url: "https://docs.bags.fm", desc: "Official Bags.fm documentation" },
+      { name: "Meteora Docs", url: "https://docs.meteora.ag", desc: "Learn about DAMM V2 and liquidity" },
+      { name: "Solana Docs", url: "https://docs.solana.com", desc: "Official Solana developer documentation" },
+      { name: "CryptoTrend.ing", url: "https://cryptotrend.ing", desc: "Crypto trending platform — community favorite" },
+    ]
+  },
+];
+
+function Library() {
+  const [tab, setTab] = useState("liquidity");
+  const [expanded, setExpanded] = useState(null);
+  const [search, setSearch] = useState("");
+
+  const filteredGlossary = LIBRARY_GLOSSARY.filter(g =>
+    g.term.toLowerCase().includes(search.toLowerCase()) ||
+    g.def.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto"}}>
+      {/* Header */}
+      <div style={{textAlign:"center",marginBottom:20}}>
+        <div style={{fontSize:36,marginBottom:6}}>📚</div>
+        <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:28,fontWeight:900,color:"#F9FAFB",margin:"0 0 4px",letterSpacing:2}}>THE LIBRARY</h2>
+        <p style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:3,margin:0}}>INDEPENDENT STUDY — NO EXAMS</p>
+        <div style={{marginTop:10,height:1,background:"linear-gradient(90deg,transparent,rgba(217,119,6,0.5),transparent)"}}/>
+      </div>
+
+      {/* Section tabs */}
+      <div style={{display:"flex",gap:6,marginBottom:20}}>
+        {[
+          {id:"liquidity",label:"🌊 LIQUIDITY",color:"#06B6D4"},
+          {id:"glossary",label:"🔤 GLOSSARY",color:"#A78BFA"},
+          {id:"resources",label:"🔗 RESOURCES",color:"#10B981"},
+        ].map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{
+            flex:1,background:tab===t.id?`${t.color}20`:"rgba(255,255,255,0.03)",
+            border:`1px solid ${tab===t.id?t.color:"rgba(255,255,255,0.08)"}`,
+            borderRadius:8,padding:"8px 4px",fontFamily:"'Oswald',sans-serif",
+            fontSize:9,fontWeight:700,color:tab===t.id?t.color:"#6B7280",
+            letterSpacing:1,cursor:"pointer"
+          }}>{t.label}</button>
+        ))}
+      </div>
+
+      {/* LIQUIDITY TAB */}
+      {tab==="liquidity" && (
+        <div>
+          <div style={{background:"rgba(6,182,212,0.08)",border:"1px solid rgba(6,182,212,0.2)",borderRadius:10,padding:"12px 14px",marginBottom:16}}>
+            <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#06B6D4",letterSpacing:1,margin:0,lineHeight:1.7}}>
+              🌊 LIQUIDITY IS OUR SPECIALTY — This section goes deeper than any lesson. Study at your own pace, no exam required.
+            </p>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            {LIBRARY_LIQUIDITY.map(item=>(
+              <div key={item.id} style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${expanded===item.id?"rgba(6,182,212,0.4)":"rgba(255,255,255,0.07)"}`,borderRadius:10,overflow:"hidden"}}>
+                <button onClick={()=>setExpanded(expanded===item.id?null:item.id)} style={{width:"100%",background:"none",border:"none",padding:"14px 16px",cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <span style={{fontSize:20}}>{item.icon}</span>
+                    <div>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#F9FAFB"}}>{item.title}</div>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",marginTop:2}}>{item.summary}</div>
+                    </div>
+                  </div>
+                  <span style={{color:"#06B6D4",fontSize:16,flexShrink:0,marginLeft:8}}>{expanded===item.id?"▲":"▼"}</span>
+                </button>
+                {expanded===item.id && (
+                  <div style={{padding:"0 16px 16px"}}>
+                    <div style={{height:1,background:"rgba(6,182,212,0.2)",marginBottom:14}}/>
+                    {item.content.split("
+
+").map((para,i)=>(
+                      <p key={i} style={{fontSize:13,color:para===para.toUpperCase()&&para.length<50?"#06B6D4":"#9CA3AF",lineHeight:1.8,margin:"0 0 12px",fontFamily:para===para.toUpperCase()&&para.length<50?"'Oswald',sans-serif":"inherit",letterSpacing:para===para.toUpperCase()&&para.length<50?1:0,fontWeight:para===para.toUpperCase()&&para.length<50?700:"normal"}}>{para}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* GLOSSARY TAB */}
+      {tab==="glossary" && (
+        <div>
+          <input
+            value={search}
+            onChange={e=>setSearch(e.target.value)}
+            placeholder="🔍 Search terms..."
+            style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px",color:"#F9FAFB",fontFamily:"'Oswald',sans-serif",fontSize:12,letterSpacing:1,marginBottom:14,boxSizing:"border-box",outline:"none"}}
+          />
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#4B5563",letterSpacing:1,marginBottom:10}}>{filteredGlossary.length} TERMS</div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {filteredGlossary.map(g=>(
+              <div key={g.term} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(167,139,250,0.15)",borderRadius:10,padding:"12px 14px"}}>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#A78BFA",marginBottom:4}}>{g.term}</div>
+                <div style={{fontSize:12,color:"#9CA3AF",lineHeight:1.6}}>{g.def}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* RESOURCES TAB */}
+      {tab==="resources" && (
+        <div style={{display:"flex",flexDirection:"column",gap:20}}>
+          {LIBRARY_RESOURCES.map(cat=>(
+            <div key={cat.category}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,color:"#D97706",marginBottom:10}}>{cat.category}</div>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                {cat.links.map(link=>(
+                  <a key={link.name} href={link.url} target="_blank" rel="noreferrer" style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:10,padding:"12px 14px",textDecoration:"none"}}>
+                    <div>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#F9FAFB",marginBottom:2}}>{link.name}</div>
+                      <div style={{fontSize:11,color:"#6B7280"}}>{link.desc}</div>
+                    </div>
+                    <span style={{color:"#D97706",fontSize:12,flexShrink:0,marginLeft:8}}>→</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── FLOCK TALK ──
 const FLOCK_ENTRIES = [
   {
@@ -1778,6 +2160,9 @@ export default function App(){
             <button onClick={()=>setScreen("challenge")} style={{flex:1,background:screen==="challenge"?"rgba(239,68,68,0.25)":"rgba(239,68,68,0.06)",border:`1px solid ${screen==="challenge"?"rgba(239,68,68,0.6)":"rgba(239,68,68,0.2)"}`,borderRadius:7,padding:"7px 0",fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:"#EF4444",letterSpacing:1,cursor:"pointer"}}>
               🥊 CHALLENGE
             </button>
+            <button onClick={()=>setScreen("library")} style={{flex:1,background:screen==="library"?"rgba(217,119,6,0.25)":"rgba(217,119,6,0.06)",border:`1px solid ${screen==="library"?"rgba(217,119,6,0.6)":"rgba(217,119,6,0.2)"}`,borderRadius:7,padding:"7px 0",fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:"#D97706",letterSpacing:1,cursor:"pointer"}}>
+              📚 LIBRARY
+            </button>
           </div>
           {/* Row 2 — data */}
           <div style={{display:"flex",gap:5}}>
@@ -1800,6 +2185,7 @@ export default function App(){
         {screen==="clkn"&&<CLKNWidget/>}
         {screen==="bags"&&<BagsPage/>}
         {screen==="flock"&&<FlockTalk/>}
+        {screen==="library"&&<Library/>}
         {screen==="select"&&<Select onSelect={id=>{setLessonId(id);setScreen("lesson");}} completed={completed}/>}
         {screen==="lesson"&&lesson&&<Lesson lesson={lesson} onComplete={finish} onBack={()=>setScreen("select")}/>}
         {screen==="complete"&&<Complete onRestart={()=>{setCompleted([]);setScreen("landing");}}/>}
