@@ -138,6 +138,40 @@ app.get("/api/fees", async (req, res) => {
   }
 });
 
+// ── Circulating Supply ──
+app.get("/api/supply", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Cache-Control", "public, max-age=300"); // cache 5 mins
+  try {
+    const MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
+    const HELIUS_KEY = process.env.HELIUS_API_KEY;
+    const url = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: "supply",
+        method: "getTokenSupply",
+        params: [MINT]
+      })
+    });
+    const data = await response.json();
+    const rawSupply = data?.result?.value?.amount;
+    const decimals = data?.result?.value?.decimals || 6;
+    if (rawSupply) {
+      const circulatingSupply = parseInt(rawSupply) / Math.pow(10, decimals);
+      console.log(`← Supply: ${circulatingSupply}`);
+      return res.status(200).json({ circulatingSupply });
+    }
+    // Fallback to known supply if RPC fails
+    return res.status(200).json({ circulatingSupply: 940000000 });
+  } catch (err) {
+    console.error("Supply error:", err.message);
+    return res.status(200).json({ circulatingSupply: 940000000 });
+  }
+});
+
 // ── Partner Stats ──
 app.get("/api/partner-stats", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
