@@ -3,6 +3,7 @@ const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
 const SOL_MINT = "So11111111111111111111111111111111111111112";
 const LAMPORTS_PER_SOL = 1_000_000_000;
 const CLKN_TRADE_LINK = "https://bags.fm/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS?ref=firechicken007";
+const JUPITER_TRADE_LINK = "https://jup.ag/swap/SOL-DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
 const PARTNER_LINK = "https://bags.fm/?ref=firechicken007";
 const BAGS_SIGNUP = "https://bags.fm/?ref=firechicken007";
 const BAGS_DEV = "https://dev.bags.fm";
@@ -574,6 +575,9 @@ function UltimateChallenge({ onBack }) {
   const [sel, setSel] = useState(null);
   const [showExp, setShowExp] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [wallet, setWallet] = useState("");
+  const [claimed, setClaimed] = useState(false);
+  const [claiming, setClaiming] = useState(false);
 
   function startChallenge() {
     // Pull all questions from lessons + challenge bank, shuffle, take 50
@@ -603,13 +607,30 @@ function UltimateChallenge({ onBack }) {
 
   const score = answers.filter(Boolean).length;
   const pct = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
+  const rawPct = questions.length > 0 ? (score / questions.length) * 100 : 0;
 
   function getTier() {
-    if (pct >= 95) return { label: "YOU ARE CLUCK NORRIS", sub: "LEGENDARY STATUS", color: "#D4AF37", icon: "👑" };
-    if (pct >= 94) return { label: "CHALLENGER DEFEATED", sub: "Cluck Norris respects you.", color: "#10B981", icon: "🏆" };
-    if (pct >= 86) return { label: "WORTHY OPPONENT", sub: "...but still inferior. Cluck Norris doesn't lose.", color: "#F59E0B", icon: "⚔️" };
-    if (pct >= 70) return { label: "EMBARRASSING", sub: "Cluck Norris is embarrassed FOR you.", color: "#EF4444", icon: "😤" };
-    return { label: "GET OUT OF HIS DOJO", sub: "Come back when you've read a whitepaper.", color: "#6B7280", icon: "💀" };
+    if (rawPct >= 95) return { label: "YOU ARE CLUCK NORRIS", sub: "LEGENDARY STATUS", color: "#D4AF37", icon: "👑", pass: true };
+    if (rawPct >= 94) return { label: "CHALLENGER DEFEATED", sub: "Cluck Norris respects you.", color: "#10B981", icon: "🏆", pass: true };
+    if (rawPct >= 86) return { label: "WORTHY OPPONENT", sub: "...but still inferior. Cluck Norris doesn't lose.", color: "#F59E0B", icon: "⚔️", pass: false };
+    if (rawPct >= 70) return { label: "EMBARRASSING", sub: "Cluck Norris is embarrassed FOR you.", color: "#EF4444", icon: "😤", pass: false };
+    return { label: "GET OUT OF HIS DOJO", sub: "Come back when you've read a whitepaper.", color: "#6B7280", icon: "💀", pass: false };
+  }
+
+  async function claimSpot() {
+    if (!wallet || wallet.length < 32) return;
+    setClaiming(true);
+    try {
+      await fetch("/api/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet, score, total: questions.length, pct })
+      });
+      setClaimed(true);
+    } catch(e) {
+      setClaimed(true); // still mark as claimed even if server fails
+    }
+    setClaiming(false);
   }
 
   // Intro screen
@@ -667,8 +688,38 @@ function UltimateChallenge({ onBack }) {
             <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#D4AF37"}}>100%</span>
           </div>
         </div>
+        {/* Trophy claim section for passers */}
+        {tier.pass && (
+          <div style={{background:"rgba(212,175,55,0.08)",border:"1px solid rgba(212,175,55,0.3)",borderRadius:12,padding:18,marginBottom:16}}>
+            <div style={{textAlign:"center",marginBottom:12}}>
+              <div style={{fontSize:32,marginBottom:6}}>🏆</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#D4AF37",letterSpacing:2,marginBottom:4}}>YOU EARNED YOUR SPOT</div>
+              <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",margin:0,lineHeight:1.6}}>
+                Drop your Solana wallet address to be considered for future CLKN airdrops and exclusive giveaways. Only passers qualify.
+              </p>
+            </div>
+            {!claimed ? (
+              <>
+                <input
+                  value={wallet}
+                  onChange={e=>setWallet(e.target.value)}
+                  placeholder="Your Solana wallet address..."
+                  style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(212,175,55,0.3)",borderRadius:8,padding:"10px 12px",color:"#F9FAFB",fontFamily:"monospace",fontSize:11,marginBottom:10,boxSizing:"border-box",outline:"none"}}
+                />
+                <button onClick={claimSpot} disabled={!wallet||wallet.length<32||claiming} style={{width:"100%",background:wallet&&wallet.length>=32?"linear-gradient(135deg,#D4AF37,#F59E0B)":"rgba(255,255,255,0.05)",border:"none",borderRadius:8,padding:"12px",fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:wallet&&wallet.length>=32?"#111":"#4B5563",letterSpacing:2,cursor:wallet&&wallet.length>=32?"pointer":"default"}}>
+                  {claiming?"SUBMITTING...":"🏆 CLAIM YOUR SPOT"}
+                </button>
+              </>
+            ) : (
+              <div style={{textAlign:"center",padding:"12px 0"}}>
+                <div style={{fontSize:24,marginBottom:6}}>✅</div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#10B981",letterSpacing:2}}>WALLET SUBMITTED — YOU'RE IN THE FLOCK</div>
+              </div>
+            )}
+          </div>
+        )}
         <div style={{display:"flex",flexDirection:"column",gap:10}}>
-          <button onClick={()=>{setStarted(false);setFinished(false);setQi(0);setAnswers([]);setSel(null);setShowExp(false);}} style={{background:"linear-gradient(135deg,#EF4444,#DC2626)",border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#fff",letterSpacing:3,cursor:"pointer"}}>
+          <button onClick={()=>{setStarted(false);setFinished(false);setQi(0);setAnswers([]);setSel(null);setShowExp(false);setWallet("");setClaimed(false);}} style={{background:"linear-gradient(135deg,#EF4444,#DC2626)",border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#fff",letterSpacing:3,cursor:"pointer"}}>
             🥊 FIGHT AGAIN
           </button>
           <button onClick={onBack} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"12px",fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#9CA3AF",letterSpacing:2,cursor:"pointer"}}>
@@ -1705,8 +1756,11 @@ function CLKNWidget() {
       </div>
 
       {/* Trade Button */}
-      <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{display:"block",width:"100%",background:"linear-gradient(135deg,#D97706,#EF4444)",border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#fff",letterSpacing:3,textDecoration:"none",textAlign:"center",boxShadow:"0 0 28px rgba(217,119,6,0.5)",marginBottom:10}}>
+      <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{display:"block",width:"100%",background:"linear-gradient(135deg,#D97706,#EF4444)",border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#fff",letterSpacing:3,textDecoration:"none",textAlign:"center",boxShadow:"0 0 28px rgba(217,119,6,0.5)",marginBottom:8}}>
         🔥 TRADE CLKN ON BAGS.FM
+      </a>
+      <a href={JUPITER_TRADE_LINK} target="_blank" rel="noreferrer" style={{display:"block",width:"100%",background:"rgba(74,222,128,0.12)",border:"1px solid rgba(74,222,128,0.3)",borderRadius:10,padding:"13px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#4ADE80",letterSpacing:3,textDecoration:"none",textAlign:"center",marginBottom:10,boxSizing:"border-box"}}>
+        ⚡ BUY ON JUPITER
       </a>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 4px"}}>
         <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563",letterSpacing:1}}>
@@ -1821,6 +1875,9 @@ function Landing({onStart,onChallenge,onIncubator,completed}){
       }}>
         🔥 TRADE CLKN ON BAGS.FM
       </a>
+      <a href={JUPITER_TRADE_LINK} target="_blank" rel="noreferrer" style={{display:"block",width:"100%",background:"rgba(74,222,128,0.12)",border:"1px solid rgba(74,222,128,0.3)",borderRadius:10,padding:"12px",fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#4ADE80",letterSpacing:3,textDecoration:"none",textAlign:"center",marginTop:8,boxSizing:"border-box"}}>
+        ⚡ BUY ON JUPITER
+      </a>
     </div>
   );
 }
@@ -1833,10 +1890,14 @@ function Select({onSelect,completed}){
         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:4,color:"#D97706",marginBottom:4}}>PICK YOUR POISON</div>
         <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:26,color:"#F9FAFB",margin:0}}>The Schoolyard</h2>
       </div>
-      <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"rgba(217,119,6,0.1)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:10,padding:"10px",marginBottom:16,textDecoration:"none"}}>
-        <span style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#D97706",letterSpacing:2}}>🔥 TRADE CLKN ON BAGS.FM</span>
-        <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#6B7280",letterSpacing:1}}>ref: firechicken007</span>
-      </a>
+      <div style={{display:"flex",gap:8,marginBottom:16}}>
+        <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:6,background:"rgba(217,119,6,0.1)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:10,padding:"10px",textDecoration:"none"}}>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D97706",letterSpacing:1}}>🔥 BAGS.FM</span>
+        </a>
+        <a href={JUPITER_TRADE_LINK} target="_blank" rel="noreferrer" style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:6,background:"rgba(74,222,128,0.1)",border:"1px solid rgba(74,222,128,0.3)",borderRadius:10,padding:"10px",textDecoration:"none"}}>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#4ADE80",letterSpacing:1}}>⚡ JUPITER</span>
+        </a>
+      </div>
       <div style={{display:"none"}}>
       </div>
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
