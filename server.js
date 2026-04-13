@@ -1,6 +1,7 @@
 import express from "express";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { createSign } from "crypto";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -154,7 +155,7 @@ async function getGoogleToken() {
     iat: now
   })).toString("base64url");
 
-  const { createSign } = require("crypto");
+  // createSign imported at top
   const sign = createSign("RSA-SHA256");
   sign.update(`${header}.${payload}`);
   const privateKey = SHEET_PRIVATE_KEY.replace(/\\n/g, "\n");
