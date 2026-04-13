@@ -176,7 +176,7 @@ async function getGoogleToken() {
 
 async function appendToSheet(values) {
   const token = await getGoogleToken();
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:E:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:G:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
@@ -187,12 +187,44 @@ async function appendToSheet(values) {
 
 async function getSheetRows() {
   const token = await getGoogleToken();
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:E`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:G`;
   const res = await fetch(url, {
     headers: { "Authorization": `Bearer ${token}` }
   });
   const data = await res.json();
   return data.values || [];
+}
+
+async function checkCLKNHolder(wallet) {
+  try {
+    const HELIUS_KEY = process.env.HELIUS_API_KEY;
+    const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
+    const url = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: "holder-check",
+        method: "getTokenAccountsByOwner",
+        params: [
+          wallet,
+          { mint: CLKN_MINT },
+          { encoding: "jsonParsed" }
+        ]
+      })
+    });
+    const data = await response.json();
+    const accounts = data?.result?.value || [];
+    if (accounts.length > 0) {
+      const balance = accounts[0]?.account?.data?.parsed?.info?.tokenAmount?.uiAmount || 0;
+      return { isHolder: balance > 0, balance };
+    }
+    return { isHolder: false, balance: 0 };
+  } catch(e) {
+    console.error("Holder check error:", e.message);
+    return { isHolder: false, balance: 0 };
+  }
 }
 
 app.post("/api/claim", async (req, res) => {
@@ -204,11 +236,13 @@ app.post("/api/claim", async (req, res) => {
     const rows = await getSheetRows();
     const exists = rows.some(row => row[0] === wallet);
     if (exists) return res.status(200).json({ success: true, message: "Already claimed" });
-    // Append new row
+    // Check if CLKN holder
+    const { isHolder, balance } = await checkCLKNHolder(wallet);
+    const holderStatus = isHolder ? "✅ YES" : "❌ NO";
     const date = new Date().toISOString();
-    await appendToSheet([wallet, score, total, pct, date]);
-    console.log(`🏆 New claim saved to Sheets: ${wallet} — ${score}/${total} (${pct}%)`);
-    return res.status(200).json({ success: true });
+    await appendToSheet([wallet, score, total, pct, date, holderStatus, balance]);
+    console.log(`🏆 New claim: ${wallet} — ${score}/${total} (${pct}%) — CLKN Holder: ${holderStatus} (${balance})`);
+    return res.status(200).json({ success: true, isHolder, balance });
   } catch(err) {
     console.error("Sheets error:", err.message);
     return res.status(500).json({ success: false, error: err.message });
@@ -223,7 +257,7 @@ app.get("/api/claims", async (req, res) => {
     const rows = await getSheetRows();
     const headers = rows[0] || [];
     const data = rows.slice(1).map(row => ({
-      wallet: row[0], score: row[1], total: row[2], pct: row[3], date: row[4]
+      wallet: row[0], score: row[1], total: row[2], pct: row[3], date: row[4], holder: row[5], balance: row[6]
     }));
     return res.status(200).json({ success: true, count: data.length, claims: data });
   } catch(err) {
