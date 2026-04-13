@@ -3,7 +3,7 @@ const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
 const SOL_MINT = "So11111111111111111111111111111111111111112";
 const LAMPORTS_PER_SOL = 1_000_000_000;
 const CLKN_TRADE_LINK = "https://bags.fm/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS?ref=firechicken007";
-const JUPITER_TRADE_LINK = "https://jup.ag/swap/SOL-DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
+const JUPITER_TRADE_LINK = "https://jup.ag/tokens/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
 const PARTNER_LINK = "https://bags.fm/?ref=firechicken007";
 const BAGS_SIGNUP = "https://bags.fm/?ref=firechicken007";
 const BAGS_DEV = "https://dev.bags.fm";
