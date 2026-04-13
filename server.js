@@ -138,6 +138,95 @@ app.get("/api/fees", async (req, res) => {
   }
 });
 
+// ── Ultimate Challenge Claims — Google Sheets ──
+const SHEET_ID = process.env.GOOGLE_SHEET_ID || "1nh3BXxalBOCMbM3EDDWiMBJtDbbYT0WyXGQjKFAarIY";
+const SHEET_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
+const SHEET_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
+
+async function getGoogleToken() {
+  const now = Math.floor(Date.now() / 1000);
+  const header = Buffer.from(JSON.stringify({ alg: "RS256", typ: "JWT" })).toString("base64url");
+  const payload = Buffer.from(JSON.stringify({
+    iss: SHEET_CLIENT_EMAIL,
+    scope: "https://www.googleapis.com/auth/spreadsheets",
+    aud: "https://oauth2.googleapis.com/token",
+    exp: now + 3600,
+    iat: now
+  })).toString("base64url");
+
+  const { createSign } = require("crypto");
+  const sign = createSign("RSA-SHA256");
+  sign.update(`${header}.${payload}`);
+  const privateKey = SHEET_PRIVATE_KEY.replace(/\\n/g, "\n");
+  const signature = sign.sign(privateKey, "base64url");
+  const jwt = `${header}.${payload}.${signature}`;
+
+  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`
+  });
+  const tokenData = await tokenRes.json();
+  return tokenData.access_token;
+}
+
+async function appendToSheet(values) {
+  const token = await getGoogleToken();
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:E:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ values: [values] })
+  });
+  return res.ok;
+}
+
+async function getSheetRows() {
+  const token = await getGoogleToken();
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:E`;
+  const res = await fetch(url, {
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+  const data = await res.json();
+  return data.values || [];
+}
+
+app.post("/api/claim", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  const { wallet, score, total, pct } = req.body;
+  if (!wallet || wallet.length < 32) return res.status(400).json({ success: false, error: "Invalid wallet" });
+  try {
+    // Check for duplicates
+    const rows = await getSheetRows();
+    const exists = rows.some(row => row[0] === wallet);
+    if (exists) return res.status(200).json({ success: true, message: "Already claimed" });
+    // Append new row
+    const date = new Date().toISOString();
+    await appendToSheet([wallet, score, total, pct, date]);
+    console.log(`🏆 New claim saved to Sheets: ${wallet} — ${score}/${total} (${pct}%)`);
+    return res.status(200).json({ success: true });
+  } catch(err) {
+    console.error("Sheets error:", err.message);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get("/api/claims", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  const auth = req.query.key;
+  if (auth !== "firechicken007") return res.status(401).json({ success: false, error: "Unauthorized" });
+  try {
+    const rows = await getSheetRows();
+    const headers = rows[0] || [];
+    const data = rows.slice(1).map(row => ({
+      wallet: row[0], score: row[1], total: row[2], pct: row[3], date: row[4]
+    }));
+    return res.status(200).json({ success: true, count: data.length, claims: data });
+  } catch(err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ── Circulating Supply ──
 app.get("/api/supply", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
