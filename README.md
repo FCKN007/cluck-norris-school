@@ -2,40 +2,99 @@
 
 A gamified crypto education platform teaching real DeFi concepts through humor, progression, and survival.
 
+---
+
 ## 🚀 Live App
-https://clucknorris.vip
 
-## 🧠 What It Does
-Users progress through ranks:
-- Freshman → Senior → Master
-
-Learning:
-- Liquidity Pools
-- Rug Pull Detection
-- Tokenomics
-- Market Psychology
-
-## 🎮 Features
-- Interactive lessons
-- Quiz-based progression
-- Meme-driven learning (Cluck Norris style)
-- No wallet required
-
-## ⚙️ Tech Stack
-- React + Vite
-- Deployed on Vercel
-- Built for Bags.fm Hackathon
-
-## 🔥 Vision
-Turn crypto education into a game:
-Learn fast. Avoid rugs. Survive the market.
-
-## 🛠️ In Progress
-- Rank progression system
-- Achievement badges
-- Expanded lesson modules
-- Ecosystem integration (CLKN)
+**https://clucknorris.app**
 
 ---
 
-Cluck Norris doesn’t teach softly.
+## 🧠 What It Does
+
+Three learning paths for every level:
+
+**🥚 CLKN Incubator** — Complete beginner? Start here. 6 foundational lessons covering wallets, tokens, DEXs, liquidity, market cap, and staying safe in crypto.
+
+**🏫 School of Hard Knocks** — 12 progressive lessons with a belt-based ranking system:
+
+| Belt | Lesson |
+|------|--------|
+| Freshman | Liquidity Pools |
+| Sophomore | Rug Pulls & Red Flags |
+| Junior | Volatility & Trading Psychology |
+| Senior | Wallet Security |
+| Graduate | Slippage & MEV |
+| Post-Grad | Reading Charts |
+| Tenured | Tokenomics |
+| Headmaster | Market Cap & FDV |
+| Professor | CEX vs DEX |
+| Dean | On-Chain Research |
+| Chancellor | Yield & DeFi Mechanics |
+| Emeritus | The Bags.fm Ecosystem |
+
+**🥊 Ultimate Challenge** — 50 questions. No study guide. No second chances. 94% to pass. Score tiers:
+
+| Score | Verdict |
+|-------|---------|
+| 95-100% | YOU ARE CLUCK NORRIS 👑 |
+| 94% | CHALLENGER DEFEATED 🏆 |
+| 86-93% | WORTHY OPPONENT ⚔️ |
+| 70-85% | EMBARRASSING 😤 |
+| Under 70% | GET OUT OF HIS DOJO 💀 |
+
+---
+
+## 🎮 Features
+
+- 📚 **The Library** — Deep-dive liquidity content, 50-term searchable glossary, curated DeFi resource links
+- 🎙️ **Flock Talk** — Media room showcasing YouTube appearances, crypto calls, and community supporters
+- 📊 **Live Token Data** — Real-time CLKN pool data, holder count, lifetime fees, and trade quotes
+- 🎒 **Bags Info** — Live Bags.fm token launch feed with prices, market caps, and direct trade links
+- 🏆 **Trophy System** — Ultimate Challenge passers can submit their Solana wallet for airdrops and giveaways
+- 💾 **Progress Saving** — Lesson progress saved automatically via localStorage
+- No wallet required. No signup. No extra credit.
+
+---
+
+## ⚙️ Tech Stack
+
+- **Frontend:** React + Vite
+- **Backend:** Node.js + Express
+- **Deployed:** Railway at clucknorris.app
+- **Built for:** Bags.fm Hackathon
+
+---
+
+## 🔌 API Integrations
+
+| API | Usage |
+|-----|-------|
+| Bags.fm API | Pool data, trade quotes, lifetime fees, token launch feed |
+| Jupiter | Live swap quotes with real slippage |
+| Helius | Live holder count via getTokenAccounts |
+| DexScreener | Market data, price, volume, 24H change |
+
+---
+
+## 🪙 Token
+
+**Cluck Norris (CLKN)** — Solana token powering the ecosystem
+
+- **Contract:** `DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS`
+- **Trade:** [bags.fm](https://bags.fm/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS?ref=firechicken007) | [Jupiter](https://jup.ag/tokens/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS)
+- **Partner Ref:** `firechicken007`
+- **DEX:** Meteora DAMM V2
+- **Pool:** `64WXkHM4zyWUkYy32TfUeBV5wDAfdcUGDxe5ntM4xaTd`
+
+---
+
+## 🔥 Vision
+
+Turn crypto education into a game: Learn fast. Avoid rugs. Survive the market.
+
+Part of the FireChicken ecosystem on Solana. Expansion into Bags.fm ecosystem for the Hackathon.
+
+---
+
+*Cluck Norris doesn't teach softly.* 🐔
