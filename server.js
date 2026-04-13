@@ -158,7 +158,10 @@ async function getGoogleToken() {
   // createSign imported at top
   const sign = createSign("RSA-SHA256");
   sign.update(`${header}.${payload}`);
-  const privateKey = SHEET_PRIVATE_KEY.replace(/\\n/g, "\n");
+  const privateKey = (SHEET_PRIVATE_KEY || "")
+    .replace(/\\n/g, "\n")
+    .replace(/\\\\n/g, "\n")
+    .trim();
   const signature = sign.sign(privateKey, "base64url");
   const jwt = `${header}.${payload}.${signature}`;
 
