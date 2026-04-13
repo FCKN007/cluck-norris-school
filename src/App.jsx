@@ -578,6 +578,8 @@ function UltimateChallenge({ onBack }) {
   const [wallet, setWallet] = useState("");
   const [claimed, setClaimed] = useState(false);
   const [claiming, setClaiming] = useState(false);
+  const [isHolder, setIsHolder] = useState(false);
+  const [holderBalance, setHolderBalance] = useState(0);
 
   function startChallenge() {
     // Pull all questions from lessons + challenge bank, shuffle, take 50
@@ -621,14 +623,17 @@ function UltimateChallenge({ onBack }) {
     if (!wallet || wallet.length < 32) return;
     setClaiming(true);
     try {
-      await fetch("/api/claim", {
+      const res = await fetch("/api/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wallet, score, total: questions.length, pct })
       });
+      const data = await res.json();
       setClaimed(true);
+      setIsHolder(data.isHolder || false);
+      setHolderBalance(data.balance || 0);
     } catch(e) {
-      setClaimed(true); // still mark as claimed even if server fails
+      setClaimed(true);
     }
     setClaiming(false);
   }
@@ -711,9 +716,35 @@ function UltimateChallenge({ onBack }) {
                 </button>
               </>
             ) : (
-              <div style={{textAlign:"center",padding:"12px 0"}}>
-                <div style={{fontSize:24,marginBottom:6}}>✅</div>
-                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#10B981",letterSpacing:2}}>WALLET SUBMITTED — YOU'RE IN THE FLOCK</div>
+              <div style={{textAlign:"center",padding:"8px 0"}}>
+                {isHolder ? (
+                  <div>
+                    <div style={{fontSize:40,marginBottom:8}}>🐔🔥</div>
+                    <div style={{fontFamily:"'Oswald',sans-serif",fontSize:16,fontWeight:900,color:"#D4AF37",letterSpacing:2,marginBottom:6}}>YOU'RE ALREADY IN THE FLOCK!</div>
+                    <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#FCD34D",marginBottom:8}}>
+                      HOLDING {parseInt(holderBalance).toLocaleString()} CLKN
+                    </div>
+                    <p style={{fontSize:12,color:"#9CA3AF",lineHeight:1.7,margin:0}}>
+                      Cluck Norris sees you. You passed the ultimate test AND you hold CLKN. That's the full package. Your wallet is locked in for airdrops and exclusive giveaways. The flock appreciates you. 🙏
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{fontSize:28,marginBottom:6}}>✅</div>
+                    <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#10B981",letterSpacing:2,marginBottom:6}}>WALLET SUBMITTED — YOU'RE IN THE FLOCK</div>
+                    <p style={{fontSize:11,color:"#6B7280",lineHeight:1.7,margin:0}}>
+                      You passed the Hard Knocks but you don't hold CLKN yet. Pick some up on Bags.fm or Jupiter and become a full member of the flock. 🐔
+                    </p>
+                    <div style={{display:"flex",gap:8,marginTop:10,justifyContent:"center"}}>
+                      <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{background:"rgba(217,119,6,0.15)",border:"1px solid rgba(217,119,6,0.4)",borderRadius:8,padding:"6px 12px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D97706",letterSpacing:1}}>
+                        🔥 BAGS.FM
+                      </a>
+                      <a href={JUPITER_TRADE_LINK} target="_blank" rel="noreferrer" style={{background:"rgba(74,222,128,0.1)",border:"1px solid rgba(74,222,128,0.3)",borderRadius:8,padding:"6px 12px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#4ADE80",letterSpacing:1}}>
+                        ⚡ JUPITER
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
