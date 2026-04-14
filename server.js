@@ -74,7 +74,7 @@ app.get("/api/holders", async (req, res) => {
     return res.status(200).json({ success: true, holderCount: owners.size });
   } catch (err) {
     console.error("Holders error:", err.message);
-    return res.status(500).json({ success: false, error: err.message });
+    return res.status(200).json({ success: false, error: err.message });
   }
 });
 
