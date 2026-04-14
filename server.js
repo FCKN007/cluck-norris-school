@@ -7,6 +7,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 const PORT = process.env.PORT || 3000;
 
 const BAGS_BASE = "https://public-api-v2.bags.fm/api/v1/";
@@ -171,27 +173,35 @@ async function getGoogleToken() {
     body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`
   });
   const tokenData = await tokenRes.json();
+  if (!tokenData.access_token) console.error("❌ Token error:", JSON.stringify(tokenData));
+  else console.log("✅ Google token obtained");
   return tokenData.access_token;
 }
 
 async function appendToSheet(values) {
   const token = await getGoogleToken();
+  if (!token) { console.error("❌ No Google token obtained"); return false; }
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:G:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+  console.log("→ Sheets append URL:", url);
   const res = await fetch(url, {
     method: "POST",
     headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ values: [values] })
   });
+  const text = await res.text();
+  console.log("← Sheets append:", res.status, text.slice(0, 200));
   return res.ok;
 }
 
 async function getSheetRows() {
   const token = await getGoogleToken();
+  if (!token) { console.error("❌ No Google token for getSheetRows"); return []; }
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:G`;
   const res = await fetch(url, {
     headers: { "Authorization": `Bearer ${token}` }
   });
   const data = await res.json();
+  console.log("← Sheets read:", res.status, JSON.stringify(data).slice(0, 200));
   return data.values || [];
 }
 
