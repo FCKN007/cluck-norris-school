@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
 const SOL_MINT = "So11111111111111111111111111111111111111112";
 const LAMPORTS_PER_SOL = 1_000_000_000;
@@ -1525,7 +1525,13 @@ function CLKNWidget() {
   const [dexData, setDexData] = useState(null);
   const [holderCount, setHolderCount] = useState(null);
   const [fees, setFees] = useState(null);
+  const [lockData, setLockData] = useState(null);
+  const [supplyData, setSupplyData] = useState(null);
+  const [heliusError, setHeliusError] = useState(null);
   const [debugInfo, setDebugInfo] = useState(null);
+
+  // In-memory cache to avoid redundant Helius fetches within the same polling window (TTL: 90s)
+  const heliusCacheRef = useRef({ ts: 0, data: null });
 
   const isGraduated = pool && pool.dammV2PoolKey;
 
@@ -1560,16 +1566,64 @@ function CLKNWidget() {
   }
 
   async function fetchHelius() {
-    try {
-      const holdersRes = await fetch(`/api/holders?mint=${CLKN_MINT}`);
-      const holdersData = await holdersRes.json();
-      if (holdersData.success) setHolderCount(holdersData.holderCount);
-    } catch (e) { console.log("Holders error:", e.message); }
-    try {
-      const feesRes = await fetch(`/api/fees`);
-      const feesData = await feesRes.json();
-      if (feesData.success) setFees(feesData.response);
-    } catch (e) { console.log("Fees error:", e.message); }
+    const CACHE_TTL_MS = 90_000; // 90 seconds — don't re-fetch if data is fresh
+    const now = Date.now();
+    if (now - heliusCacheRef.current.ts < CACHE_TTL_MS && heliusCacheRef.current.data) {
+      // Reuse cached data; no need to hit Helius again
+      const cached = heliusCacheRef.current.data;
+      if (cached.holderCount != null) setHolderCount(cached.holderCount);
+      if (cached.fees != null) setFees(cached.fees);
+      if (cached.lockData != null) setLockData(cached.lockData);
+      if (cached.supplyData != null) setSupplyData(cached.supplyData);
+      return;
+    }
+
+    const results = { holderCount: null, fees: null, lockData: null, supplyData: null };
+    let anyError = false;
+
+    // Fetch all four endpoints in parallel to minimise latency
+    const [holdersResult, feesResult, locksResult, supplyResult] = await Promise.allSettled([
+      fetch(`/api/holders?mint=${CLKN_MINT}`).then(r => r.json()),
+      fetch(`/api/fees`).then(r => r.json()),
+      fetch(`/api/locks?mint=${CLKN_MINT}`).then(r => r.json()),
+      fetch(`/api/supply?mint=${CLKN_MINT}`).then(r => r.json()),
+    ]);
+
+    if (holdersResult.status === "fulfilled" && holdersResult.value?.success) {
+      results.holderCount = holdersResult.value.holderCount;
+      setHolderCount(holdersResult.value.holderCount);
+    } else {
+      anyError = true;
+      console.warn("Holders fetch failed:", holdersResult.reason ?? holdersResult.value?.error);
+    }
+
+    if (feesResult.status === "fulfilled" && feesResult.value?.success) {
+      results.fees = feesResult.value.response;
+      setFees(feesResult.value.response);
+    } else {
+      console.warn("Fees fetch failed:", feesResult.reason ?? feesResult.value?.error);
+    }
+
+    if (locksResult.status === "fulfilled" && locksResult.value?.success) {
+      results.lockData = locksResult.value;
+      setLockData(locksResult.value);
+    } else {
+      anyError = true;
+      console.warn("Locks fetch failed:", locksResult.reason ?? locksResult.value?.error);
+    }
+
+    if (supplyResult.status === "fulfilled" && supplyResult.value?.success) {
+      results.supplyData = supplyResult.value;
+      setSupplyData(supplyResult.value);
+    } else {
+      anyError = true;
+      console.warn("Supply fetch failed:", supplyResult.reason ?? supplyResult.value?.error);
+    }
+
+    setHeliusError(anyError ? "Some on-chain data could not be loaded. Retrying next refresh." : null);
+
+    // Cache the successful results
+    heliusCacheRef.current = { ts: Date.now(), data: results };
   }
 
   async function fetchData() {
@@ -1629,6 +1683,12 @@ function CLKNWidget() {
 
   return (
     <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto"}}>
+      {heliusError && (
+        <div style={{background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:16}}>⚠️</span>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#FCA5A5",letterSpacing:1,lineHeight:1.4}}>{heliusError}</span>
+        </div>
+      )}
       <div style={{textAlign:"center",marginBottom:20}}>
         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:4,color:"#D97706",marginBottom:4}}>LIVE TOKEN DATA</div>
         <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:26,color:"#F9FAFB",margin:"0 0 8px"}}>CLKN on Bags.fm</h2>

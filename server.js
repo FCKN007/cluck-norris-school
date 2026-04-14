@@ -39,8 +39,7 @@ app.get("/api/bags-proxy", async (req, res) => {
 // ── Helius — Holder Count ──
 app.get("/api/holders", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Cache-Control", "public, max-age=120"); // cache 2 mins — holder count changes slowly
   const { mint } = req.query;
   const HELIUS_KEY = process.env.HELIUS_API_KEY;
   console.log("→ Holders request for mint:", mint);
@@ -81,12 +80,12 @@ app.get("/api/holders", async (req, res) => {
 // ── Jupiter Lock — hardcoded from lock.jup.ag ──
 app.get("/api/locks", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Cache-Control", "public, max-age=300"); // cache 5 mins — lock data rarely changes
   const { mint } = req.query;
   const HELIUS_KEY = process.env.HELIUS_API_KEY;
   if (!mint) return res.status(400).json({ success: false, error: "Missing mint" });
   if (!HELIUS_KEY) return res.status(500).json({ success: false, error: "Missing HELIUS_API_KEY" });
+  console.log("→ Locks request for mint:", mint);
   const HELIUS_URL = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
   try {
     const response = await fetch(HELIUS_URL, {
@@ -100,8 +99,13 @@ app.get("/api/locks", async (req, res) => {
     });
     const data = await response.json();
     console.log("← Helius locks status:", response.status, JSON.stringify(data).slice(0, 300));
+    if (data.error) {
+      console.error("Locks RPC error:", JSON.stringify(data.error));
+      return res.status(500).json({ success: false, error: data.error.message });
+    }
     const accounts = data.result?.token_accounts || [];
     const totalLocked = accounts.reduce((sum, a) => sum + (parseInt(a.amount) || 0), 0);
+    console.log(`← Locks: ${accounts.length} accounts, totalLocked: ${totalLocked}`);
     return res.status(200).json({ success: true, lockCount: accounts.length, totalLocked, locks: accounts.slice(0, 10) });
   } catch (err) {
     console.error("Locks error:", err.message);
@@ -279,10 +283,13 @@ app.get("/api/claims", async (req, res) => {
 app.get("/api/supply", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Cache-Control", "public, max-age=300"); // cache 5 mins
+  const { mint } = req.query;
+  const HELIUS_KEY = process.env.HELIUS_API_KEY;
+  if (!mint) return res.status(400).json({ success: false, error: "Missing mint" });
+  if (!HELIUS_KEY) return res.status(500).json({ success: false, error: "Missing HELIUS_API_KEY" });
+  console.log("→ Supply request for mint:", mint);
+  const url = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
   try {
-    const MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
-    const HELIUS_KEY = process.env.HELIUS_API_KEY;
-    const url = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -290,22 +297,26 @@ app.get("/api/supply", async (req, res) => {
         jsonrpc: "2.0",
         id: "supply",
         method: "getTokenSupply",
-        params: [MINT]
+        params: [mint]
       })
     });
     const data = await response.json();
+    console.log("← Supply status:", response.status, JSON.stringify(data).slice(0, 200));
+    if (data.error) {
+      console.error("Supply RPC error:", JSON.stringify(data.error));
+      return res.status(200).json({ success: true, circulatingSupply: null, error: data.error.message });
+    }
     const rawSupply = data?.result?.value?.amount;
-    const decimals = data?.result?.value?.decimals || 6;
+    const decimals = data?.result?.value?.decimals ?? 6;
     if (rawSupply) {
       const circulatingSupply = parseInt(rawSupply) / Math.pow(10, decimals);
       console.log(`← Supply: ${circulatingSupply}`);
-      return res.status(200).json({ circulatingSupply });
+      return res.status(200).json({ success: true, circulatingSupply });
     }
-    // Fallback to known supply if RPC fails
-    return res.status(200).json({ circulatingSupply: 940000000 });
+    return res.status(200).json({ success: false, error: "No supply data returned" });
   } catch (err) {
     console.error("Supply error:", err.message);
-    return res.status(200).json({ circulatingSupply: 940000000 });
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
