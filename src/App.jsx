@@ -281,6 +281,20 @@ const LESSONS = [
   },
 ];
 
+
+// ── Shuffle question options ──
+function shuffleOptions(question) {
+  const indices = question.options.map((_, i) => i);
+  // Fisher-Yates shuffle
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  const newOptions = indices.map(i => question.options[i]);
+  const newCorrect = indices.indexOf(question.correct);
+  return { ...question, options: newOptions, correct: newCorrect };
+}
+
 const BELT_BG   = { "FRESHMAN":"#F0F0F0","SOPHOMORE":"#FCD34D","JUNIOR":"#F97316","SENIOR":"#10B981","GRADUATE":"#06B6D4","POST-GRAD":"#92400E","TENURED":"#DC2626","HEADMASTER":"#111","PROFESSOR":"#14B8A6","DEAN":"#84CC16","CHANCELLOR":"#D97706","EMERITUS":"#A855F7" };
 const BELT_TEXT = { "FRESHMAN":"#111","SOPHOMORE":"#111","JUNIOR":"#fff","SENIOR":"#fff","GRADUATE":"#fff","POST-GRAD":"#fff","TENURED":"#fff","HEADMASTER":"#D4AF37","PROFESSOR":"#fff","DEAN":"#111","CHANCELLOR":"#fff","EMERITUS":"#fff" };
 function Belt({belt,small}){return(<span style={{display:"inline-block",background:BELT_BG[belt],color:BELT_TEXT[belt],fontFamily:"'Oswald',sans-serif",fontSize:small?9:10,fontWeight:700,letterSpacing:1.5,padding:small?"2px 6px":"3px 10px",borderRadius:3,border:belt==="BLACK BELT"?"1px solid #D4AF37":"none",textTransform:"uppercase"}}>{belt}</span>);}
@@ -409,7 +423,8 @@ function Incubator({ onComplete, onBack }) {
   const [completed, setCompleted] = useState([]);
 
   const lesson = INCUBATOR_LESSONS[lessonIdx];
-  const q = lesson?.questions[qi];
+  const shuffledIncubatorQs = lesson ? lesson.questions.map(shuffleOptions) : [];
+  const q = shuffledIncubatorQs[qi];
   const allDone = completed.length === INCUBATOR_LESSONS.length;
 
   function pick(i) {
@@ -585,7 +600,7 @@ function UltimateChallenge({ onBack }) {
     // Pull all questions from lessons + challenge bank, shuffle, take 50
     const allLessonQs = LESSONS.flatMap(l => l.questions.map(q => ({...q, source: l.title})));
     const allQs = [...allLessonQs, ...CHALLENGE_QUESTIONS.map(q => ({...q, source: "ULTIMATE"}))];
-    const shuffled = allQs.sort(() => Math.random() - 0.5).slice(0, 50);
+    const shuffled = allQs.sort(() => Math.random() - 0.5).slice(0, 50).map(shuffleOptions);
     setQuestions(shuffled);
     setStarted(true);
   }
@@ -1999,11 +2014,12 @@ function Lesson({lesson:l,onComplete,onBack}){
     </div>
   );
 
+  const shuffledQuestions = l.questions.map(shuffleOptions);
   if(phase==="quiz") return(
     <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto"}}>
       <div style={{marginBottom:20}}>
         <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#6B7280",fontFamily:"'Oswald',sans-serif",letterSpacing:1,marginBottom:5}}>
-          <span>{l.title.toUpperCase()}</span><span>EXAM {qi+1} OF {l.questions.length}</span>
+          <span>{l.title.toUpperCase()}</span><span>EXAM {qi+1} OF {shuffledQuestions.length}</span>
         </div>
         <div style={{height:4,background:"rgba(255,255,255,0.08)",borderRadius:2}}>
           <div style={{height:"100%",width:`${(qi/l.questions.length)*100}%`,background:l.color,borderRadius:2}}/>
