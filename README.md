@@ -1,5 +1,10 @@
 # 🐔 Cluck Norris: School of Crypto Hard Knocks
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Built on Solana](https://img.shields.io/badge/Built%20on-Solana-9945FF)](https://solana.com)
+[![Powered by Bags.fm](https://img.shields.io/badge/Powered%20by-Bags.fm-orange)](https://bags.fm?ref=firechicken007)
+[![Live App](https://img.shields.io/badge/Live-clucknorris.app-green)](https://clucknorris.app)
+
 A gamified crypto education platform teaching real DeFi concepts through humor, progression, and survival.
 
 ---
@@ -94,6 +99,12 @@ Three learning paths for every level:
 Turn crypto education into a game: Learn fast. Avoid rugs. Survive the market.
 
 Part of the FireChicken ecosystem on Solana. Expansion into Bags.fm ecosystem for the Hackathon.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ---
 
