@@ -292,7 +292,7 @@ app.post("/api/verify-clkn-payment", async (req, res) => {
 
   try {
     // Use Helius enhanced transactions — shows balance changes per wallet cleanly
-    const url = `https://api.helius.xyz/v0/addresses/${CLKN_RECEIVE_WALLET}/transactions?api-key=${HELIUS_KEY}&limit=10`;
+    const url = `https://api.helius.xyz/v0/addresses/${CLKN_RECEIVE_WALLET}/transactions?api-key=${HELIUS_KEY}&limit=50&t=${Date.now()}`;
     console.log(`🔍 Checking balance changes for ${CLKN_RECEIVE_WALLET.slice(0,8)}... expected:${expectedAmount}`);
     const response = await fetch(url);
     const txs = await response.json();
@@ -302,7 +302,7 @@ app.post("/api/verify-clkn-payment", async (req, res) => {
       return res.status(500).json({ success: false, error: "Could not fetch transactions" });
     }
 
-    console.log(`🔍 Got ${txs.length} transactions`);
+    console.log(`🔍 Got ${txs.length} transactions, checking for ${expectedAmount} CLKN`);
 
     for (const tx of txs) {
       const accountData = tx.accountData || [];
