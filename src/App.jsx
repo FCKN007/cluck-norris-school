@@ -1193,6 +1193,9 @@ function Library() {
         ))}
       </div>
 
+      {/* ASK CLUCK — top of library */}
+      <AskCluck context="The Library — DeFi Education" compact={true}/>
+
       {/* LIQUIDITY TAB */}
       {tab==="liquidity" && (
         <div>
@@ -1248,9 +1251,6 @@ function Library() {
           </div>
         </div>
       )}
-
-      {/* ASK CLUCK — available on all library tabs */}
-      <AskCluck context="The Library — DeFi Education" compact={false}/>
 
       {/* RESOURCES TAB */}
       {tab==="resources" && (
