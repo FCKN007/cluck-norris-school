@@ -294,6 +294,7 @@ app.post("/api/verify-clkn-payment", async (req, res) => {
     const rpcUrl = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
 
     // Step 1: Find the CLKN token account owned by our wallet
+    console.log(`🔍 Looking up token account for wallet: ${CLKN_RECEIVE_WALLET}`);
     const tokenAcctRes = await fetch(rpcUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
