@@ -181,7 +181,7 @@ async function getGoogleToken() {
 async function appendToSheet(values) {
   const token = await getGoogleToken();
   if (!token) { console.error("❌ No Google token obtained"); return false; }
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:G:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:H:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
   console.log("→ Sheets append URL:", url);
   const res = await fetch(url, {
     method: "POST",
@@ -196,7 +196,7 @@ async function appendToSheet(values) {
 async function getSheetRows() {
   const token = await getGoogleToken();
   if (!token) { console.error("❌ No Google token for getSheetRows"); return []; }
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:G`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:H`;
   const res = await fetch(url, {
     headers: { "Authorization": `Bearer ${token}` }
   });
@@ -239,7 +239,7 @@ async function checkCLKNHolder(wallet) {
 
 app.post("/api/claim", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  const { wallet, score, total, pct } = req.body;
+  const { wallet, score, total, pct, source } = req.body;
   if (!wallet || wallet.length < 32) return res.status(400).json({ success: false, error: "Invalid wallet" });
   try {
     // Check for duplicates
@@ -250,7 +250,7 @@ app.post("/api/claim", async (req, res) => {
     const { isHolder, balance } = await checkCLKNHolder(wallet);
     const holderStatus = isHolder ? "✅ YES" : "❌ NO";
     const date = new Date().toISOString();
-    await appendToSheet([wallet, score, total, pct, date, holderStatus, balance]);
+    await appendToSheet([wallet, score, total, pct, date, holderStatus, balance, source || "CHALLENGE"]);
     console.log(`🏆 New claim: ${wallet} — ${score}/${total} (${pct}%) — CLKN Holder: ${holderStatus} (${balance})`);
     return res.status(200).json({ success: true, isHolder, balance });
   } catch(err) {
@@ -267,10 +267,67 @@ app.get("/api/claims", async (req, res) => {
     const rows = await getSheetRows();
     const headers = rows[0] || [];
     const data = rows.slice(1).map(row => ({
-      wallet: row[0], score: row[1], total: row[2], pct: row[3], date: row[4], holder: row[5], balance: row[6]
+      wallet: row[0], score: row[1], total: row[2], pct: row[3], date: row[4], holder: row[5], balance: row[6], source: row[7]
     }));
     return res.status(200).json({ success: true, count: data.length, claims: data });
   } catch(err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ── Ask Cluck Norris (Claude AI) ──
+app.post("/api/ask-cluck", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  const { question, context } = req.body;
+  if (!question || question.trim().length < 3) {
+    return res.status(400).json({ success: false, error: "Question too short" });
+  }
+
+  const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+  if (!ANTHROPIC_KEY) {
+    return res.status(500).json({ success: false, error: "AI not configured" });
+  }
+
+  try {
+    const systemPrompt = `You are Cluck Norris — the toughest crypto professor in the schoolyard. You teach DeFi, blockchain, and crypto concepts at the School of Crypto Hard Knocks, powered by the CLKN token on Solana and built on Bags.fm.
+
+Your personality:
+- Tough but fair. You don't suffer fools but you always teach.
+- Use occasional chicken/rooster puns naturally — "Let me lay this out for you", "Don't chicken out now", "Peck at this concept"
+- Short, punchy answers — 3 to 5 sentences max. This is a mobile app.
+- Reference the school occasionally — "In my schoolyard...", "Hard Knocks rule #1..."
+- You respect people who hold CLKN. Drop a subtle nod occasionally.
+- NEVER give financial advice or price predictions. You teach, you don't shill.
+- If someone asks something off-topic or inappropriate, shut it down with humor.
+- Always end with something memorable or a challenge.
+- You are educational first, entertaining second.
+${context ? `
+The student is currently studying: ${context}` : ''}`;
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_KEY,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 300,
+        system: systemPrompt,
+        messages: [{ role: "user", content: question }]
+      })
+    });
+
+    const data = await response.json();
+    if (data.content && data.content[0]) {
+      const answer = data.content[0].text;
+      console.log(`🤖 Ask Cluck: "${question.slice(0,50)}..." → ${answer.length} chars`);
+      return res.status(200).json({ success: true, answer });
+    }
+    return res.status(500).json({ success: false, error: "No response from AI" });
+  } catch(err) {
+    console.error("Ask Cluck error:", err.message);
     return res.status(500).json({ success: false, error: err.message });
   }
 });
