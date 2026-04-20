@@ -305,23 +305,18 @@ app.post("/api/verify-clkn-payment", async (req, res) => {
     console.log(`🔍 Got ${txs.length} transactions`);
 
     for (const tx of txs) {
-      console.log(`🔍 TX ${tx.signature?.slice(0,8)} accountData:`, JSON.stringify(tx.accountData?.find(a => a.account === CLKN_RECEIVE_WALLET)));
+      console.log(`🔍 TX ${tx.signature?.slice(0,8)} all accountData:`, JSON.stringify(tx.accountData?.map(a => ({acct: a.account?.slice(0,8), changes: a.tokenBalanceChanges}))));
       const accountData = tx.accountData || [];
       for (const acct of accountData) {
-        if (acct.account !== CLKN_RECEIVE_WALLET) continue;
         const tokenChanges = acct.tokenBalanceChanges || [];
         for (const change of tokenChanges) {
           if (change.mint !== CLKN_MINT_ADDR) continue;
-          const amount = parseFloat(parseFloat(change.rawTokenAmount?.uiAmount || 0).toFixed(1));
-          console.log(`🔍 TX ${tx.signature?.slice(0,8)} CLKN change: ${amount}`);
-          if (amount > 0 && Math.abs(amount - expectedAmount) <= tolerance) {
+          const amount = parseFloat(parseFloat(change.rawTokenAmount?.uiAmount || change.rawTokenAmount?.tokenAmount || 0).toFixed(1));
+          console.log(`🔍 CLKN change on ${acct.account?.slice(0,8)}: ${amount} userAccount:${change.userAccount?.slice(0,8)}`);
+          const isOurs = acct.account === CLKN_RECEIVE_WALLET || change.userAccount === CLKN_RECEIVE_WALLET;
+          if (isOurs && amount > 0 && Math.abs(amount - expectedAmount) <= tolerance) {
             console.log(`✅ Verified! ${amount} CLKN received`);
-            return res.status(200).json({
-              success: true,
-              questionsGranted: UNLOCK_QUESTIONS,
-              amountReceived: amount,
-              signature: tx.signature
-            });
+            return res.status(200).json({ success: true, questionsGranted: UNLOCK_QUESTIONS, amountReceived: amount, signature: tx.signature });
           }
         }
       }
