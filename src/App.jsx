@@ -976,7 +976,9 @@ function AskCluck({ context, compact }) {
         <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:10,padding:"12px 14px"}}>
           <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
             <span style={{fontSize:16,flexShrink:0}}>🐔</span>
-            <p style={{margin:0,fontSize:13,color:"#D1D5DB",lineHeight:1.7,fontFamily:"inherit"}}>{answer}</p>
+            <p style={{margin:0,fontSize:15,color:"#D1D5DB",lineHeight:1.8,fontFamily:"inherit"}}>
+            {answer.replace(/\*\*([^*]+)\*\*/g, (_,t)=>t).replace(/\*([^*]+)\*/g, (_,t)=>t)}
+          </p>
           </div>
           <button onClick={()=>{setAnswer(null);setQuestion("");}} style={{marginTop:8,background:"none",border:"none",color:"#6B7280",fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:1,cursor:"pointer"}}>
             ASK ANOTHER →
