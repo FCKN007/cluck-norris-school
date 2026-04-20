@@ -869,6 +869,108 @@ function UltimateChallenge({ onBack }) {
 
 
 
+
+// ── AUTO VERIFY COMPONENT ──
+function AutoVerify({ unlockAmount, onUnlock, onBack }) {
+  const [status, setStatus] = useState("watching"); // watching | found | failed
+  const [attempts, setAttempts] = useState(0);
+  const [dots, setDots] = useState(".");
+  const maxAttempts = 40; // 40 × 3s = 2 minutes
+
+  // Animate dots
+  useEffect(() => {
+    if (status !== "watching") return;
+    const interval = setInterval(() => {
+      setDots(d => d.length >= 3 ? "." : d + ".");
+    }, 500);
+    return () => clearInterval(interval);
+  }, [status]);
+
+  // Auto poll every 3 seconds
+  useEffect(() => {
+    if (status !== "watching") return;
+    if (attempts >= maxAttempts) {
+      setStatus("failed");
+      return;
+    }
+
+    const poll = async () => {
+      try {
+        const res = await fetch("/api/verify-clkn-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ unlockAmount })
+        });
+        const data = await res.json();
+        if (data.success) {
+          // Grant questions
+          const today = new Date().toDateString();
+          const current = JSON.parse(localStorage.getItem("cluck_questions") || "{}");
+          const currentLimit = (current.date === today) ? (current.limit || DAILY_LIMIT) : DAILY_LIMIT;
+          const newLimit = currentLimit + data.questionsGranted;
+          localStorage.setItem("cluck_questions", JSON.stringify({
+            count: current.count || 0,
+            limit: newLimit,
+            date: today
+          }));
+          localStorage.removeItem("cluck_unlock_amount");
+          setStatus("found");
+          setTimeout(() => onUnlock(data.questionsGranted), 1500);
+        } else {
+          setAttempts(a => a + 1);
+        }
+      } catch(e) {
+        setAttempts(a => a + 1);
+      }
+    };
+
+    const timer = setTimeout(poll, attempts === 0 ? 2000 : 3000);
+    return () => clearTimeout(timer);
+  }, [attempts, status]);
+
+  if (status === "found") return (
+    <div style={{textAlign:"center",padding:"20px 0"}}>
+      <div style={{fontSize:48,marginBottom:12}}>🎉</div>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:16,fontWeight:700,color:"#10B981",letterSpacing:2,marginBottom:8}}>PAYMENT VERIFIED!</div>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#D1D5DB"}}>20 questions unlocked. Cluck Norris is impressed.</div>
+    </div>
+  );
+
+  if (status === "failed") return (
+    <div style={{textAlign:"center",padding:"16px 0"}}>
+      <div style={{fontSize:32,marginBottom:10}}>⏱️</div>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#EF4444",letterSpacing:1,marginBottom:8}}>PAYMENT NOT FOUND</div>
+      <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",margin:"0 0 14px",lineHeight:1.7}}>
+        Could not find your {unlockAmount.toFixed(1)} CLKN payment after 2 minutes. Make sure you sent the exact amount to the correct wallet.
+      </p>
+      <div style={{display:"flex",gap:8}}>
+        <button onClick={onBack} style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px",fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#6B7280",cursor:"pointer"}}>← TRY AGAIN</button>
+        <button onClick={()=>window.open("https://t.me/clucknorris","_blank")} style={{flex:1,background:"rgba(217,119,6,0.15)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:8,padding:"10px",fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#D97706",cursor:"pointer"}}>📱 GET HELP</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{textAlign:"center",padding:"16px 0"}}>
+      <div style={{fontSize:36,marginBottom:12}}>🔍</div>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#D97706",letterSpacing:2,marginBottom:8}}>
+        WATCHING FOR YOUR PAYMENT{dots}
+      </div>
+      <div style={{background:"rgba(0,0,0,0.3)",borderRadius:8,padding:"10px 14px",marginBottom:12}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginBottom:4}}>LOOKING FOR EXACTLY</div>
+        <div style={{fontFamily:"monospace",fontSize:24,color:"#FCD34D",fontWeight:700}}>{unlockAmount.toFixed(1)} CLKN</div>
+      </div>
+      <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",margin:"0 0 12px",lineHeight:1.7}}>
+        Checking every 3 seconds{dots} usually takes less than 15 seconds after your transaction confirms.
+      </p>
+      <div style={{height:4,background:"rgba(255,255,255,0.08)",borderRadius:2,marginBottom:12}}>
+        <div style={{height:"100%",width:`${(attempts/maxAttempts)*100}%`,background:"linear-gradient(90deg,#D97706,#EF4444)",borderRadius:2,transition:"width 0.3s"}}/>
+      </div>
+      <button onClick={onBack} style={{background:"none",border:"none",color:"#6B7280",fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:1,cursor:"pointer"}}>← BACK</button>
+    </div>
+  );
+}
+
 // ── CLKN UNLOCK COMPONENT ──
 function generateUnlockAmount() {
   const whole = Math.floor(Math.random() * 51) + 475; // 475-525
@@ -884,42 +986,11 @@ function CluckUnlock({ onUnlock }) {
     localStorage.setItem("cluck_unlock_amount", amount.toString());
     return amount;
   });
-  const [verifying, setVerifying] = useState(false);
-  const [error, setError] = useState(null);
   const [step, setStep] = useState(1);
   const [walletCopied, setWalletCopied] = useState(false);
   const [amountCopied, setAmountCopied] = useState(false);
 
-  async function verify() {
-    setVerifying(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/verify-clkn-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ unlockAmount })
-      });
-      const data = await res.json();
-      if (data.success) {
-        const today = new Date().toDateString();
-        const current = JSON.parse(localStorage.getItem("cluck_questions") || "{}");
-        const currentLimit = (current.date === today) ? (current.limit || DAILY_LIMIT) : DAILY_LIMIT;
-        const newLimit = currentLimit + data.questionsGranted;
-        localStorage.setItem("cluck_questions", JSON.stringify({ 
-          count: current.count || 0, 
-          limit: newLimit,
-          date: today 
-        }));
-        localStorage.removeItem("cluck_unlock_amount");
-        onUnlock(data.questionsGranted);
-      } else {
-        setError(data.error || "Payment not found yet. Wait a moment and try again.");
-      }
-    } catch(e) {
-      setError("Verification failed. Try again.");
-    }
-    setVerifying(false);
-  }
+
 
   return (
     <div style={{background:"rgba(217,119,6,0.06)",border:"1px solid rgba(217,119,6,0.25)",borderRadius:12,padding:16,marginTop:8}}>
@@ -1002,23 +1073,11 @@ function CluckUnlock({ onUnlock }) {
       )}
 
       {step===3 && (
-        <div>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D97706",letterSpacing:2,marginBottom:8}}>STEP 3 — VERIFY PAYMENT</div>
-          <p style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#9CA3AF",margin:"0 0 12px",lineHeight:1.7}}>
-            Once your transaction confirms on Solana (usually 5-10 seconds) tap verify below.
-          </p>
-          {error && (
-            <div style={{background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,padding:"10px 12px",marginBottom:10}}>
-              <p style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#EF4444",margin:0,lineHeight:1.6}}>{error}</p>
-            </div>
-          )}
-          <div style={{display:"flex",gap:8}}>
-            <button onClick={()=>setStep(2)} style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px",fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#6B7280",cursor:"pointer"}}>← BACK</button>
-            <button onClick={verify} disabled={verifying} style={{flex:2,background:verifying?"rgba(255,255,255,0.05)":"linear-gradient(135deg,#D97706,#EF4444)",border:"none",borderRadius:8,padding:"10px",fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,color:verifying?"#6B7280":"#fff",letterSpacing:1,cursor:verifying?"default":"pointer"}}>
-              {verifying?"CHECKING...":"✅ VERIFY PAYMENT"}
-            </button>
-          </div>
-        </div>
+        <AutoVerify
+          unlockAmount={unlockAmount}
+          onUnlock={onUnlock}
+          onBack={()=>setStep(2)}
+        />
       )}
     </div>
   );
