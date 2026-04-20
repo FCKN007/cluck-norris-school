@@ -305,7 +305,6 @@ app.post("/api/verify-clkn-payment", async (req, res) => {
     console.log(`🔍 Got ${txs.length} transactions`);
 
     for (const tx of txs) {
-      console.log(`🔍 TX ${tx.signature?.slice(0,8)} all accountData:`, JSON.stringify(tx.accountData?.map(a => ({acct: a.account?.slice(0,8), changes: a.tokenBalanceChanges}))));
       const accountData = tx.accountData || [];
       for (const acct of accountData) {
         const tokenChanges = acct.tokenBalanceChanges || [];
