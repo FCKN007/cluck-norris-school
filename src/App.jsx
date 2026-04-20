@@ -875,6 +875,7 @@ function AutoVerify({ unlockAmount, onUnlock, onBack }) {
   const [status, setStatus] = useState("watching"); // watching | found | failed
   const [attempts, setAttempts] = useState(0);
   const [dots, setDots] = useState(".");
+  const [grantedQ, setGrantedQ] = useState(20);
   const maxAttempts = 40; // 40 × 3s = 2 minutes
 
   // Animate dots
@@ -914,8 +915,9 @@ function AutoVerify({ unlockAmount, onUnlock, onBack }) {
             date: today
           }));
           localStorage.removeItem("cluck_unlock_amount");
+          setGrantedQ(data.questionsGranted);
           setStatus("found");
-          setTimeout(() => onUnlock(data.questionsGranted), 4000);
+          setTimeout(() => onUnlock(data.questionsGranted), 99999999);
         } else {
           setAttempts(a => a + 1);
         }
@@ -936,9 +938,12 @@ function AutoVerify({ unlockAmount, onUnlock, onBack }) {
         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:28,fontWeight:900,color:"#FCD34D",marginBottom:4}}>+20 QUESTIONS</div>
         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#D1D5DB",letterSpacing:1}}>UNLOCKED AND READY</div>
       </div>
-      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#9CA3AF",lineHeight:1.7}}>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#9CA3AF",lineHeight:1.7,marginBottom:16}}>
         Cluck Norris is impressed. Don't waste them. 🐔
       </div>
+      <button onClick={()=>onUnlock(grantedQ)} style={{width:"100%",background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#fff",letterSpacing:2,cursor:"pointer"}}>
+        ASK NEXT QUESTION →
+      </button>
     </div>
   );
 
