@@ -868,6 +868,135 @@ function UltimateChallenge({ onBack }) {
 
 
 
+
+// ── CLKN UNLOCK COMPONENT ──
+function generateUnlockAmount() {
+  const whole = Math.floor(Math.random() * 51) + 475; // 475-525
+  const decimal = Math.floor(Math.random() * 10); // 0-9
+  return parseFloat(`${whole}.${decimal}`);
+}
+
+function CluckUnlock({ onUnlock }) {
+  const [unlockAmount] = useState(() => {
+    const stored = localStorage.getItem("cluck_unlock_amount");
+    if (stored) return parseFloat(stored);
+    const amount = generateUnlockAmount();
+    localStorage.setItem("cluck_unlock_amount", amount.toString());
+    return amount;
+  });
+  const [verifying, setVerifying] = useState(false);
+  const [error, setError] = useState(null);
+  const [step, setStep] = useState(1);
+
+  async function verify() {
+    setVerifying(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/verify-clkn-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unlockAmount })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const today = new Date().toDateString();
+        const current = JSON.parse(localStorage.getItem("cluck_questions") || "{}");
+        const newCount = Math.max(0, (current.count || 10) - data.questionsGranted);
+        localStorage.setItem("cluck_questions", JSON.stringify({ count: newCount, date: today }));
+        localStorage.removeItem("cluck_unlock_amount");
+        onUnlock(data.questionsGranted);
+      } else {
+        setError(data.error || "Payment not found yet. Wait a moment and try again.");
+      }
+    } catch(e) {
+      setError("Verification failed. Try again.");
+    }
+    setVerifying(false);
+  }
+
+  return (
+    <div style={{background:"rgba(217,119,6,0.06)",border:"1px solid rgba(217,119,6,0.25)",borderRadius:12,padding:16,marginTop:8}}>
+      <div style={{textAlign:"center",marginBottom:14}}>
+        <div style={{fontSize:28,marginBottom:6}}>🪙</div>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#D97706",letterSpacing:2,marginBottom:4}}>DAILY LIMIT REACHED</div>
+        <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",margin:0,lineHeight:1.7}}>
+          Cluck Norris has answered enough questions today. Send <span style={{color:"#FCD34D",fontWeight:700}}>{unlockAmount.toFixed(1)} CLKN</span> to unlock <span style={{color:"#FCD34D",fontWeight:700}}>20 more questions</span>. No memo needed — the exact amount is your key.
+        </p>
+      </div>
+
+      {/* Step indicator */}
+      <div style={{display:"flex",gap:6,marginBottom:14}}>
+        {[1,2,3].map(s=>(
+          <div key={s} style={{flex:1,height:3,borderRadius:2,background:step>=s?"#D97706":"rgba(255,255,255,0.1)"}}/>
+        ))}
+      </div>
+
+      {step===1 && (
+        <div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D97706",letterSpacing:2,marginBottom:8}}>STEP 1 — YOUR EXACT SEND AMOUNT</div>
+          <div style={{background:"rgba(0,0,0,0.3)",borderRadius:8,padding:"14px",marginBottom:10,textAlign:"center"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:1,marginBottom:4}}>SEND EXACTLY</div>
+            <div style={{fontFamily:"monospace",fontSize:28,color:"#FCD34D",fontWeight:700}}>{unlockAmount.toFixed(1)} CLKN</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginTop:4}}>THIS EXACT AMOUNT VERIFIES YOUR PAYMENT</div>
+          </div>
+          <p style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#9CA3AF",margin:"0 0 12px",lineHeight:1.7}}>
+            The specific decimal amount is how we identify your payment — no memo needed. Send the exact amount shown above.
+          </p>
+          <button onClick={()=>setStep(2)} style={{width:"100%",background:"linear-gradient(135deg,#D97706,#EF4444)",border:"none",borderRadius:8,padding:"11px",fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,color:"#fff",letterSpacing:2,cursor:"pointer"}}>
+            GOT IT — NEXT →
+          </button>
+        </div>
+      )}
+
+      {step===2 && (
+        <div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D97706",letterSpacing:2,marginBottom:8}}>STEP 2 — SEND 500 CLKN</div>
+          <div style={{background:"rgba(0,0,0,0.3)",borderRadius:8,padding:"10px 14px",marginBottom:10}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginBottom:4}}>SEND TO:</div>
+            <div style={{fontFamily:"monospace",fontSize:10,color:"#F9FAFB",wordBreak:"break-all",lineHeight:1.5}}>GHudCBikdjcaZNXfZxH4XK2FcWBP6JyVgnoVMCRLNDoa</div>
+          </div>
+          <div style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"10px 14px",marginBottom:12}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginBottom:6}}>HOW TO SEND IN PHANTOM:</div>
+            {["Open Phantom wallet", "Select CLKN token", "Tap Send", `Enter amount: ${unlockAmount.toFixed(1)}`, "Paste the wallet address above", "Confirm and send"].map((s,i)=>(
+              <div key={i} style={{display:"flex",gap:8,marginBottom:4,alignItems:"flex-start"}}>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#D97706",minWidth:14}}>{i+1}.</span>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D1D5DB"}}>{s}</span>
+              </div>
+            ))}
+          </div>
+          <p style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",margin:"0 0 12px",lineHeight:1.7}}>
+            Need help? Come find us on Telegram — the flock will sort you out. 🐔
+          </p>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>setStep(1)} style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px",fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#6B7280",cursor:"pointer"}}>← BACK</button>
+            <button onClick={()=>setStep(3)} style={{flex:2,background:"linear-gradient(135deg,#D97706,#EF4444)",border:"none",borderRadius:8,padding:"10px",fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,color:"#fff",letterSpacing:1,cursor:"pointer"}}>SENT IT →</button>
+          </div>
+        </div>
+      )}
+
+      {step===3 && (
+        <div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D97706",letterSpacing:2,marginBottom:8}}>STEP 3 — VERIFY PAYMENT</div>
+          <p style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#9CA3AF",margin:"0 0 12px",lineHeight:1.7}}>
+            Once your transaction confirms on Solana (usually 5-10 seconds) tap verify below.
+          </p>
+          {error && (
+            <div style={{background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,padding:"10px 12px",marginBottom:10}}>
+              <p style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#EF4444",margin:0,lineHeight:1.6}}>{error}</p>
+            </div>
+          )}
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>setStep(2)} style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px",fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#6B7280",cursor:"pointer"}}>← BACK</button>
+            <button onClick={verify} disabled={verifying} style={{flex:2,background:verifying?"rgba(255,255,255,0.05)":"linear-gradient(135deg,#D97706,#EF4444)",border:"none",borderRadius:8,padding:"10px",fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,color:verifying?"#6B7280":"#fff",letterSpacing:1,cursor:verifying?"default":"pointer"}}>
+              {verifying?"CHECKING...":"✅ VERIFY PAYMENT"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── ASK CLUCK NORRIS COMPONENT ──
 const DAILY_LIMIT = 10;
 const STORAGE_KEY = "cluck_questions";
@@ -967,9 +1096,7 @@ function AskCluck({ context, compact }) {
           </div>
         </>
       ) : (
-        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#EF4444",letterSpacing:1,marginBottom:answer?10:0}}>
-          Cluck Norris has answered enough questions today. Come back tomorrow and hit the books in the meantime.
-        </div>
+        <CluckUnlock onUnlock={(q)=>{setQuestionsLeft(q);}} />
       )}
 
       {answer && (
