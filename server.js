@@ -380,6 +380,89 @@ app.post("/api/verify-unlock", async (req, res) => {
   }
 });
 
+// ── Verify CLKN Payment for AI Unlock ──
+const CLKN_RECEIVE_WALLET = "GHudCBikdjcaZNXfZxH4XK2FcWBP6JyVgnoVMCRLNDoa";
+const CLKN_MINT_ADDR = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
+const UNLOCK_AMOUNT = 500;
+const UNLOCK_QUESTIONS = 20;
+
+app.post("/api/verify-clkn-payment", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  const { unlockAmount } = req.body;
+  if (!unlockAmount) return res.status(400).json({ success: false, error: "Missing unlock amount" });
+
+  const HELIUS_KEY = process.env.HELIUS_API_KEY;
+  const expectedAmount = parseFloat(parseFloat(unlockAmount).toFixed(1));
+  const tolerance = 0.05; // allow tiny rounding differences
+
+  try {
+    const url = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
+    // Get recent transactions to our wallet
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: "verify-payment",
+        method: "getSignaturesForAddress",
+        params: [CLKN_RECEIVE_WALLET, { limit: 50 }]
+      })
+    });
+    const data = await response.json();
+    const signatures = data?.result || [];
+
+    for (const sig of signatures) {
+      try {
+        const txRes = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: "get-tx",
+            method: "getTransaction",
+            params: [sig.signature, { encoding: "jsonParsed", maxSupportedTransactionVersion: 0 }]
+          })
+        });
+        const txData = await txRes.json();
+        const tx = txData?.result;
+        if (!tx) continue;
+
+        // Check CLKN transfer amount to our wallet
+        const postBalances = tx?.meta?.postTokenBalances || [];
+        const preBalances = tx?.meta?.preTokenBalances || [];
+
+        const postEntry = postBalances.find(b =>
+          b.mint === CLKN_MINT_ADDR && b.owner === CLKN_RECEIVE_WALLET
+        );
+        const preEntry = preBalances.find(b =>
+          b.mint === CLKN_MINT_ADDR && b.owner === CLKN_RECEIVE_WALLET
+        );
+
+        const postAmt = postEntry?.uiTokenAmount?.uiAmount || 0;
+        const preAmt = preEntry?.uiTokenAmount?.uiAmount || 0;
+        const received = parseFloat((postAmt - preAmt).toFixed(1));
+
+        console.log(`🔍 Checking tx ${sig.signature.slice(0,8)}... received:${received} expected:${expectedAmount}`);
+
+        if (Math.abs(received - expectedAmount) <= tolerance) {
+          console.log(`✅ Payment verified! Amount:${received} CLKN`);
+          return res.status(200).json({
+            success: true,
+            questionsGranted: UNLOCK_QUESTIONS,
+            amountReceived: received,
+            signature: sig.signature
+          });
+        }
+      } catch(e) { continue; }
+    }
+
+    return res.status(200).json({ success: false, error: "Payment not found yet. Make sure you sent exactly " + expectedAmount.toFixed(1) + " CLKN and wait a few seconds for confirmation." });
+  } catch(err) {
+    console.error("Verify payment error:", err.message);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ── Ask Cluck Norris (Claude AI) ──
 app.post("/api/ask-cluck", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
