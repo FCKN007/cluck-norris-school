@@ -941,7 +941,7 @@ function CluckUnlock({ onUnlock }) {
             <div style={{fontFamily:"monospace",fontSize:28,color:"#FCD34D",fontWeight:700}}>{unlockAmount.toFixed(1)} CLKN</div>
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginTop:4}}>THIS EXACT AMOUNT VERIFIES YOUR PAYMENT</div>
           </div>
-          <p style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#9CA3AF",margin:"0 0 12px",lineHeight:1.7}}>
+          <p style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#9CA3AF",margin:"0 0 12px",lineHeight:1.7}}>
             The specific decimal amount is how we identify your payment — no memo needed. Send the exact amount shown above.
           </p>
           <button onClick={()=>setStep(2)} style={{width:"100%",background:"linear-gradient(135deg,#D97706,#EF4444)",border:"none",borderRadius:8,padding:"11px",fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,color:"#fff",letterSpacing:2,cursor:"pointer"}}>
@@ -954,12 +954,12 @@ function CluckUnlock({ onUnlock }) {
         <div>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D97706",letterSpacing:2,marginBottom:8}}>STEP 2 — SEND {unlockAmount.toFixed(1)} CLKN</div>
           {/* Clickable wallet address */}
-          <div onClick={()=>{navigator.clipboard?.writeText("GHudCBikdjcaZNXfZxH4XK2FcWBP6JyVgnoVMCRLNDoa");setWalletCopied(true);setTimeout(()=>setWalletCopied(false),2000);}} style={{background:"rgba(0,0,0,0.3)",borderRadius:8,padding:"10px 14px",marginBottom:10,cursor:"pointer",border:`1px solid ${walletCopied?"rgba(16,185,129,0.5)":"rgba(255,255,255,0.08)"}`}}>
+          <div onClick={()=>{navigator.clipboard?.writeText("GBuZGPEodVByDNTJFUMwfyFYhkVZ7MghbhvDe83pbGyH");setWalletCopied(true);setTimeout(()=>setWalletCopied(false),2000);}} style={{background:"rgba(0,0,0,0.3)",borderRadius:8,padding:"10px 14px",marginBottom:10,cursor:"pointer",border:`1px solid ${walletCopied?"rgba(16,185,129,0.5)":"rgba(255,255,255,0.08)"}`}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
               <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>SEND TO: (TAP TO COPY)</div>
               <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:walletCopied?"#10B981":"#D97706",letterSpacing:1}}>{walletCopied?"✓ COPIED!":"📋 COPY"}</div>
             </div>
-            <div style={{fontFamily:"monospace",fontSize:10,color:"#F9FAFB",wordBreak:"break-all",lineHeight:1.5}}>GHudCBikdjcaZNXfZxH4XK2FcWBP6JyVgnoVMCRLNDoa</div>
+            <div style={{fontFamily:"monospace",fontSize:10,color:"#F9FAFB",wordBreak:"break-all",lineHeight:1.5}}>GBuZGPEodVByDNTJFUMwfyFYhkVZ7MghbhvDe83pbGyH</div>
           </div>
           {/* Clickable amount */}
           <div onClick={()=>{navigator.clipboard?.writeText(unlockAmount.toFixed(1));setAmountCopied(true);setTimeout(()=>setAmountCopied(false),2000);}} style={{background:"rgba(0,0,0,0.3)",borderRadius:8,padding:"10px 14px",marginBottom:10,cursor:"pointer",border:`1px solid ${amountCopied?"rgba(16,185,129,0.5)":"rgba(217,119,6,0.3)"}`}}>
@@ -974,7 +974,7 @@ function CluckUnlock({ onUnlock }) {
             {["Open the wallet holding your CLKN", "Select CLKN token", "Tap Send", `Enter amount: ${unlockAmount.toFixed(1)}`, "Paste the wallet address above", "Confirm and send"].map((s,i)=>(
               <div key={i} style={{display:"flex",gap:8,marginBottom:4,alignItems:"flex-start"}}>
                 <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#D97706",minWidth:14}}>{i+1}.</span>
-                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D1D5DB"}}>{s}</span>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#D1D5DB"}}>{s}</span>
               </div>
             ))}
           </div>
@@ -986,7 +986,7 @@ function CluckUnlock({ onUnlock }) {
               <a href={JUPITER_TRADE_LINK} target="_blank" rel="noreferrer" style={{flex:1,background:"rgba(74,222,128,0.1)",border:"1px solid rgba(74,222,128,0.3)",borderRadius:6,padding:"7px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#4ADE80",letterSpacing:1,textAlign:"center"}}>⚡ JUPITER</a>
             </div>
           </div>
-          <p style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",margin:"0 0 12px",lineHeight:1.7}}>
+          <p style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#9CA3AF",margin:"0 0 12px",lineHeight:1.7}}>
             Need help? Come find us on Telegram — the flock will sort you out. 🐔
           </p>
           <div style={{display:"flex",gap:8}}>
