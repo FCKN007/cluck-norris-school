@@ -288,70 +288,40 @@ app.post("/api/verify-clkn-payment", async (req, res) => {
 
   const HELIUS_KEY = process.env.HELIUS_API_KEY;
   const expectedAmount = parseFloat(parseFloat(unlockAmount).toFixed(1));
-  const tolerance = 0.05; // allow tiny rounding differences
+  const tolerance = 0.15;
 
   try {
-    const url = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
-    // Get recent transactions to our wallet
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: "verify-payment",
-        method: "getSignaturesForAddress",
-        params: [CLKN_RECEIVE_WALLET, { limit: 50 }]
-      })
-    });
-    const data = await response.json();
-    const signatures = data?.result || [];
+    // Use Helius Enhanced Transactions API — parses individual token transfers cleanly
+    const url = `https://api.helius.xyz/v0/addresses/${CLKN_RECEIVE_WALLET}/transactions?api-key=${HELIUS_KEY}&limit=50&type=TRANSFER`;
+    console.log(`🔍 Fetching enhanced txs... expected:${expectedAmount} CLKN`);
+    const response = await fetch(url);
+    const transactions = await response.json();
 
-    for (const sig of signatures) {
-      try {
-        const txRes = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            id: "get-tx",
-            method: "getTransaction",
-            params: [sig.signature, { encoding: "jsonParsed", maxSupportedTransactionVersion: 0 }]
-          })
-        });
-        const txData = await txRes.json();
-        const tx = txData?.result;
-        if (!tx) continue;
+    if (!Array.isArray(transactions)) {
+      console.error("❌ Unexpected response:", JSON.stringify(transactions).slice(0,200));
+      return res.status(500).json({ success: false, error: "Could not fetch transactions" });
+    }
 
-        // Check CLKN transfer amount to our wallet
-        const postBalances = tx?.meta?.postTokenBalances || [];
-        const preBalances = tx?.meta?.preTokenBalances || [];
+    console.log(`🔍 Got ${transactions.length} transactions to check`);
 
-        // Find our wallet's post and pre balance
-        const postEntry = postBalances.find(b =>
-          b.mint === CLKN_MINT_ADDR && b.owner === CLKN_RECEIVE_WALLET
-        );
-        const preEntry = preBalances.find(b =>
-          b.mint === CLKN_MINT_ADDR && b.owner === CLKN_RECEIVE_WALLET
-        );
-
-        if (!postEntry) continue; // our wallet not involved in this tx
-
-        const postAmt = postEntry?.uiTokenAmount?.uiAmount || 0;
-        const preAmt = preEntry?.uiTokenAmount?.uiAmount || 0;
-        const received = parseFloat(Math.abs(postAmt - preAmt).toFixed(1));
-
-        console.log(`🔍 Checking tx ${sig.signature.slice(0,8)}... postAmt:${postAmt} preAmt:${preAmt} received:${received} expected:${expectedAmount}`);
-
-        if (Math.abs(received - expectedAmount) <= tolerance) {
-          console.log(`✅ Payment verified! Amount:${received} CLKN`);
-          return res.status(200).json({
-            success: true,
-            questionsGranted: UNLOCK_QUESTIONS,
-            amountReceived: received,
-            signature: sig.signature
-          });
+    for (const tx of transactions) {
+      const transfers = tx.tokenTransfers || [];
+      for (const transfer of transfers) {
+        if (transfer.mint === CLKN_MINT_ADDR) {
+          const received = parseFloat(parseFloat(transfer.tokenAmount).toFixed(1));
+          console.log(`🔍 TX ${tx.signature?.slice(0,8)}... to:${transfer.toUserAccount?.slice(0,8)} tokenAcct:${transfer.toTokenAccount?.slice(0,8)} amount:${received}`);
+          const toMatch = transfer.toUserAccount === CLKN_RECEIVE_WALLET || transfer.toTokenAccount === CLKN_RECEIVE_WALLET;
+          if (toMatch && Math.abs(received - expectedAmount) <= tolerance) {
+            console.log(`✅ Payment verified! Amount:${received} CLKN`);
+            return res.status(200).json({
+              success: true,
+              questionsGranted: UNLOCK_QUESTIONS,
+              amountReceived: received,
+              signature: tx.signature
+            });
+          }
         }
-      } catch(e) { continue; }
+      }
     }
 
     return res.status(200).json({ success: false, error: "Payment not found yet. Make sure you sent exactly " + expectedAmount.toFixed(1) + " CLKN and wait a few seconds for confirmation." });
