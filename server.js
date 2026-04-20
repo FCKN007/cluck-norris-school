@@ -326,9 +326,7 @@ app.post("/api/verify-clkn-payment", async (req, res) => {
         const postBalances = tx?.meta?.postTokenBalances || [];
         const preBalances = tx?.meta?.preTokenBalances || [];
 
-        // Log all token balances to diagnose
-        console.log(`🔍 TX ${sig.signature.slice(0,8)} postBalances:`, JSON.stringify(postBalances.map(b=>({mint:b.mint?.slice(0,8),owner:b.owner?.slice(0,8),amt:b.uiTokenAmount?.uiAmount}))));
-
+        // Find our wallet's post and pre balance
         const postEntry = postBalances.find(b =>
           b.mint === CLKN_MINT_ADDR && b.owner === CLKN_RECEIVE_WALLET
         );
@@ -336,20 +334,13 @@ app.post("/api/verify-clkn-payment", async (req, res) => {
           b.mint === CLKN_MINT_ADDR && b.owner === CLKN_RECEIVE_WALLET
         );
 
-        // Also try matching by accountIndex if owner field is missing
-        const accountKeys = tx?.transaction?.message?.accountKeys || [];
-        const receiveIdx = accountKeys.findIndex(k => (k?.pubkey || k) === CLKN_RECEIVE_WALLET);
-        const postEntryByIdx = postBalances.find(b => b.accountIndex === receiveIdx && b.mint === CLKN_MINT_ADDR);
-        const preEntryByIdx = preBalances.find(b => b.accountIndex === receiveIdx && b.mint === CLKN_MINT_ADDR);
+        if (!postEntry) continue; // our wallet not involved in this tx
 
-        const finalPost = postEntry || postEntryByIdx;
-        const finalPre = preEntry || preEntryByIdx;
+        const postAmt = postEntry?.uiTokenAmount?.uiAmount || 0;
+        const preAmt = preEntry?.uiTokenAmount?.uiAmount || 0;
+        const received = parseFloat(Math.abs(postAmt - preAmt).toFixed(1));
 
-        const postAmt = finalPost?.uiTokenAmount?.uiAmount || 0;
-        const preAmt = finalPre?.uiTokenAmount?.uiAmount || 0;
-        const received = parseFloat((postAmt - preAmt).toFixed(1));
-
-        console.log(`🔍 Checking tx ${sig.signature.slice(0,8)}... received:${received} expected:${expectedAmount} receiveIdx:${receiveIdx}`);
+        console.log(`🔍 Checking tx ${sig.signature.slice(0,8)}... postAmt:${postAmt} preAmt:${preAmt} received:${received} expected:${expectedAmount}`);
 
         if (Math.abs(received - expectedAmount) <= tolerance) {
           console.log(`✅ Payment verified! Amount:${received} CLKN`);
