@@ -929,7 +929,7 @@ function AskCluck({ context, compact }) {
       <img src={LOGO_B64} alt="CN" style={{width:28,height:28,borderRadius:"50%",objectFit:"cover"}}/>
       <div style={{textAlign:"left",flex:1}}>
         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,color:"#D97706",letterSpacing:1}}>ASK CLUCK NORRIS</div>
-        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>Need clarification? Ask the professor. ({questionsLeft} left today)</div>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#9CA3AF",letterSpacing:1}}>Need clarification? Ask the professor. ({questionsLeft} left today)</div>
       </div>
       <span style={{color:"#D97706",fontSize:14}}>→</span>
     </button>
