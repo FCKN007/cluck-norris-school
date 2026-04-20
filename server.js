@@ -305,7 +305,7 @@ app.post("/api/verify-clkn-payment", async (req, res) => {
     console.log(`🔍 Got ${txs.length} transactions`);
 
     for (const tx of txs) {
-      // Look through accountData for our wallet's token balance changes
+      console.log(`🔍 TX ${tx.signature?.slice(0,8)} accountData:`, JSON.stringify(tx.accountData?.find(a => a.account === CLKN_RECEIVE_WALLET)));
       const accountData = tx.accountData || [];
       for (const acct of accountData) {
         if (acct.account !== CLKN_RECEIVE_WALLET) continue;
