@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
 const SOL_MINT = "So11111111111111111111111111111111111111112";
 const LAMPORTS_PER_SOL = 1_000_000_000;
@@ -423,7 +423,7 @@ function Incubator({ onComplete, onBack }) {
   const [completed, setCompleted] = useState([]);
 
   const lesson = INCUBATOR_LESSONS[lessonIdx];
-  const shuffledIncubatorQs = lesson ? lesson.questions.map(shuffleOptions) : [];
+  const shuffledIncubatorQs = useMemo(() => lesson ? lesson.questions.map(shuffleOptions) : [], [lessonIdx]);
   const q = shuffledIncubatorQs[qi];
   const allDone = completed.length === INCUBATOR_LESSONS.length;
 
@@ -2177,7 +2177,7 @@ function Lesson({lesson:l,onComplete,onBack}){
     </div>
   );
 
-  const shuffledQuestions = l.questions.map(shuffleOptions);
+  const shuffledQuestions = useMemo(() => l.questions.map(shuffleOptions), [l.id]);
   if(phase==="quiz") return(
     <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto"}}>
       <div style={{marginBottom:20}}>
