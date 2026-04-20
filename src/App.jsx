@@ -915,7 +915,7 @@ function AutoVerify({ unlockAmount, onUnlock, onBack }) {
           }));
           localStorage.removeItem("cluck_unlock_amount");
           setStatus("found");
-          setTimeout(() => onUnlock(data.questionsGranted), 1500);
+          setTimeout(() => onUnlock(data.questionsGranted), 4000);
         } else {
           setAttempts(a => a + 1);
         }
@@ -929,10 +929,16 @@ function AutoVerify({ unlockAmount, onUnlock, onBack }) {
   }, [attempts, status]);
 
   if (status === "found") return (
-    <div style={{textAlign:"center",padding:"20px 0"}}>
-      <div style={{fontSize:48,marginBottom:12}}>🎉</div>
-      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:16,fontWeight:700,color:"#10B981",letterSpacing:2,marginBottom:8}}>PAYMENT VERIFIED!</div>
-      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#D1D5DB"}}>20 questions unlocked. Cluck Norris is impressed.</div>
+    <div style={{textAlign:"center",padding:"28px 0"}}>
+      <div style={{fontSize:64,marginBottom:16}}>🎉</div>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:20,fontWeight:900,color:"#10B981",letterSpacing:3,marginBottom:12}}>PAYMENT VERIFIED!</div>
+      <div style={{background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:12,padding:"14px 20px",marginBottom:12}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:28,fontWeight:900,color:"#FCD34D",marginBottom:4}}>+20 QUESTIONS</div>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#D1D5DB",letterSpacing:1}}>UNLOCKED AND READY</div>
+      </div>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#9CA3AF",lineHeight:1.7}}>
+        Cluck Norris is impressed. Don't waste them. 🐔
+      </div>
     </div>
   );
 
