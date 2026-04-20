@@ -276,7 +276,7 @@ app.get("/api/claims", async (req, res) => {
 });
 
 // ── Verify CLKN Payment for AI Unlock ──
-const CLKN_RECEIVE_WALLET = "GBuZGPEodVByDNTJFUMwfyFYhkVZ7MghbhvDe83pbGyH";
+const CLKN_RECEIVE_WALLET = "7LHBcRYosycMBwBqxBHeRiDQohYzpppDALKYVT4TNY5H";
 const CLKN_MINT_ADDR = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
 const UNLOCK_AMOUNT = 500;
 const UNLOCK_QUESTIONS = 20;
