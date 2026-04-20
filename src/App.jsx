@@ -865,6 +865,126 @@ function UltimateChallenge({ onBack }) {
 
 
 
+
+// ── ASK CLUCK NORRIS COMPONENT ──
+const DAILY_LIMIT = 10;
+const STORAGE_KEY = "cluck_questions";
+
+function getQuestionsToday() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return { count: 0, date: new Date().toDateString() };
+    const data = JSON.parse(stored);
+    if (data.date !== new Date().toDateString()) return { count: 0, date: new Date().toDateString() };
+    return data;
+  } catch(e) { return { count: 0, date: new Date().toDateString() }; }
+}
+
+function incrementQuestions() {
+  const data = getQuestionsToday();
+  const updated = { count: data.count + 1, date: new Date().toDateString() };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  return updated.count;
+}
+
+function AskCluck({ context, compact }) {
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [questionsLeft, setQuestionsLeft] = useState(DAILY_LIMIT - getQuestionsToday().count);
+  const [expanded, setExpanded] = useState(false);
+
+  async function askQuestion() {
+    if (!question.trim() || loading || questionsLeft <= 0) return;
+    setLoading(true);
+    setAnswer(null);
+    try {
+      const res = await fetch("/api/ask-cluck", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question, context })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAnswer(data.answer);
+        const newCount = incrementQuestions();
+        setQuestionsLeft(DAILY_LIMIT - newCount);
+      } else {
+        setAnswer("Cluck Norris is unavailable right now. Hit the books instead.");
+      }
+    } catch(e) {
+      setAnswer("Something went wrong in the schoolyard. Try again.");
+    }
+    setLoading(false);
+  }
+
+  if (compact && !expanded) return (
+    <button onClick={()=>setExpanded(true)} style={{
+      display:"flex",alignItems:"center",gap:8,background:"rgba(217,119,6,0.1)",
+      border:"1px solid rgba(217,119,6,0.3)",borderRadius:10,padding:"10px 14px",
+      width:"100%",cursor:"pointer",marginTop:12
+    }}>
+      <img src={LOGO_B64} alt="CN" style={{width:28,height:28,borderRadius:"50%",objectFit:"cover"}}/>
+      <div style={{textAlign:"left",flex:1}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,color:"#D97706",letterSpacing:1}}>ASK CLUCK NORRIS</div>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>Need clarification? Ask the professor. ({questionsLeft} left today)</div>
+      </div>
+      <span style={{color:"#D97706",fontSize:14}}>→</span>
+    </button>
+  );
+
+  return (
+    <div style={{background:"rgba(217,119,6,0.06)",border:"1px solid rgba(217,119,6,0.25)",borderRadius:12,padding:16,marginTop:12}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+        <img src={LOGO_B64} alt="CN" style={{width:36,height:36,borderRadius:"50%",objectFit:"cover",border:"2px solid #D97706"}}/>
+        <div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#D97706",letterSpacing:1}}>ASK CLUCK NORRIS</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>
+            {questionsLeft > 0 ? `${questionsLeft} of ${DAILY_LIMIT} questions remaining today` : "Daily limit reached — come back tomorrow"}
+          </div>
+        </div>
+        {compact && <button onClick={()=>setExpanded(false)} style={{marginLeft:"auto",background:"none",border:"none",color:"#6B7280",cursor:"pointer",fontSize:16}}>✕</button>}
+      </div>
+
+      {questionsLeft > 0 ? (
+        <>
+          <div style={{display:"flex",gap:8,marginBottom:10}}>
+            <input
+              value={question}
+              onChange={e=>setQuestion(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&askQuestion()}
+              placeholder="Ask anything about crypto, DeFi, or this lesson..."
+              style={{flex:1,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:8,padding:"9px 12px",color:"#F9FAFB",fontFamily:"'Oswald',sans-serif",fontSize:12,outline:"none"}}
+            />
+            <button onClick={askQuestion} disabled={!question.trim()||loading} style={{background:question.trim()&&!loading?"linear-gradient(135deg,#D97706,#EF4444)":"rgba(255,255,255,0.05)",border:"none",borderRadius:8,padding:"9px 14px",fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,color:question.trim()&&!loading?"#fff":"#4B5563",cursor:question.trim()&&!loading?"pointer":"default",letterSpacing:1,whiteSpace:"nowrap"}}>
+              {loading ? "..." : "ASK →"}
+            </button>
+          </div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563",letterSpacing:1,marginBottom:answer?10:0}}>
+            Don't abuse Cluck Norris's generosity — it's not very common. 🐔
+          </div>
+        </>
+      ) : (
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#EF4444",letterSpacing:1,marginBottom:answer?10:0}}>
+          Cluck Norris has answered enough questions today. Come back tomorrow and hit the books in the meantime.
+        </div>
+      )}
+
+      {answer && (
+        <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:10,padding:"12px 14px"}}>
+          <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
+            <span style={{fontSize:16,flexShrink:0}}>🐔</span>
+            <p style={{margin:0,fontSize:13,color:"#D1D5DB",lineHeight:1.7,fontFamily:"inherit"}}>{answer}</p>
+          </div>
+          <button onClick={()=>{setAnswer(null);setQuestion("");}} style={{marginTop:8,background:"none",border:"none",color:"#6B7280",fontFamily:"'Oswald',sans-serif",fontSize:9,letterSpacing:1,cursor:"pointer"}}>
+            ASK ANOTHER →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── THE LIBRARY ──
 const LIBRARY_LIQUIDITY = [
   {
@@ -1124,6 +1244,9 @@ function Library() {
           </div>
         </div>
       )}
+
+      {/* ASK CLUCK — available on all library tabs */}
+      <AskCluck context="The Library — DeFi Education" compact={false}/>
 
       {/* RESOURCES TAB */}
       {tab==="resources" && (
@@ -2116,6 +2239,31 @@ function Lesson({lesson:l,onComplete,onBack}){
 }
 
 function Complete({onRestart}){
+  const [wallet, setWallet] = useState("");
+  const [claimed, setClaimed] = useState(false);
+  const [claiming, setClaiming] = useState(false);
+  const [isHolder, setIsHolder] = useState(false);
+  const [holderBalance, setHolderBalance] = useState(0);
+
+  async function claimSpot() {
+    if (!wallet || wallet.length < 32) return;
+    setClaiming(true);
+    try {
+      const res = await fetch("/api/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet, score: 12, total: 12, pct: 100, source: "GRADUATION" })
+      });
+      const data = await res.json();
+      setClaimed(true);
+      setIsHolder(data.isHolder || false);
+      setHolderBalance(data.balance || 0);
+    } catch(e) {
+      setClaimed(true);
+    }
+    setClaiming(false);
+  }
+
   return(
     <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto",textAlign:"center"}}>
       <div style={{position:"relative",display:"inline-block",marginBottom:12}}>
@@ -2125,11 +2273,11 @@ function Complete({onRestart}){
       <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:6,color:"#D97706",marginBottom:6}}>GRADUATED. FEW MAKE IT.</div>
       <h1 style={{fontFamily:"'Oswald',sans-serif",fontSize:34,fontWeight:900,background:"linear-gradient(135deg,#FCD34D,#F97316)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",margin:"0 0 6px"}}>HEADMASTER CERTIFIED</h1>
       <div style={{fontSize:24,margin:"8px 0 16px"}}>🎓📜🏆</div>
-      <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:12,padding:18,marginBottom:24,boxShadow:"0 0 28px rgba(217,119,6,0.2)"}}>
+      <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:12,padding:18,marginBottom:20,boxShadow:"0 0 28px rgba(217,119,6,0.2)"}}>
         <p style={{fontFamily:"Georgia,serif",fontStyle:"italic",color:"#FCD34D",fontSize:16,margin:"0 0 10px",lineHeight:1.5}}>"You graduated from the Hard Knocks. Most dropped out. The blockchain remembers those who stayed."</p>
         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D97706",letterSpacing:2}}> -  PROFESSOR NORRIS</div>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:24}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:20}}>
         {[["12","CLASSES"],["72","EXAMS"],["0","EXTRA CREDIT"]].map(([n,lb])=>(
           <div key={lb} style={{background:"rgba(255,255,255,0.04)",borderRadius:10,padding:"10px 6px",border:"1px solid rgba(255,255,255,0.07)"}}>
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:22,color:"#FCD34D"}}>{n}</div>
@@ -2137,10 +2285,54 @@ function Complete({onRestart}){
           </div>
         ))}
       </div>
-      <div style={{background:"rgba(217,119,6,0.08)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:10,padding:12,marginBottom:20}}>
-        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:2,color:"#D97706",marginBottom:4}}>JOIN THE ECOSYSTEM</div>
-        <p style={{margin:0,fontSize:12,color:"#9CA3AF"}}>Trade CLKN on Bags.fm • Powered by Solana</p>
+
+      {/* Wallet claim section */}
+      <div style={{background:"rgba(212,175,55,0.08)",border:"1px solid rgba(212,175,55,0.3)",borderRadius:12,padding:18,marginBottom:16,textAlign:"left"}}>
+        <div style={{textAlign:"center",marginBottom:12}}>
+          <div style={{fontSize:28,marginBottom:6}}>🏆</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#D4AF37",letterSpacing:2,marginBottom:4}}>YOU EARNED YOUR SPOT IN THE FLOCK</div>
+          <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",margin:0,lineHeight:1.6}}>
+            Completing all 12 lessons is no small feat. Submit your Solana wallet to be considered for future CLKN airdrops and exclusive giveaways.
+          </p>
+        </div>
+        {!claimed ? (
+          <>
+            <input
+              value={wallet}
+              onChange={e=>setWallet(e.target.value)}
+              placeholder="Your Solana wallet address..."
+              style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(212,175,55,0.3)",borderRadius:8,padding:"10px 12px",color:"#F9FAFB",fontFamily:"monospace",fontSize:11,marginBottom:10,boxSizing:"border-box",outline:"none"}}
+            />
+            <button onClick={claimSpot} disabled={!wallet||wallet.length<32||claiming} style={{width:"100%",background:wallet&&wallet.length>=32?"linear-gradient(135deg,#D4AF37,#F59E0B)":"rgba(255,255,255,0.05)",border:"none",borderRadius:8,padding:"12px",fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:wallet&&wallet.length>=32?"#111":"#4B5563",letterSpacing:2,cursor:wallet&&wallet.length>=32?"pointer":"default"}}>
+              {claiming ? "SUBMITTING..." : "🏆 CLAIM YOUR SPOT"}
+            </button>
+          </>
+        ) : (
+          <div style={{textAlign:"center",padding:"8px 0"}}>
+            {isHolder ? (
+              <div>
+                <div style={{fontSize:36,marginBottom:8}}>🐔🔥</div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:900,color:"#D4AF37",letterSpacing:2,marginBottom:6}}>YOU'RE ALREADY IN THE FLOCK!</div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#FCD34D",marginBottom:8}}>HOLDING {parseInt(holderBalance).toLocaleString()} CLKN</div>
+                <p style={{fontSize:12,color:"#9CA3AF",lineHeight:1.7,margin:0}}>Cluck Norris sees you. You finished the whole curriculum AND you hold CLKN. The flock appreciates you. 🙏</p>
+              </div>
+            ) : (
+              <div>
+                <div style={{fontSize:28,marginBottom:6}}>✅</div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#10B981",letterSpacing:2,marginBottom:6}}>WALLET SUBMITTED — YOU'RE IN THE FLOCK</div>
+                <p style={{fontSize:11,color:"#6B7280",lineHeight:1.7,margin:0}}>
+                  You finished the Hard Knocks but don't hold CLKN yet. Pick some up and become a full member of the flock. 🐔
+                </p>
+                <div style={{display:"flex",gap:8,marginTop:10,justifyContent:"center"}}>
+                  <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{background:"rgba(217,119,6,0.15)",border:"1px solid rgba(217,119,6,0.4)",borderRadius:8,padding:"6px 12px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D97706",letterSpacing:1}}>🔥 BAGS.FM</a>
+                  <a href={JUPITER_TRADE_LINK} target="_blank" rel="noreferrer" style={{background:"rgba(74,222,128,0.1)",border:"1px solid rgba(74,222,128,0.3)",borderRadius:8,padding:"6px 12px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#4ADE80",letterSpacing:1}}>⚡ JUPITER</a>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
       <div style={{display:"flex",gap:10,marginBottom:16}}>
         <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{flex:1,background:"linear-gradient(135deg,#D97706,#EF4444)",borderRadius:10,padding:"13px",fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#fff",letterSpacing:2,textDecoration:"none",textAlign:"center",boxShadow:"0 0 20px rgba(217,119,6,0.4)"}}>
           🔥 TRADE CLKN
