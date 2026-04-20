@@ -311,9 +311,11 @@ app.post("/api/verify-clkn-payment", async (req, res) => {
         const tokenChanges = acct.tokenBalanceChanges || [];
         for (const change of tokenChanges) {
           if (change.mint !== CLKN_MINT_ADDR) continue;
-          const amount = parseFloat(parseFloat(change.rawTokenAmount?.uiAmount || change.rawTokenAmount?.tokenAmount || 0).toFixed(1));
+          const rawAmount = parseInt(change.rawTokenAmount?.tokenAmount || 0);
+          const decimals = change.rawTokenAmount?.decimals || 9;
+          const amount = parseFloat((Math.abs(rawAmount) / Math.pow(10, decimals)).toFixed(1));
           console.log(`🔍 CLKN change on ${acct.account?.slice(0,8)}: ${amount} userAccount:${change.userAccount?.slice(0,8)}`);
-          const isOurs = acct.account === CLKN_RECEIVE_WALLET || change.userAccount === CLKN_RECEIVE_WALLET;
+          const isOurs = change.userAccount === CLKN_RECEIVE_WALLET;
           if (isOurs && amount > 0 && Math.abs(amount - expectedAmount) <= tolerance) {
             console.log(`✅ Verified! ${amount} CLKN received`);
             return res.status(200).json({ success: true, questionsGranted: UNLOCK_QUESTIONS, amountReceived: amount, signature: tx.signature });
