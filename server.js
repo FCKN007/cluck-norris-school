@@ -275,6 +275,111 @@ app.get("/api/claims", async (req, res) => {
   }
 });
 
+// ── CLKN Token Unlock Verification ──
+const CLKN_RECEIVE_WALLET = "GHudCBikdjcaZNXfZxH4XK2FcWBP6JyVgnoVMCRLNDoa";
+const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
+
+const UNLOCK_TIERS = {
+  1000: 10,    // 1,000 CLKN → 10 questions
+  5000: 50,    // 5,000 CLKN → 50 questions
+  10000: 999,  // 10,000 CLKN → unlimited (999)
+};
+
+app.post("/api/verify-unlock", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  const { memoCode } = req.body;
+  if (!memoCode) return res.status(400).json({ success: false, error: "No memo code provided" });
+
+  const HELIUS_KEY = process.env.HELIUS_API_KEY;
+  try {
+    // Search recent transactions to our wallet for the memo code
+    const url = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
+
+    // Get recent token transfers to our wallet
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: "unlock-check",
+        method: "getSignaturesForAddress",
+        params: [CLKN_RECEIVE_WALLET, { limit: 50 }]
+      })
+    });
+    const data = await response.json();
+    const signatures = data?.result || [];
+
+    // Check each transaction for our memo code
+    for (const sig of signatures) {
+      const txRes = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: "tx-detail",
+          method: "getTransaction",
+          params: [sig.signature, { encoding: "jsonParsed", maxSupportedTransactionVersion: 0 }]
+        })
+      });
+      const txData = await txRes.json();
+      const tx = txData?.result;
+      if (!tx) continue;
+
+      // Check memo in transaction
+      const instructions = tx?.transaction?.message?.instructions || [];
+      const memoInstruction = instructions.find(ix =>
+        ix.program === "spl-memo" || ix.programId === "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+      );
+
+      if (memoInstruction && memoInstruction.parsed === memoCode) {
+        // Found the memo — now check the amount
+        const preBalances = tx?.meta?.preTokenBalances || [];
+        const postBalances = tx?.meta?.postTokenBalances || [];
+
+        // Find CLKN transfer to our wallet
+        const preBalance = preBalances.find(b =>
+          b.mint === CLKN_MINT &&
+          tx?.transaction?.message?.accountKeys?.[b.accountIndex]?.pubkey === CLKN_RECEIVE_WALLET
+        );
+        const postBalance = postBalances.find(b =>
+          b.mint === CLKN_MINT &&
+          tx?.transaction?.message?.accountKeys?.[b.accountIndex]?.pubkey === CLKN_RECEIVE_WALLET
+        );
+
+        if (postBalance) {
+          const preAmount = preBalance?.uiTokenAmount?.uiAmount || 0;
+          const postAmount = postBalance?.uiTokenAmount?.uiAmount || 0;
+          const received = postAmount - preAmount;
+
+          console.log(`🪙 Unlock check: memo=${memoCode}, received=${received} CLKN`);
+
+          // Find matching tier
+          let questionsGranted = 0;
+          if (received >= 10000) questionsGranted = 999;
+          else if (received >= 5000) questionsGranted = 50;
+          else if (received >= 1000) questionsGranted = 10;
+
+          if (questionsGranted > 0) {
+            return res.status(200).json({
+              success: true,
+              questionsGranted,
+              received: Math.floor(received),
+              unlimited: questionsGranted === 999
+            });
+          } else {
+            return res.status(200).json({ success: false, error: `Insufficient CLKN. Received ${Math.floor(received)}, minimum 1,000 required.` });
+          }
+        }
+      }
+    }
+
+    return res.status(200).json({ success: false, error: "Transaction not found yet. Please wait a moment and try again." });
+  } catch(err) {
+    console.error("Unlock verify error:", err.message);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ── Ask Cluck Norris (Claude AI) ──
 app.post("/api/ask-cluck", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -321,7 +426,8 @@ The student is currently studying: ${context}` : ''}`;
 
     const data = await response.json();
     if (data.content && data.content[0]) {
-      const answer = data.content[0].text;
+      const raw = data.content[0].text;
+      const answer = raw.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1").replace(/#{1,3}\s/g, "").trim();
       console.log(`🤖 Ask Cluck: "${question.slice(0,50)}..." → ${answer.length} chars`);
       return res.status(200).json({ success: true, answer });
     }
