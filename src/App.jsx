@@ -2143,12 +2143,13 @@ function Lesson({lesson:l,onComplete,onBack}){
   const [answers,setAnswers]=useState([]);
   const [finalScore,setFinalScore]=useState(0);
   const [showExp,setShowExp]=useState(false);
-  const q=l.questions[qi];
+  const shuffledQuestions = useMemo(() => l.questions.map(shuffleOptions), [l.id]);
+  const q=shuffledQuestions[qi];
   function pick(i){if(sel!==null)return;setSel(i);setShowExp(true);}
   function next(){
     const a=[...answers,sel===q.correct];
     setAnswers(a);
-    if(qi+1<l.questions.length){setQi(qi+1);setSel(null);setShowExp(false);}
+    if(qi+1<shuffledQuestions.length){setQi(qi+1);setSel(null);setShowExp(false);}
     else{setFinalScore(a.filter(Boolean).length);setPhase("result");}
   }
   function retry(){setPhase("intro");setQi(0);setSel(null);setAnswers([]);setFinalScore(0);setShowExp(false);}
@@ -2181,7 +2182,7 @@ function Lesson({lesson:l,onComplete,onBack}){
     </div>
   );
 
-  const shuffledQuestions = useMemo(() => l.questions.map(shuffleOptions), [l.id]);
+  const shuffledQuestions2 = shuffledQuestions;
   if(phase==="quiz") return(
     <div style={{padding:"0 16px 40px",maxWidth:520,margin:"0 auto"}}>
       <div style={{marginBottom:20}}>
