@@ -962,7 +962,7 @@ function AskCluck({ context, compact }) {
               {loading ? "..." : "ASK →"}
             </button>
           </div>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563",letterSpacing:1,marginBottom:answer?10:0}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",letterSpacing:1,marginBottom:answer?10:0}}>
             Don't abuse Cluck Norris's generosity — it's not very common. 🐔
           </div>
         </>
