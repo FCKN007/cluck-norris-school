@@ -1049,7 +1049,7 @@ function AskCluck({ context, compact }) {
     setLoading(false);
   }
 
-  if (compact && !expanded) return (
+  if (compact && !expanded && questionsLeft > 0) return (
     <button onClick={()=>setExpanded(true)} style={{
       display:"flex",alignItems:"center",gap:8,background:"rgba(217,119,6,0.1)",
       border:"1px solid rgba(217,119,6,0.3)",borderRadius:10,padding:"10px 14px",
@@ -1096,7 +1096,7 @@ function AskCluck({ context, compact }) {
           </div>
         </>
       ) : (
-        <CluckUnlock onUnlock={(q)=>{setQuestionsLeft(q);}} />
+        <CluckUnlock onUnlock={(q)=>{setQuestionsLeft(prev => prev + q);}} />
       )}
 
       {answer && (
