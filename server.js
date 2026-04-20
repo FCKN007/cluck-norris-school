@@ -291,79 +291,39 @@ app.post("/api/verify-clkn-payment", async (req, res) => {
   const tolerance = 0.15;
 
   try {
-    const rpcUrl = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
+    // Use Helius enhanced transactions — shows balance changes per wallet cleanly
+    const url = `https://api.helius.xyz/v0/addresses/${CLKN_RECEIVE_WALLET}/transactions?api-key=${HELIUS_KEY}&limit=10`;
+    console.log(`🔍 Checking balance changes for ${CLKN_RECEIVE_WALLET.slice(0,8)}... expected:${expectedAmount}`);
+    const response = await fetch(url);
+    const txs = await response.json();
 
-    // Step 1: Find the CLKN token account owned by our wallet
-    console.log(`🔍 Looking up token account for wallet: ${CLKN_RECEIVE_WALLET}`);
-    const tokenAcctRes = await fetch(rpcUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0", id: "get-token-acct",
-        method: "getTokenAccountsByOwner",
-        params: [CLKN_RECEIVE_WALLET, { mint: CLKN_MINT_ADDR }, { encoding: "jsonParsed" }]
-      })
-    });
-    const tokenAcctData = await tokenAcctRes.json();
-    const tokenAccounts = tokenAcctData?.result?.value || [];
-    if (!tokenAccounts.length) {
-      return res.status(200).json({ success: false, error: "No CLKN token account found for receive wallet" });
+    if (!Array.isArray(txs)) {
+      console.error("❌ Bad response:", JSON.stringify(txs).slice(0,200));
+      return res.status(500).json({ success: false, error: "Could not fetch transactions" });
     }
-    const tokenAccount = tokenAccounts[0].pubkey;
-    console.log(`🔍 CLKN token account: ${tokenAccount} expected:${expectedAmount}`);
 
-    // Step 2: Get recent signatures for the token account (newest first)
-    const sigsRes = await fetch(rpcUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0", id: "get-sigs",
-        method: "getSignaturesForAddress",
-        params: [tokenAccount, { limit: 20 }]
-      })
-    });
-    const sigsData = await sigsRes.json();
-    const signatures = sigsData?.result || [];
-    console.log(`🔍 Got ${signatures.length} recent token account transactions`);
+    console.log(`🔍 Got ${txs.length} transactions`);
 
-    // Step 3: Check each tx for exact incoming amount
-    for (const sig of signatures) {
-      const txRes = await fetch(rpcUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jsonrpc: "2.0", id: "get-tx",
-          method: "getTransaction",
-          params: [sig.signature, { encoding: "jsonParsed", maxSupportedTransactionVersion: 0 }]
-        })
-      });
-      const txData = await txRes.json();
-      const tx = txData?.result;
-      if (!tx) continue;
-
-      const preBalances = tx?.meta?.preTokenBalances || [];
-      const postBalances = tx?.meta?.postTokenBalances || [];
-
-      const pre = preBalances.find(b => b.mint === CLKN_MINT_ADDR && b.owner === CLKN_RECEIVE_WALLET);
-      const post = postBalances.find(b => b.mint === CLKN_MINT_ADDR && b.owner === CLKN_RECEIVE_WALLET);
-
-      if (!post) continue;
-
-      const preAmt = pre?.uiTokenAmount?.uiAmount || 0;
-      const postAmt = post?.uiTokenAmount?.uiAmount || 0;
-      const diff = parseFloat((postAmt - preAmt).toFixed(1));
-
-      console.log(`🔍 TX ${sig.signature.slice(0,8)} diff:${diff} expected:${expectedAmount}`);
-
-      // Only match POSITIVE diff (incoming) matching expected amount
-      if (diff > 0 && Math.abs(diff - expectedAmount) <= tolerance) {
-        console.log(`✅ Payment verified! Amount:${diff} CLKN`);
-        return res.status(200).json({
-          success: true,
-          questionsGranted: UNLOCK_QUESTIONS,
-          amountReceived: diff,
-          signature: sig.signature
-        });
+    for (const tx of txs) {
+      // Look through accountData for our wallet's token balance changes
+      const accountData = tx.accountData || [];
+      for (const acct of accountData) {
+        if (acct.account !== CLKN_RECEIVE_WALLET) continue;
+        const tokenChanges = acct.tokenBalanceChanges || [];
+        for (const change of tokenChanges) {
+          if (change.mint !== CLKN_MINT_ADDR) continue;
+          const amount = parseFloat(parseFloat(change.rawTokenAmount?.uiAmount || 0).toFixed(1));
+          console.log(`🔍 TX ${tx.signature?.slice(0,8)} CLKN change: ${amount}`);
+          if (amount > 0 && Math.abs(amount - expectedAmount) <= tolerance) {
+            console.log(`✅ Verified! ${amount} CLKN received`);
+            return res.status(200).json({
+              success: true,
+              questionsGranted: UNLOCK_QUESTIONS,
+              amountReceived: amount,
+              signature: tx.signature
+            });
+          }
+        }
       }
     }
 
