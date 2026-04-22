@@ -2776,10 +2776,28 @@ The people depositing tokens into pools are called Liquidity Providers — LPs. 
         explanation: "In DeFi, anyone can be a liquidity provider. You deposit two tokens into a pool, earn a share of every trading fee generated, and can withdraw at any time. This is one of the most powerful concepts in all of DeFi."
       },
       {
-        q: "A pool has $500,000 in TVL. Another pool for a different token has $5,000 in TVL. Which pool will give you better trade execution?",
+        q: "A pool has $500,000 in TVL. Another pool has $5,000 in TVL. Which gives better trade execution?",
         options: ["The $5,000 pool — less competition", "The $500,000 pool — more liquidity means less price impact", "They are identical — DEXs normalize prices", "Depends on the token price"],
         correct: 1,
-        explanation: "More liquidity always means less price impact for the same trade size. The $500,000 pool has 100x more depth so the same $100 trade moves the price 100x less. Always trade in the deepest pool available."
+        explanation: "More liquidity always means less price impact for the same trade size. The $500,000 pool has 100x more depth so the same trade moves the price 100x less. Always trade in the deepest pool available."
+      },
+      {
+        q: "What is TVL?",
+        options: ["Total Volume Locked — the amount traded in 24 hours", "Total Value Locked — the combined dollar value of tokens in a pool", "Token Volatility Level — a measure of price swings", "Trade Validation Limit — maximum trade size allowed"],
+        correct: 1,
+        explanation: "TVL stands for Total Value Locked. It represents the combined dollar value of all tokens currently sitting in a liquidity pool. Higher TVL generally means deeper liquidity and less slippage for traders."
+      },
+      {
+        q: "You set your slippage tolerance to 25% before a trade. What risk does this create?",
+        options: ["Your transaction will fail", "MEV bots can sandwich your trade and extract value from your high tolerance", "The DEX will reject the trade", "Nothing — higher tolerance is always better"],
+        correct: 1,
+        explanation: "High slippage tolerance is an invitation for sandwich attacks. MEV bots see your pending transaction, buy ahead of you to push the price up, let your trade execute at the worse price you accepted, then sell immediately after. Set slippage as low as practically possible."
+      },
+      {
+        q: "Which of these is a protocol-specific feature rather than a universal DeFi liquidity concept?",
+        options: ["Impermanent loss", "Price impact", "Slippage", "Orca Whirlpools tick spacing"],
+        correct: 3,
+        explanation: "Impermanent loss, price impact, and slippage are universal concepts that apply to every AMM on every chain. Orca Whirlpools tick spacing is a specific implementation detail of Orca's concentrated liquidity system. Understanding the universal concepts first lets you navigate any protocol."
       }
     ],
     cluckVerdict: "Liquidity is the foundation. Every single lesson in this lab builds on what you just learned. If you skipped something, go back. The LP Lab has no shortcuts and no sympathy for lazy students."
@@ -2869,9 +2887,12 @@ function LPLessonView({ lesson, onBack, onComplete }) {
         </div>
       )}
       {showExp && (
-        <button onClick={nextQuestion} style={{width:"100%",background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:10,padding:"13px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#fff",letterSpacing:2,cursor:"pointer"}}>
-          {qi+1<shuffledQuestions.length?"NEXT QUESTION →":"SEE RESULTS →"}
-        </button>
+        <>
+          <AskCluck context={`LP Lab Lesson ${lesson.id}: ${lesson.title}`} compact={true}/>
+          <button onClick={nextQuestion} style={{width:"100%",background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:10,padding:"13px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#fff",letterSpacing:2,cursor:"pointer",marginTop:8}}>
+            {qi+1<shuffledQuestions.length?"NEXT QUESTION →":"SEE RESULTS →"}
+          </button>
+        </>
       )}
     </div>
   );
@@ -3005,16 +3026,30 @@ function LPLessonView({ lesson, onBack, onComplete }) {
         <p style={{margin:0,fontFamily:"Georgia,serif",fontStyle:"italic",color:"#FCD34D",fontSize:13,lineHeight:1.7}}>{lesson.cluckVerdict}</p>
       </div>
 
-      <button onClick={()=>{setPhase("quiz");setQi(0);setSel(null);setAnswers([]);setShowExp(false);}} style={{width:"100%",background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#fff",letterSpacing:3,cursor:"pointer"}}>
+      <AskCluck context={`LP Lab Lesson ${lesson.id}: ${lesson.title}`} compact={true}/>
+      <button onClick={()=>{setPhase("quiz");setQi(0);setSel(null);setAnswers([]);setShowExp(false);}} style={{width:"100%",background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#fff",letterSpacing:3,cursor:"pointer",marginTop:12}}>
         ✅ TAKE THE QUIZ →
       </button>
     </div>
   );
 }
 
+const LP_LAB_KEY = "lplab_completed";
+
+function getLPCompleted() {
+  try {
+    const stored = localStorage.getItem(LP_LAB_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch(e) { return []; }
+}
+
+function saveLPCompleted(arr) {
+  try { localStorage.setItem(LP_LAB_KEY, JSON.stringify(arr)); } catch(e) {}
+}
+
 function LPLab() {
   const [selectedLesson, setSelectedLesson] = useState(null);
-  const [completed, setCompleted] = useState([]);
+  const [completed, setCompleted] = useState(() => getLPCompleted());
 
   if (selectedLesson !== null) {
     return (
@@ -3022,7 +3057,9 @@ function LPLab() {
         lesson={LP_LESSONS[selectedLesson]}
         onBack={()=>setSelectedLesson(null)}
         onComplete={()=>{
-          setCompleted(prev=>[...new Set([...prev, selectedLesson])]);
+          const updated = [...new Set([...completed, selectedLesson])];
+          setCompleted(updated);
+          saveLPCompleted(updated);
           setSelectedLesson(null);
         }}
       />
