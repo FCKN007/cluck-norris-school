@@ -2652,6 +2652,9 @@ export default function App(){
             <button onClick={()=>setScreen(screen==="flock"?"landing":"flock")} style={{flex:1,background:screen==="flock"?"rgba(217,119,6,0.25)":"rgba(217,119,6,0.06)",border:`1px solid ${screen==="flock"?"rgba(252,211,77,0.6)":"rgba(252,211,77,0.2)"}`,borderRadius:7,padding:"7px 0",fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:"#FCD34D",letterSpacing:1,cursor:"pointer"}}>
               🎙️ FLOCK TALK
             </button>
+            <button onClick={()=>setScreen(screen==="lplab"?"landing":"lplab")} style={{flex:1,background:screen==="lplab"?"rgba(16,185,129,0.25)":"rgba(16,185,129,0.06)",border:`1px solid ${screen==="lplab"?"rgba(16,185,129,0.6)":"rgba(16,185,129,0.2)"}`,borderRadius:7,padding:"7px 0",fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:"#10B981",letterSpacing:1,cursor:"pointer"}}>
+              ⚗️ LP LAB
+            </button>
           </div>
         </div>
       </div>
@@ -2662,10 +2665,428 @@ export default function App(){
         {screen==="clkn"&&<CLKNWidget/>}
         {screen==="bags"&&<BagsPage/>}
         {screen==="flock"&&<FlockTalk/>}
+        {screen==="lplab"&&<LPLab/>}
         {screen==="library"&&<Library/>}
         {screen==="select"&&<Select onSelect={id=>{setLessonId(id);setScreen("lesson");}} completed={completed}/>}
         {screen==="lesson"&&lesson&&<Lesson lesson={lesson} onComplete={finish} onBack={()=>setScreen("select")}/>}
         {screen==="complete"&&<Complete onRestart={()=>{setCompleted([]);setScreen("landing");}}/>}
+      </div>
+    </div>
+  );
+}
+
+// ── LP LAB ──
+const LP_LESSONS = [
+  {
+    id: 1,
+    title: "What Is Liquidity?",
+    icon: "💧",
+    tagline: "The foundation. Everything else builds on this.",
+    cluckHook: "Before you touch a single LP position, you need to understand what liquidity actually is. Most people skip this. Those people get wrecked. Sit down.",
+    sections: [
+      {
+        heading: "The Basic Concept",
+        body: `Liquidity is simply how easily an asset can be bought or sold without dramatically changing its price.
+
+Think of it like water. A deep ocean — you can throw a rock in and barely see a ripple. A shallow puddle — that same rock creates waves that hit every edge.
+
+In crypto, the "water" is the money sitting in a trading pool. More water = more liquidity = less price impact when you trade.
+
+HIGH LIQUIDITY POOL:
+• Large trades execute near the quoted price
+• Tight bid/ask spread
+• Price is stable under normal trading volume
+
+LOW LIQUIDITY POOL:
+• Even small trades move the price significantly
+• Wide spread
+• Vulnerable to price manipulation`
+      },
+      {
+        heading: "Why Liquidity Matters To YOU",
+        body: `Every time you swap a token you are interacting with a liquidity pool. The depth of that pool determines how good or bad your execution price is.
+
+This is called SLIPPAGE — the difference between the price you expected and the price you actually got.
+
+EXAMPLE:
+You want to buy $100 worth of a token.
+• Deep pool ($500K TVL) → You lose only $1.50 to slippage. You keep 98.5% of your value.
+• Shallow pool ($10K TVL) → You lose $9 to slippage. You keep only 91% of your value.
+
+That gap is money leaving your wallet. Permanently. Before the market even moves.
+
+Hard Knocks Rule: ALWAYS check the pool liquidity before you buy. If you cannot find the pool depth, do not trade it.`
+      },
+      {
+        heading: "Where Does Liquidity Come From?",
+        body: `In traditional finance, large institutions called market makers provide liquidity. They sit on both sides of the order book and pocket the spread.
+
+In DeFi, YOU can be the market maker. Anyone can deposit tokens into a liquidity pool and earn fees from every trade that passes through it.
+
+This is the fundamental promise of DeFi liquidity:
+• Traders get access to markets 24/7
+• Liquidity providers earn passive income from trading fees
+• No middleman takes the spread
+
+The people depositing tokens into pools are called Liquidity Providers — LPs. Every lesson in this lab is building toward making you a smarter one.`
+      },
+      {
+        heading: "Liquidity Across Protocols",
+        body: `The same concept exists on every DEX in crypto. The implementation differs but the fundamentals are identical. Master the concept on one protocol and you can walk into any of them.`,
+        table: {
+          headers: ["Protocol", "Chain", "Type", "Known For"],
+          rows: [
+            ["Raydium", "Solana", "AMM + CLMM", "Highest Solana volume"],
+            ["Orca", "Solana", "Whirlpools", "Concentrated LP, clean UI"],
+            ["Meteora", "Solana", "DAMM + DLMM", "Dynamic fees, CLKN lives here"],
+            ["Uniswap", "Ethereum", "v2 + v3", "The original DEX"],
+            ["Curve", "Multi-chain", "StableSwap", "Stablecoin specialist"],
+          ]
+        }
+      },
+      {
+        heading: "Common Mistakes",
+        body: `These are the mistakes that cost people real money. Learn them here instead of the hard way.
+
+❌ Trading illiquid tokens without checking pool depth first
+❌ Setting slippage tolerance too high — bots will sandwich your transaction
+❌ Setting slippage tolerance too low — your transactions will fail constantly
+❌ Confusing token market cap with liquidity depth — they are not the same thing
+❌ Assuming a token with a high price has deep liquidity — price and depth are independent
+❌ Buying into a pool right after a large buy moved the price — you are the exit liquidity`
+      }
+    ],
+    quiz: [
+      {
+        q: "What is slippage?",
+        options: ["The fee paid to the DEX", "The difference between expected price and actual execution price", "The time it takes for a transaction to confirm", "The spread between buy and sell price"],
+        correct: 1,
+        explanation: "Slippage is the difference between the price you saw when you submitted a trade and the price you actually got when it executed. It's caused by low liquidity and other trades happening at the same time."
+      },
+      {
+        q: "What happens when you make a large trade in a pool with very low liquidity?",
+        options: ["The trade fails automatically", "Your trade moves the price significantly — you pay more than expected", "You get a better price because there's less competition", "Nothing — DEXs guarantee fixed prices"],
+        correct: 1,
+        explanation: "Low liquidity means your trade represents a large portion of the pool. The AMM formula pushes the price against you with every token you take out. This is called price impact — and it comes directly out of your pocket."
+      },
+      {
+        q: "Who provides liquidity in DeFi pools?",
+        options: ["Only the token creators", "Centralized exchanges", "Anyone — regular users who deposit their tokens and earn fees", "Only large institutions and market makers"],
+        correct: 2,
+        explanation: "In DeFi, anyone can be a liquidity provider. You deposit two tokens into a pool, earn a share of every trading fee generated, and can withdraw at any time. This is one of the most powerful concepts in all of DeFi."
+      },
+      {
+        q: "A pool has $500,000 in TVL. Another pool for a different token has $5,000 in TVL. Which pool will give you better trade execution?",
+        options: ["The $5,000 pool — less competition", "The $500,000 pool — more liquidity means less price impact", "They are identical — DEXs normalize prices", "Depends on the token price"],
+        correct: 1,
+        explanation: "More liquidity always means less price impact for the same trade size. The $500,000 pool has 100x more depth so the same $100 trade moves the price 100x less. Always trade in the deepest pool available."
+      }
+    ],
+    cluckVerdict: "Liquidity is the foundation. Every single lesson in this lab builds on what you just learned. If you skipped something, go back. The LP Lab has no shortcuts and no sympathy for lazy students."
+  }
+];
+
+function LPLessonView({ lesson, onBack, onComplete }) {
+  const [phase, setPhase] = useState("content"); // content | quiz | result
+  const [openSection, setOpenSection] = useState(0);
+  const [qi, setQi] = useState(0);
+  const [sel, setSel] = useState(null);
+  const [showExp, setShowExp] = useState(false);
+  const [answers, setAnswers] = useState([]);
+  const [score, setScore] = useState(0);
+  const [tradeSize, setTradeSize] = useState(500);
+
+  const shuffledQuestions = useMemo(() => lesson.quiz.map(q => {
+    const opts = [...q.options];
+    const correctText = opts[q.correct];
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    return { ...q, options: opts, correct: opts.indexOf(correctText) };
+  }), [lesson.id]);
+
+  const q = shuffledQuestions[qi];
+
+  // Price impact calculator
+  const shallowPool = 10000;
+  const deepPool = 500000;
+  const calcImpact = (poolSize, trade) => {
+    const k = poolSize * poolSize;
+    const newPool = poolSize + trade;
+    const out = poolSize - k / newPool;
+    const impact = ((trade - out) / trade) * 100;
+    return Math.max(0, impact).toFixed(2);
+  };
+  const shallowImpact = calcImpact(shallowPool, tradeSize);
+  const deepImpact = calcImpact(deepPool, tradeSize);
+
+  function pickAnswer(i) {
+    if (sel !== null) return;
+    setSel(i);
+    setShowExp(true);
+  }
+
+  function nextQuestion() {
+    const a = [...answers, sel === q.correct];
+    setAnswers(a);
+    if (qi + 1 < shuffledQuestions.length) {
+      setQi(qi + 1); setSel(null); setShowExp(false);
+    } else {
+      setScore(a.filter(Boolean).length);
+      setPhase("result");
+    }
+  }
+
+  if (phase === "quiz") return (
+    <div style={{padding:"0 16px 40px",maxWidth:540,margin:"0 auto"}}>
+      <button onClick={()=>setPhase("content")} style={{background:"none",border:"none",color:"#6B7280",fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:2,cursor:"pointer",marginBottom:16}}>← BACK TO LESSON</button>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#10B981",letterSpacing:2,marginBottom:4}}>⚗️ LP LAB — LESSON {lesson.id} QUIZ</div>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:1,marginBottom:16}}>QUESTION {qi+1} OF {shuffledQuestions.length}</div>
+      <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:12,padding:"14px 16px",marginBottom:16}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:15,color:"#F9FAFB",lineHeight:1.5}}>{q.q}</div>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:12}}>
+        {q.options.map((opt,i)=>{
+          let bg = "rgba(255,255,255,0.04)";
+          let border = "rgba(255,255,255,0.1)";
+          let color = "#D1D5DB";
+          if (sel !== null) {
+            if (i === q.correct) { bg="rgba(16,185,129,0.15)"; border="#10B981"; color="#10B981"; }
+            else if (i === sel) { bg="rgba(239,68,68,0.15)"; border="#EF4444"; color="#EF4444"; }
+          }
+          return (
+            <button key={i} onClick={()=>pickAnswer(i)} style={{background:bg,border:`1px solid ${border}`,borderRadius:10,padding:"12px 14px",textAlign:"left",fontFamily:"'Oswald',sans-serif",fontSize:13,color,cursor:sel===null?"pointer":"default",letterSpacing:0.5}}>
+              <span style={{color:"#6B7280",marginRight:8}}>{String.fromCharCode(65+i)}.</span>{opt}
+            </button>
+          );
+        })}
+      </div>
+      {showExp && (
+        <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:10,padding:14,marginBottom:12}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:sel===q.correct?"#10B981":"#EF4444",letterSpacing:1,marginBottom:6}}>{sel===q.correct?"✓ CORRECT":"✗ NOT QUITE"} — CLUCK EXPLAINS:</div>
+          <p style={{margin:0,fontSize:13,color:"#D1D5DB",lineHeight:1.7}}>{q.explanation}</p>
+        </div>
+      )}
+      {showExp && (
+        <button onClick={nextQuestion} style={{width:"100%",background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:10,padding:"13px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#fff",letterSpacing:2,cursor:"pointer"}}>
+          {qi+1<shuffledQuestions.length?"NEXT QUESTION →":"SEE RESULTS →"}
+        </button>
+      )}
+    </div>
+  );
+
+  if (phase === "result") return (
+    <div style={{padding:"0 16px 40px",maxWidth:540,margin:"0 auto",textAlign:"center"}}>
+      <div style={{fontSize:48,marginBottom:12}}>{score===shuffledQuestions.length?"🏆":score>=3?"✅":"📚"}</div>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:20,fontWeight:900,color:"#10B981",letterSpacing:2,marginBottom:8}}>
+        {score}/{shuffledQuestions.length} CORRECT
+      </div>
+      <div style={{background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:12,padding:16,marginBottom:16}}>
+        <p style={{fontFamily:"Georgia,serif",fontStyle:"italic",color:"#FCD34D",fontSize:14,margin:"0 0 8px",lineHeight:1.6}}>
+          {score===shuffledQuestions.length
+            ? '"Perfect score. You actually read it. Rare in this schoolyard. Move on to the next lesson."'
+            : score>=3
+            ? '"Decent. You understand the basics. But decent doesn\'t survive this market. Review what you missed."'
+            : '"You need to go back. Read every section again. The market doesn\'t grade on a curve."'}
+        </p>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#D97706",letterSpacing:2}}>— CLUCK NORRIS</div>
+      </div>
+      <div style={{display:"flex",gap:10}}>
+        <button onClick={()=>{setPhase("content");setQi(0);setSel(null);setAnswers([]);setShowExp(false);}} style={{flex:1,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"12px",fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#D1D5DB",cursor:"pointer",letterSpacing:1}}>
+          📖 REVIEW LESSON
+        </button>
+        <button onClick={onComplete} style={{flex:1,background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:10,padding:"12px",fontFamily:"'Oswald',sans-serif",fontSize:12,fontWeight:700,color:"#fff",letterSpacing:1,cursor:"pointer"}}>
+          NEXT LESSON →
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{padding:"0 16px 40px",maxWidth:540,margin:"0 auto"}}>
+      <button onClick={onBack} style={{background:"none",border:"none",color:"#6B7280",fontFamily:"'Oswald',sans-serif",fontSize:10,letterSpacing:2,cursor:"pointer",marginBottom:16}}>← BACK TO LP LAB</button>
+
+      {/* Header */}
+      <div style={{textAlign:"center",marginBottom:20}}>
+        <div style={{fontSize:40,marginBottom:6}}>{lesson.icon}</div>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#10B981",letterSpacing:3,marginBottom:4}}>⚗️ LP LAB — LESSON {lesson.id}</div>
+        <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:26,fontWeight:900,color:"#F9FAFB",margin:"0 0 6px",letterSpacing:2}}>{lesson.title}</h2>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#6B7280",letterSpacing:2}}>{lesson.tagline}</div>
+      </div>
+
+      {/* Cluck hook */}
+      <div style={{background:"rgba(217,119,6,0.08)",border:"1px solid rgba(217,119,6,0.25)",borderRadius:12,padding:"14px 16px",marginBottom:20,display:"flex",gap:12,alignItems:"flex-start"}}>
+        <img src={LOGO_B64} alt="CN" style={{width:36,height:36,borderRadius:"50%",objectFit:"cover",border:"2px solid #D97706",flexShrink:0}}/>
+        <p style={{margin:0,fontFamily:"Georgia,serif",fontStyle:"italic",color:"#FCD34D",fontSize:13,lineHeight:1.7}}>{lesson.cluckHook}</p>
+      </div>
+
+      {/* Sections */}
+      {lesson.sections.map((sec, i) => (
+        <div key={i} style={{marginBottom:8}}>
+          <button onClick={()=>setOpenSection(openSection===i?-1:i)} style={{width:"100%",background:openSection===i?"rgba(16,185,129,0.1)":"rgba(255,255,255,0.03)",border:`1px solid ${openSection===i?"rgba(16,185,129,0.4)":"rgba(255,255,255,0.08)"}`,borderRadius:openSection===i?"12px 12px 0 0":"12px",padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}}>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:openSection===i?"#10B981":"#D1D5DB",letterSpacing:1}}>{sec.heading}</span>
+            <span style={{color:openSection===i?"#10B981":"#6B7280",fontSize:16}}>{openSection===i?"▲":"▼"}</span>
+          </button>
+          {openSection===i && (
+            <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(16,185,129,0.2)",borderTop:"none",borderRadius:"0 0 12px 12px",padding:"14px 16px"}}>
+              <p style={{margin:"0 0 12px",fontSize:13,color:"#D1D5DB",lineHeight:1.8,whiteSpace:"pre-line"}}>{sec.body}</p>
+              {sec.table && (
+                <div style={{overflowX:"auto",marginTop:8}}>
+                  <table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
+                    <thead>
+                      <tr>{sec.table.headers.map((h,j)=>(
+                        <th key={j} style={{background:"rgba(16,185,129,0.15)",padding:"8px 10px",textAlign:"left",fontFamily:"'Oswald',sans-serif",color:"#10B981",letterSpacing:1,borderBottom:"1px solid rgba(16,185,129,0.3)"}}>{h}</th>
+                      ))}</tr>
+                    </thead>
+                    <tbody>
+                      {sec.table.rows.map((row,j)=>(
+                        <tr key={j} style={{borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+                          {row.map((cell,k)=>(
+                            <td key={k} style={{padding:"8px 10px",color:k===0?"#FCD34D":"#D1D5DB",fontFamily:k===0?"'Oswald',sans-serif":"inherit",letterSpacing:k===0?1:0}}>{cell}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Interactive: Liquidity Depth Visualizer */}
+      <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:12,padding:16,marginTop:16,marginBottom:8}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#10B981",letterSpacing:2,marginBottom:4}}>🧮 INTERACTIVE — LIQUIDITY DEPTH VISUALIZER</div>
+        <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",margin:"0 0 14px",lineHeight:1.6}}>See how pool depth affects your trade. Drag the slider to change trade size.</p>
+        
+        <div style={{marginBottom:14}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#D1D5DB",letterSpacing:1}}>TRADE SIZE</span>
+            <span style={{fontFamily:"monospace",fontSize:14,color:"#FCD34D",fontWeight:700}}>${tradeSize.toLocaleString()}</span>
+          </div>
+          <input type="range" min="50" max="50000" step="50" value={tradeSize} onChange={e=>setTradeSize(Number(e.target.value))}
+            style={{width:"100%",accentColor:"#10B981"}}/>
+          <div style={{display:"flex",justifyContent:"space-between"}}>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#4B5563"}}>$50</span>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#4B5563"}}>$50,000</span>
+          </div>
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          {[
+            {label:"SHALLOW POOL",tvl:"$10,000 TVL",impact:shallowImpact,color:"#EF4444",bg:"rgba(239,68,68,0.08)",border:"rgba(239,68,68,0.3)"},
+            {label:"DEEP POOL",tvl:"$500,000 TVL",impact:deepImpact,color:"#10B981",bg:"rgba(16,185,129,0.08)",border:"rgba(16,185,129,0.3)"},
+          ].map((pool,i)=>(
+            <div key={i} style={{background:pool.bg,border:`1px solid ${pool.border}`,borderRadius:10,padding:12,textAlign:"center"}}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:pool.color,letterSpacing:1,marginBottom:2}}>{pool.label}</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",marginBottom:8}}>{pool.tvl}</div>
+              <div style={{fontFamily:"monospace",fontSize:26,fontWeight:700,color:pool.color,marginBottom:2}}>{pool.impact}%</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>PRICE IMPACT</div>
+              <div style={{marginTop:8,fontFamily:"'Oswald',sans-serif",fontSize:10,color:pool.color}}>
+                You lose ${(tradeSize * pool.impact / 100).toFixed(2)} to impact
+              </div>
+            </div>
+          ))}
+        </div>
+        {parseFloat(shallowImpact) > 5 && (
+          <div style={{marginTop:10,background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,padding:"8px 12px"}}>
+            <p style={{margin:0,fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#EF4444",lineHeight:1.6}}>
+              ⚠️ That's a {shallowImpact}% price impact in the shallow pool. Cluck Norris would not make that trade.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Cluck verdict */}
+      <div style={{background:"rgba(217,119,6,0.06)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:12,padding:"14px 16px",marginBottom:16,marginTop:8}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#D97706",letterSpacing:2,marginBottom:6}}>🐔 CLUCK'S VERDICT</div>
+        <p style={{margin:0,fontFamily:"Georgia,serif",fontStyle:"italic",color:"#FCD34D",fontSize:13,lineHeight:1.7}}>{lesson.cluckVerdict}</p>
+      </div>
+
+      <button onClick={()=>{setPhase("quiz");setQi(0);setSel(null);setAnswers([]);setShowExp(false);}} style={{width:"100%",background:"linear-gradient(135deg,#10B981,#059669)",border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#fff",letterSpacing:3,cursor:"pointer"}}>
+        ✅ TAKE THE QUIZ →
+      </button>
+    </div>
+  );
+}
+
+function LPLab() {
+  const [selectedLesson, setSelectedLesson] = useState(null);
+  const [completed, setCompleted] = useState([]);
+
+  if (selectedLesson !== null) {
+    return (
+      <LPLessonView
+        lesson={LP_LESSONS[selectedLesson]}
+        onBack={()=>setSelectedLesson(null)}
+        onComplete={()=>{
+          setCompleted(prev=>[...new Set([...prev, selectedLesson])]);
+          setSelectedLesson(null);
+        }}
+      />
+    );
+  }
+
+  return (
+    <div style={{padding:"0 16px 40px",maxWidth:540,margin:"0 auto"}}>
+      {/* Header */}
+      <div style={{textAlign:"center",marginBottom:24}}>
+        <div style={{fontSize:36,marginBottom:6}}>⚗️</div>
+        <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:28,fontWeight:900,color:"#F9FAFB",margin:"0 0 4px",letterSpacing:2}}>THE LP LAB</h2>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:3,marginBottom:12}}>ADVANCED LIQUIDITY TRAINING</div>
+        <div style={{background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.2)",borderRadius:10,padding:"10px 14px",display:"inline-block"}}>
+          <p style={{margin:0,fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#10B981",lineHeight:1.6,letterSpacing:0.5}}>
+            Protocol-agnostic. Works on Meteora, Raydium, Orca, Uniswap — anywhere. Master the mechanics, not just the buttons.
+          </p>
+        </div>
+      </div>
+
+      {/* Lessons list */}
+      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        {LP_LESSONS.map((lesson, i) => {
+          const done = completed.includes(i);
+          return (
+            <button key={i} onClick={()=>setSelectedLesson(i)} style={{background:done?"rgba(16,185,129,0.08)":"rgba(255,255,255,0.03)",border:`1px solid ${done?"rgba(16,185,129,0.4)":"rgba(255,255,255,0.08)"}`,borderRadius:12,padding:"14px 16px",display:"flex",alignItems:"center",gap:14,cursor:"pointer",textAlign:"left"}}>
+              <div style={{fontSize:28,flexShrink:0}}>{lesson.icon}</div>
+              <div style={{flex:1}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
+                  <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#10B981",letterSpacing:2}}>LESSON {lesson.id}</span>
+                  {done && <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#10B981",background:"rgba(16,185,129,0.15)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:10,padding:"1px 6px",letterSpacing:1}}>✓ DONE</span>}
+                </div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#F9FAFB",marginBottom:2,letterSpacing:1}}>{lesson.title}</div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",letterSpacing:0.5}}>{lesson.tagline}</div>
+              </div>
+              <span style={{color:"#10B981",fontSize:16,flexShrink:0}}>→</span>
+            </button>
+          );
+        })}
+
+        {/* Coming soon lessons */}
+        {[
+          {n:2, title:"How AMMs Work", icon:"⚙️", tag:"The math that runs every DEX"},
+          {n:3, title:"Impermanent Loss", icon:"📉", tag:"The #1 risk every LP must understand"},
+          {n:4, title:"LP Fees & Earnings", icon:"💰", tag:"How you actually make money"},
+          {n:5, title:"Concentrated Liquidity", icon:"🎯", tag:"More fees, less capital"},
+          {n:6, title:"Price Bins & Ticks", icon:"📊", tag:"Meteora DLMM & Orca Whirlpools"},
+          {n:7, title:"Single-Sided Deposits", icon:"↕️", tag:"DCA mechanics and launch pools"},
+          {n:8, title:"Active vs Passive LP", icon:"⚖️", tag:"When to monitor, when to relax"},
+          {n:9, title:"LP Risk Management", icon:"🛡️", tag:"Know your risk or the market will teach you"},
+          {n:10, title:"Reading Pool Data", icon:"🔍", tag:"Volume, TVL, APR — what it all means"},
+          {n:11, title:"Token Launch Liquidity", icon:"🚀", tag:"Bonding curves, graduation, Bags.fm"},
+          {n:12, title:"Building a Real LP Strategy", icon:"♟️", tag:"Put it all together"},
+        ].map((l,i)=>(
+          <div key={i} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:12,padding:"14px 16px",display:"flex",alignItems:"center",gap:14,opacity:0.5}}>
+            <div style={{fontSize:28,flexShrink:0}}>{l.icon}</div>
+            <div style={{flex:1}}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:2,marginBottom:3}}>LESSON {l.n}</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#9CA3AF",marginBottom:2,letterSpacing:1}}>{l.title}</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#4B5563",letterSpacing:0.5}}>{l.tag}</div>
+            </div>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563",letterSpacing:1}}>COMING SOON</span>
+          </div>
+        ))}
       </div>
     </div>
   );
