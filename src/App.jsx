@@ -2146,7 +2146,7 @@ function CLKNWidget() {
           ) : quote ? (
             <div>
               <div style={{fontFamily:"'Oswald',sans-serif",fontSize:28,fontWeight:900,color:"#FCD34D",lineHeight:1}}>
-                {parseInt(parseFloat(quote.outAmount) / Math.pow(10, 6)).toLocaleString()} CLKN
+                {parseInt(parseFloat(quote.outAmount) / Math.pow(10, 9)).toLocaleString()} CLKN
               </div>
               <div style={{marginTop:8,display:"flex",justifyContent:"center",gap:16,flexWrap:"wrap"}}>
                 {(() => {
@@ -2164,7 +2164,7 @@ function CLKNWidget() {
                       )}
                       {quote.otherAmountThreshold && (
                         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#F59E0B",letterSpacing:1}}>
-                          MIN: {parseInt(parseFloat(quote.otherAmountThreshold) / Math.pow(10,6)).toLocaleString()} CLKN
+                          MIN: {parseInt(parseFloat(quote.otherAmountThreshold) / Math.pow(10,9)).toLocaleString()} CLKN
                         </div>
                       )}
                       <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>
