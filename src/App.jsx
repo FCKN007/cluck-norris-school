@@ -1165,7 +1165,7 @@ function AskCluck({ context, compact }) {
   );
 
   return (
-    <div style={{background:"rgba(217,119,6,0.06)",border:"1px solid rgba(217,119,6,0.25)",borderRadius:12,padding:16,marginTop:12}}>
+    <div style={{background:"rgba(217,119,6,0.06)",border:"1px solid rgba(217,119,6,0.25)",borderRadius:12,padding:16,marginTop:12,overflow:"hidden",minWidth:0,maxWidth:"100%",boxSizing:"border-box"}}>
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
         <img src={LOGO_B64} alt="CN" style={{width:36,height:36,borderRadius:"50%",objectFit:"cover",border:"2px solid #D97706"}}/>
         <div>
@@ -1200,10 +1200,10 @@ function AskCluck({ context, compact }) {
       )}
 
       {answer && (
-        <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:10,padding:"12px 14px"}}>
-          <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
+        <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:10,padding:"12px 14px",overflow:"hidden",minWidth:0}}>
+          <div style={{display:"flex",gap:8,alignItems:"flex-start",minWidth:0}}>
             <span style={{fontSize:16,flexShrink:0}}>🐔</span>
-            <p style={{margin:0,fontSize:15,color:"#D1D5DB",lineHeight:1.8,fontFamily:"inherit"}}>
+            <p style={{margin:0,fontSize:15,color:"#D1D5DB",lineHeight:1.8,fontFamily:"inherit",wordBreak:"break-word",overflowWrap:"break-word",whiteSpace:"pre-wrap"}}>
             {answer.replace(/\*\*([^*]+)\*\*/g, (_,t)=>t).replace(/\*([^*]+)\*/g, (_,t)=>t)}
           </p>
           </div>
