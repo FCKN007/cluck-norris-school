@@ -2343,8 +2343,9 @@ function Library() {
                     <span style={{color:openTopic===topic.id?"#F59E0B":"#6B7280",fontSize:14,flexShrink:0}}>{openTopic===topic.id?"▲":"▼"}</span>
                   </button>
                   {openTopic===topic.id && (
-                    <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(245,158,11,0.2)",borderTop:"none",borderRadius:"0 0 12px 12px",padding:"16px"}}>
-                      {/* Cluck hook */}
+                    <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(245,158,11,0.2)",borderTop:"none",borderRadius:"0 0 12px 12px",padding:"16px",position:"relative"}}>
+                      {/* Sticky close button */}
+                        {/* Cluck hook */}
                       <div style={{background:"rgba(217,119,6,0.08)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:10,padding:"12px 14px",marginBottom:16,display:"flex",gap:10,alignItems:"flex-start"}}>
                         <img src={LOGO_B64} alt="CN" style={{width:30,height:30,borderRadius:"50%",objectFit:"cover",border:"1px solid #D97706",flexShrink:0}}/>
                         <p style={{margin:0,fontFamily:"Georgia,serif",fontStyle:"italic",color:"#FCD34D",fontSize:12,lineHeight:1.7}}>{topic.cluckHook}</p>
@@ -2360,6 +2361,12 @@ function Library() {
                       <div style={{background:"rgba(217,119,6,0.06)",border:"1px solid rgba(217,119,6,0.2)",borderRadius:10,padding:"12px 14px",marginTop:8}}>
                         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#D97706",letterSpacing:2,marginBottom:6}}>🐔 CLUCK'S VERDICT</div>
                         <p style={{margin:0,fontFamily:"Georgia,serif",fontStyle:"italic",color:"#FCD34D",fontSize:12,lineHeight:1.7}}>{topic.cluckVerdict}</p>
+                      </div>
+                      {/* Close button at bottom + sticky */}
+                      <div style={{position:"sticky",bottom:16,zIndex:10,textAlign:"center",marginTop:16}}>
+                        <button onClick={()=>setOpenTopic(null)} style={{background:"rgba(245,158,11,0.95)",border:"none",borderRadius:20,padding:"8px 24px",fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,color:"#111",letterSpacing:1,cursor:"pointer",boxShadow:"0 4px 12px rgba(0,0,0,0.5)"}}>
+                          ▲ CLOSE SECTION
+                        </button>
                       </div>
                     </div>
                   )}
@@ -2392,11 +2399,16 @@ function Library() {
                   <span style={{color:"#06B6D4",fontSize:16,flexShrink:0,marginLeft:8}}>{expanded===item.id?"▲":"▼"}</span>
                 </button>
                 {expanded===item.id && (
-                  <div style={{padding:"0 16px 16px"}}>
+                  <div style={{padding:"0 16px 16px",position:"relative"}}>
                     <div style={{height:1,background:"rgba(6,182,212,0.2)",marginBottom:14}}/>
                     {item.content.split("\n\n").map((para,i)=>(
                       <p key={i} style={{fontSize:13,color:para===para.toUpperCase()&&para.length<50?"#06B6D4":"#9CA3AF",lineHeight:1.8,margin:"0 0 12px",fontFamily:para===para.toUpperCase()&&para.length<50?"'Oswald',sans-serif":"inherit",letterSpacing:para===para.toUpperCase()&&para.length<50?1:0,fontWeight:para===para.toUpperCase()&&para.length<50?700:"normal"}}>{para}</p>
                     ))}
+                    <div style={{position:"sticky",bottom:16,zIndex:10,textAlign:"center",marginTop:16}}>
+                      <button onClick={()=>setExpanded(null)} style={{background:"rgba(6,182,212,0.95)",border:"none",borderRadius:20,padding:"8px 24px",fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,color:"#111",letterSpacing:1,cursor:"pointer",boxShadow:"0 4px 12px rgba(0,0,0,0.5)"}}>
+                        ▲ CLOSE SECTION
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
