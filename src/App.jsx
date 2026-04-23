@@ -3772,7 +3772,228 @@ The people depositing tokens into pools are called Liquidity Providers — LPs. 
     ],
     cluckVerdict: "Liquidity is the foundation. Every single lesson in this lab builds on what you just learned. If you skipped something, go back. The LP Lab has no shortcuts and no sympathy for lazy students."
   }
+  ,
+  {
+    id: 2,
+    title: "How AMMs Work",
+    icon: "⚙️",
+    tagline: "Every swap you have ever made went through one of these.",
+    cluckHook: "Every swap you have ever made went through an AMM. Most people have no idea what actually happened. That ends today.",
+    sections: [
+      {
+        heading: "What Is an AMM?",
+        body: `An Automated Market Maker is a smart contract that holds two tokens in a pool and automatically sets the price between them based on their ratio. There is no order book. There are no buyers and sellers being matched. Just math.
+
+TRADITIONAL EXCHANGE (Order Book):
+• Buyers post bids — prices they will pay
+• Sellers post asks — prices they will accept
+• A trade happens when a bid meets an ask
+• Requires constant participation from market makers
+
+AMM (Liquidity Pool):
+• Two tokens sit in a pool — for example SOL and CLKN
+• The ratio between them determines the price
+• Anyone can swap against the pool at any time
+• Price adjusts automatically with every trade
+
+The AMM never sleeps. It never runs out of quotes. It never needs a counterparty. It is just math running on a blockchain 24 hours a day.`
+      },
+      {
+        heading: "The x*y=k Formula",
+        body: `The most common AMM formula is the constant product formula. It looks like this:
+
+x × y = k
+
+Where:
+• x = the amount of Token A in the pool
+• y = the amount of Token B in the pool
+• k = a constant — it never changes
+
+EXAMPLE:
+Pool has 1,000 SOL and 100,000,000 CLKN
+k = 1,000 × 100,000,000 = 100,000,000,000
+
+You want to buy some SOL by selling CLKN.
+You add 1,000,000 CLKN to the pool.
+New y = 101,000,000 CLKN
+
+To keep k constant:
+New x = k / new y = 100,000,000,000 / 101,000,000 = 990.099 SOL
+
+You added 1,000,000 CLKN and received 1,000 - 990.099 = 9.9 SOL
+
+The pool always maintains the constant product. This is why large trades relative to pool size move the price significantly — adding a lot to one side requires removing a lot from the other side to keep k the same.`
+      },
+      {
+        heading: "How Price Moves",
+        body: `The price in an AMM is simply the ratio of the two tokens.
+
+Price of SOL in CLKN = CLKN in pool / SOL in pool
+
+STARTING STATE:
+Pool: 1,000 SOL / 100,000,000 CLKN
+Price: 100,000 CLKN per SOL
+
+AFTER SOMEONE BUYS SOL (adds CLKN, removes SOL):
+Pool: 990 SOL / 101,000,000 CLKN  
+New price: 102,020 CLKN per SOL
+
+The price went up because there is now less SOL relative to CLKN in the pool. Every buy pushes price up. Every sell pushes price down.
+
+This is why AMMs are called self-balancing — as the price in the pool drifts from the market price, arbitrageurs step in to buy the cheaper asset and sell the more expensive one, bringing the pool back into alignment. Arbitrage is what keeps AMM prices accurate.`
+      },
+      {
+        heading: "Price Impact vs Slippage",
+        body: `These two terms are related but they are not the same thing. Confusing them costs people money.
+
+PRICE IMPACT:
+The change in price caused by your specific trade. It is deterministic — based purely on your trade size relative to the pool size. You can calculate it exactly before trading.
+
+Large trade in small pool = high price impact
+Small trade in large pool = low price impact
+
+SLIPPAGE:
+The difference between the price when you submitted the transaction and the price when it actually executed. Caused by other trades happening between submission and execution.
+
+You set a slippage tolerance — the maximum you are willing to accept. If price moves more than your tolerance before your trade executes, the transaction fails.
+
+TOO HIGH slippage tolerance: Your trade always goes through but sandwich bots exploit the gap to extract value from you.
+TOO LOW slippage tolerance: Your trades fail constantly during volatile markets.
+
+FINDING THE RIGHT TOLERANCE:
+• Stable pairs and deep pools: 0.1-0.5%
+• Normal pairs with good liquidity: 0.5-1%
+• Volatile or illiquid tokens: 1-3%
+• Never set above 5% unless you understand exactly what you are doing`
+      },
+      {
+        heading: "Common Mistakes",
+        body: `❌ Not checking price impact before a large trade — open DexScreener first
+❌ Setting slippage too high on illiquid tokens — sandwich bots are watching
+❌ Assuming the quoted price is what you will get — always check the minimum received
+❌ Trading the same token in multiple transactions without checking pool state between them
+❌ Ignoring the "minimum received" field — this is your actual worst-case execution
+❌ Thinking failed transactions mean no cost — you still pay the gas fee on failed transactions on EVM chains (not Solana)`
+      }
+    ],
+    quiz: [
+      {
+        q: "In the AMM formula x*y=k, what does k represent?",
+        options: ["The current token price", "A constant that never changes regardless of trades", "The total dollar value of the pool", "The number of liquidity providers"],
+        correct: 1,
+        explanation: "k is the constant product — the result of multiplying the two token reserves together. Every trade changes x and y but the product must remain k. This is what forces the price to move as trades happen."
+      },
+      {
+        q: "A pool has 500 SOL and 50,000,000 CLKN. You want to make a very large buy of SOL. What happens to the price of SOL?",
+        options: ["Price stays the same — AMMs have fixed prices", "Price goes down — more demand means lower price", "Price goes up — removing SOL from the pool increases its relative scarcity", "Price goes up then immediately resets"],
+        correct: 2,
+        explanation: "When you buy SOL you remove it from the pool and add CLKN. Less SOL relative to more CLKN means each SOL is worth more CLKN. The price of SOL goes up with every unit you buy. This is price impact — and the larger your trade relative to the pool, the more you pay above the starting price."
+      },
+      {
+        q: "What is the difference between price impact and slippage?",
+        options: ["They are the same thing — just different names", "Price impact is your trade's effect on price. Slippage is caused by other trades happening while yours is pending.", "Slippage is your trade's effect on price. Price impact is the fee you pay.", "Price impact only affects large traders. Slippage only affects small traders."],
+        correct: 1,
+        explanation: "Price impact is deterministic — you can calculate it before trading based on your size vs pool size. Slippage is unpredictable — it depends on what other transactions execute before yours. Both cost you money but they come from different sources."
+      },
+      {
+        q: "Why do arbitrageurs keep AMM prices accurate?",
+        options: ["They are paid by the protocol to maintain prices", "When AMM price differs from market price, they profit by trading the difference — which brings the prices back together", "They vote on price adjustments through governance", "AMM prices are always accurate — no arbitrage needed"],
+        correct: 1,
+        explanation: "When an AMM's price drifts from the real market price, arbitrageurs buy the cheaper asset in the AMM and sell it elsewhere (or vice versa) until the prices converge. They profit from the difference, and their activity is what keeps AMM prices aligned with the broader market."
+      }
+    ],
+    cluckVerdict: "x times y equals k. Four characters. The foundation of hundreds of billions of dollars of DeFi volume. Now you know what actually happens when you hit swap."
+  }
 ];
+
+// ── AMM CALCULATOR ──
+function AMMCalculator() {
+  const [solInPool, setSolInPool] = useState(1000);
+  const [tokenInPool, setTokenInPool] = useState(100000000);
+  const [tradeAmount, setTradeAmount] = useState(10);
+  const [tradeDir, setTradeDir] = useState("buyToken"); // buyToken or buySOL
+
+  const k = solInPool * tokenInPool;
+  let priceImpact = 0;
+  let receive = 0;
+  let newPrice = 0;
+  const startPrice = tokenInPool / solInPool;
+
+  if (tradeDir === "buyToken") {
+    const newSol = solInPool + tradeAmount;
+    const newToken = k / newSol;
+    receive = tokenInPool - newToken;
+    newPrice = newToken / newSol;
+    priceImpact = ((startPrice - newPrice) / startPrice * 100);
+  } else {
+    const newToken = tokenInPool + tradeAmount;
+    const newSol = k / newToken;
+    receive = solInPool - newSol;
+    newPrice = newToken / newSol;
+    priceImpact = ((newPrice - startPrice) / startPrice * 100);
+  }
+
+  return (
+    <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:12,padding:16,marginTop:16,marginBottom:8}}>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#10B981",letterSpacing:2,marginBottom:4}}>🧮 INTERACTIVE — AMM PRICE CALCULATOR</div>
+      <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",margin:"0 0 14px",lineHeight:1.6}}>Adjust the pool size and trade size to see how x*y=k works in practice.</p>
+
+      {/* Pool setup */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+        <div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginBottom:4}}>SOL IN POOL</div>
+          <input type="range" min="100" max="10000" step="100" value={solInPool} onChange={e=>setSolInPool(Number(e.target.value))} style={{width:"100%",accentColor:"#10B981"}}/>
+          <div style={{fontFamily:"monospace",fontSize:13,color:"#FCD34D",textAlign:"center"}}>{solInPool.toLocaleString()} SOL</div>
+        </div>
+        <div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginBottom:4}}>TOKENS IN POOL</div>
+          <input type="range" min="1000000" max="500000000" step="1000000" value={tokenInPool} onChange={e=>setTokenInPool(Number(e.target.value))} style={{width:"100%",accentColor:"#10B981"}}/>
+          <div style={{fontFamily:"monospace",fontSize:13,color:"#FCD34D",textAlign:"center"}}>{(tokenInPool/1000000).toFixed(0)}M</div>
+        </div>
+      </div>
+
+      {/* Trade direction */}
+      <div style={{display:"flex",gap:8,marginBottom:12}}>
+        <button onClick={()=>setTradeDir("buyToken")} style={{flex:1,background:tradeDir==="buyToken"?"rgba(16,185,129,0.2)":"rgba(255,255,255,0.04)",border:`1px solid ${tradeDir==="buyToken"?"#10B981":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"8px",fontFamily:"'Oswald',sans-serif",fontSize:10,color:tradeDir==="buyToken"?"#10B981":"#6B7280",cursor:"pointer",letterSpacing:1}}>
+          BUY TOKENS WITH SOL
+        </button>
+        <button onClick={()=>setTradeDir("buySOL")} style={{flex:1,background:tradeDir==="buySOL"?"rgba(16,185,129,0.2)":"rgba(255,255,255,0.04)",border:`1px solid ${tradeDir==="buySOL"?"#10B981":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"8px",fontFamily:"'Oswald',sans-serif",fontSize:10,color:tradeDir==="buySOL"?"#10B981":"#6B7280",cursor:"pointer",letterSpacing:1}}>
+          BUY SOL WITH TOKENS
+        </button>
+      </div>
+
+      {/* Trade size */}
+      <div style={{marginBottom:14}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>TRADE SIZE ({tradeDir==="buyToken"?"SOL":"TOKENS"})</span>
+          <span style={{fontFamily:"monospace",fontSize:13,color:"#FCD34D",fontWeight:700}}>{tradeDir==="buyToken"?`${tradeAmount} SOL`:`${tradeAmount.toLocaleString()} tokens`}</span>
+        </div>
+        <input type="range" min={tradeDir==="buyToken"?1:100000} max={tradeDir==="buyToken"?solInPool*0.5:tokenInPool*0.5} step={tradeDir==="buyToken"?1:100000} value={tradeAmount} onChange={e=>setTradeAmount(Number(e.target.value))} style={{width:"100%",accentColor:"#10B981"}}/>
+      </div>
+
+      {/* Results */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+        {[
+          {label:"YOU RECEIVE", value: tradeDir==="buyToken" ? `${Math.floor(receive).toLocaleString()}` : `${receive.toFixed(2)} SOL`, color:"#FCD34D"},
+          {label:"PRICE IMPACT", value:`${Math.abs(priceImpact).toFixed(2)}%`, color: priceImpact > 5 ? "#EF4444" : priceImpact > 2 ? "#F59E0B" : "#10B981"},
+          {label:"NEW PRICE", value:`${Math.floor(newPrice).toLocaleString()}`, color:"#9CA3AF"},
+        ].map((r,i)=>(
+          <div key={i} style={{background:"rgba(0,0,0,0.3)",borderRadius:8,padding:"10px 8px",textAlign:"center"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#6B7280",letterSpacing:1,marginBottom:4}}>{r.label}</div>
+            <div style={{fontFamily:"monospace",fontSize:14,color:r.color,fontWeight:700}}>{r.value}</div>
+          </div>
+        ))}
+      </div>
+      {Math.abs(priceImpact) > 5 && (
+        <div style={{marginTop:10,background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,padding:"8px 12px"}}>
+          <p style={{margin:0,fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#EF4444",lineHeight:1.6}}>
+            ⚠️ {Math.abs(priceImpact).toFixed(1)}% price impact. That is significant. Cluck Norris would not make this trade without checking alternatives first.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function LPLessonView({ lesson, onBack, onComplete }) {
   const [phase, setPhase] = useState("content"); // content | quiz | result
@@ -3947,6 +4168,11 @@ function LPLessonView({ lesson, onBack, onComplete }) {
         </div>
       ))}
 
+      {/* Interactive: AMM Calculator — Lesson 2 */}
+      {lesson.id === 2 && (
+        <AMMCalculator />
+      )}
+
       {/* Interactive: Liquidity Depth Visualizer */}
       <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:12,padding:16,marginTop:16,marginBottom:8}}>
         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#10B981",letterSpacing:2,marginBottom:4}}>🧮 INTERACTIVE — LIQUIDITY DEPTH VISUALIZER</div>
@@ -4072,8 +4298,8 @@ function LPLab() {
 
         {/* Coming soon lessons */}
         {[
-          {n:2, title:"How AMMs Work", icon:"⚙️", tag:"The math that runs every DEX"},
           {n:3, title:"Impermanent Loss", icon:"📉", tag:"The #1 risk every LP must understand"},
+          {n:2, title:"", icon:"", tag:""},
           {n:4, title:"LP Fees & Earnings", icon:"💰", tag:"How you actually make money"},
           {n:5, title:"Concentrated Liquidity", icon:"🎯", tag:"More fees, less capital"},
           {n:6, title:"Price Bins & Ticks", icon:"📊", tag:"Meteora DLMM & Orca Whirlpools"},
