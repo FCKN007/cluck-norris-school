@@ -3241,7 +3241,16 @@ function Landing({onStart,onChallenge,onIncubator,completed}){
       </div>
       <div style={{fontFamily:"'Oswald',sans-serif",fontSize:14,letterSpacing:6,color:"#D97706",marginBottom:6}}>SCHOOL OF</div>
       <h1 style={{fontFamily:"'Oswald',sans-serif",fontSize:40,fontWeight:900,margin:"0 0 4px",background:"linear-gradient(135deg,#FCD34D,#F97316,#EF4444)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",textTransform:"uppercase",letterSpacing:1,lineHeight:1}}>Crypto Hard Knocks</h1>
-      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#6B7280",letterSpacing:4,marginBottom:20}}>POWERED BY CLKN</div>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:"#6B7280",letterSpacing:4,marginBottom:12}}>POWERED BY CLKN</div>
+      {/* Social Links */}
+      <div style={{display:"flex",gap:10,marginBottom:20,justifyContent:"center"}}>
+        <a href={TWITTER_LINK} target="_blank" rel="noreferrer" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:20,padding:"7px 18px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,color:"#F9FAFB",letterSpacing:1}}>
+          𝕏 TWITTER
+        </a>
+        <a href={TELEGRAM_LINK} target="_blank" rel="noreferrer" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",borderRadius:20,padding:"7px 18px",textDecoration:"none",fontFamily:"'Oswald',sans-serif",fontSize:11,fontWeight:700,color:"#60A5FA",letterSpacing:1}}>
+          ✈️ TELEGRAM
+        </a>
+      </div>
       <p style={{color:"#9CA3AF",fontSize:16,lineHeight:1.7,marginBottom:24,fontStyle:"italic"}}>"No participation trophies. No hand-holding. Just hard knocks."</p>
       {completed.length>0&&(
         <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,padding:"12px 16px",marginBottom:20}}>
