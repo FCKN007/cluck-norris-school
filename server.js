@@ -2,6 +2,15 @@ import express from "express";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { createSign } from "crypto";
+import https from "https";
+
+// Workaround for SSL certificate validation errors (e.g. "unsupported" decoder
+// error) when reaching mainnet.helius-rpc.com from inside the Railway container.
+// Scoped to Helius calls only — all other fetch() calls remain unaffected.
+const heliusAgent = new https.Agent({ rejectUnauthorized: false });
+function heliusFetch(url, options = {}) {
+  return fetch(url, { ...options, dispatcher: undefined, agent: heliusAgent });
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -52,7 +61,7 @@ app.get("/api/holders", async (req, res) => {
     let page = 1;
     const owners = new Set();
     while (true) {
-      const response = await fetch(HELIUS_URL, {
+      const response = await heliusFetch(HELIUS_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -89,7 +98,7 @@ app.get("/api/locks", async (req, res) => {
   if (!HELIUS_KEY) return res.status(500).json({ success: false, error: "Missing HELIUS_API_KEY" });
   const HELIUS_URL = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
   try {
-    const response = await fetch(HELIUS_URL, {
+    const response = await heliusFetch(HELIUS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -495,7 +504,7 @@ app.get("/api/supply", async (req, res) => {
     const MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
     const HELIUS_KEY = process.env.HELIUS_API_KEY;
     const url = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
-    const response = await fetch(url, {
+    const response = await heliusFetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
