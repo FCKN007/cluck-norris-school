@@ -4,6 +4,8 @@ const SOL_MINT = "So11111111111111111111111111111111111111112";
 const LAMPORTS_PER_SOL = 1_000_000_000;
 const CLKN_TRADE_LINK = "https://bags.fm/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS?ref=firechicken007";
 const JUPITER_TRADE_LINK = "https://jup.ag/tokens/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
+const TWITTER_LINK = "https://x.com/firechicken007";
+const TELEGRAM_LINK = "https://t.me/FireChicken007";
 const PARTNER_LINK = "https://bags.fm/?ref=firechicken007";
 const BAGS_SIGNUP = "https://bags.fm/?ref=firechicken007";
 const BAGS_DEV = "https://dev.bags.fm";
@@ -3960,11 +3962,11 @@ function LPLessonView({ lesson, onBack, onComplete }) {
             {label:"DEEP POOL",tvl:"$500,000 TVL",impact:deepImpact,color:"#10B981",bg:"rgba(16,185,129,0.08)",border:"rgba(16,185,129,0.3)"},
           ].map((pool,i)=>(
             <div key={i} style={{background:pool.bg,border:`1px solid ${pool.border}`,borderRadius:10,padding:12,textAlign:"center"}}>
-              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:pool.color,letterSpacing:1,marginBottom:2}}>{pool.label}</div>
-              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",marginBottom:8}}>{pool.tvl}</div>
-              <div style={{fontFamily:"monospace",fontSize:26,fontWeight:700,color:pool.color,marginBottom:2}}>{pool.impact}%</div>
-              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>PRICE IMPACT</div>
-              <div style={{marginTop:8,fontFamily:"'Oswald',sans-serif",fontSize:10,color:pool.color}}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,color:pool.color,letterSpacing:1,marginBottom:3}}>{pool.label}</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:12,color:"#9CA3AF",marginBottom:8}}>{pool.tvl}</div>
+              <div style={{fontFamily:"monospace",fontSize:32,fontWeight:700,color:pool.color,marginBottom:3}}>{pool.impact}%</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",letterSpacing:1}}>PRICE IMPACT</div>
+              <div style={{marginTop:8,fontFamily:"'Oswald',sans-serif",fontSize:12,color:pool.color}}>
                 You lose ${(tradeSize * pool.impact / 100).toFixed(2)} to impact
               </div>
             </div>
