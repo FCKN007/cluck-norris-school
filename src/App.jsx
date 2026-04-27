@@ -2839,6 +2839,7 @@ function CLKNWidget() {
   const [meteoraPool, setMeteorPool] = useState(null);
   const [dexData, setDexData] = useState(null);
   const [holderCount, setHolderCount] = useState(null);
+  const [holderError, setHolderError] = useState(null);
   const [fees, setFees] = useState(null);
   const [debugInfo, setDebugInfo] = useState(null);
 
@@ -2878,8 +2879,17 @@ function CLKNWidget() {
     try {
       const holdersRes = await fetch(`/api/holders?mint=${CLKN_MINT}`);
       const holdersData = await holdersRes.json();
-      if (holdersData.success) setHolderCount(holdersData.holderCount);
-    } catch (e) { console.log("Holders error:", e.message); }
+      if (holdersData.success) {
+        setHolderCount(holdersData.holderCount);
+        setHolderError(null);
+      } else {
+        console.warn("Holders unavailable:", holdersData.error);
+        setHolderError(holdersData.error || "Holder data unavailable");
+      }
+    } catch (e) {
+      console.log("Holders error:", e.message);
+      setHolderError("Could not reach Helius");
+    }
     try {
       const feesRes = await fetch(`/api/fees`);
       const feesData = await feesRes.json();
@@ -3011,12 +3021,25 @@ function CLKNWidget() {
 
       {/* Holder Count + Locks — Helius powered */}
       <div style={{display:"flex",gap:8,marginBottom:12}}>
-        <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"16px",textAlign:"center"}}>
+        <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:`1px solid ${holderError ? "rgba(239,68,68,0.35)" : "rgba(255,255,255,0.12)"}`,borderRadius:10,padding:"16px",textAlign:"center"}}>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,color:"#9CA3AF",marginBottom:6}}>👥 HOLDERS</div>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:40,fontWeight:700,color:"#FCD34D",lineHeight:1}}>
-            {holderCount !== null ? holderCount.toLocaleString() : "—"}
+          {holderError ? (
+            <div title={holderError} style={{cursor:"help"}}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#EF4444",lineHeight:1.3,marginBottom:4}}>
+                UNAVAILABLE
+              </div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#EF4444",letterSpacing:1,opacity:0.8}}>
+                ⚠ DATA UNAVAILABLE
+              </div>
+            </div>
+          ) : (
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:40,fontWeight:700,color:"#FCD34D",lineHeight:1}}>
+              {holderCount !== null ? holderCount.toLocaleString() : "—"}
+            </div>
+          )}
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:holderError ? "#6B7280" : "#6B7280",letterSpacing:1,marginTop:6}}>
+            {holderError ? "HELIUS UNAVAILABLE" : "VIA HELIUS"}
           </div>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginTop:6}}>VIA HELIUS</div>
         </div>
         <div style={{flex:1,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(217,119,6,0.3)",borderRadius:10,padding:"16px",textAlign:"center"}}>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,letterSpacing:2,color:"#D97706",marginBottom:6}}>💰 FEES EARNED</div>
