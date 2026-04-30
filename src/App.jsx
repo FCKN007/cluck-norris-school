@@ -3904,7 +3904,563 @@ FINDING THE RIGHT TOLERANCE:
     ],
     cluckVerdict: "x times y equals k. Four characters. The foundation of hundreds of billions of dollars of DeFi volume. Now you know what actually happens when you hit swap."
   }
+  ,
+  {
+    id: 3,
+    title: "Impermanent Loss",
+    icon: "📉",
+    tagline: "The #1 risk every LP must understand before deploying capital.",
+    cluckHook: "Impermanent loss has ended more LP careers than any market crash. Not because it is complicated. Because people refused to understand it before they deployed capital. You will not make that mistake.",
+    sections: [
+      {
+        heading: "What Is Impermanent Loss?",
+        body: `Impermanent loss is the difference in value between holding two tokens in your wallet versus providing them as liquidity in a pool.
+
+When token prices change relative to each other, the AMM automatically rebalances — arbitrageurs buy the appreciating token from your pool until the ratio reflects the new market price. The result: you end up holding more of the token that went down and less of the one that went up.
+
+It is called impermanent because if prices return to your entry ratio, the loss disappears entirely. It becomes permanent the moment you withdraw at a different price ratio than you entered.
+
+SIMPLE EXAMPLE:
+You deposit $1,000 into a SOL/USDC pool: $500 SOL + $500 USDC.
+SOL doubles in price. The pool rebalances automatically.
+If you had just held: $1,000 SOL + $500 USDC = $1,500
+As an LP after rebalancing: approximately $1,414
+
+Impermanent loss = $86 or 5.7%
+
+The pool did not lose your money. The rebalancing mechanic redirected value away from you and toward the arbitrageurs who corrected the price.`
+      },
+      {
+        heading: "The IL Table — Know These Numbers Cold",
+        body: `The relationship between price change and IL follows a predictable curve. Memorize the key data points.
+
+PRICE CHANGE → IMPERMANENT LOSS:
+1.25x price change → 0.6% IL
+1.5x price change → 2.0% IL
+2x price change → 5.7% IL
+3x price change → 13.4% IL
+4x price change → 20.0% IL
+5x price change → 25.5% IL
+10x price change → 42.5% IL
+
+This applies whether the price goes up OR down by that multiple. A 2x move in either direction costs you the same 5.7%.
+
+THE CRITICAL INSIGHT:
+For low-volatility pairs the IL is manageable. For meme coins and volatile assets it is brutal. A 10x move — common in crypto — means you lose 42.5% of your position value compared to simply holding. Your fee income would need to be exceptional to overcome that.`
+      },
+      {
+        heading: "When IL Matters and When It Does Not",
+        body: `IL is not always a problem. Context determines whether it is significant or irrelevant.
+
+IL MATTERS WHEN:
+• Tokens in the pair are uncorrelated — they move independently
+• One token experiences a large price move while the other stays flat
+• Fee income is low relative to the price divergence
+• You are LPing meme coins or highly volatile assets
+
+IL DOES NOT MATTER WHEN:
+• Both tokens are highly correlated — they move together (BTC/ETH, SOL/jitoSOL)
+• You are in a stablecoin pair — USDC/USDT has near-zero IL
+• Fee income significantly exceeds the IL rate
+• You believe prices will return to your entry ratio before you withdraw
+• You are a long-term holder who would have held both tokens anyway
+
+THE CORRELATED PAIR INSIGHT:
+If you LP SOL/mSOL — both tokens track SOL price closely. When SOL goes up, both go up together. IL is minimal. This is why stablecoin pairs and liquid staking pairs are popular for conservative LPs.`
+      },
+      {
+        heading: "IL vs Fee Income — The Real Calculation",
+        body: `The only number that actually matters is net return = Fee APR minus IL rate.
+
+A pool showing 80% APR is meaningless if you are experiencing 70% annualized IL from price divergence. Your real return is 10%.
+
+HOW TO EVALUATE:
+Step 1: Find the pool's 30-day fee APR on DexScreener or the protocol dashboard
+Step 2: Estimate your expected IL based on the token pair's historical volatility
+Step 3: Subtract estimated IL from fee APR
+Step 4: Compare that number to simply holding the tokens
+
+If net return after IL is higher than holding — LP position makes sense.
+If net return after IL is lower than holding — you are better off just holding.
+
+CLUCK'S FRAMEWORK: Never enter an LP position without running this calculation. The number of people who think they are earning yield while actually underperforming a simple hold is staggering.`
+      },
+      {
+        heading: "Common Mistakes",
+        body: `❌ Providing liquidity to meme coin pairs without calculating expected IL
+❌ Celebrating fee APR without subtracting IL — the gross number is meaningless
+❌ Thinking IL only applies when prices go up — a 2x drop costs the same as a 2x rise
+❌ Withdrawing immediately after a price move locks in IL permanently — sometimes waiting is correct
+❌ Assuming stablecoin pairs have zero IL — they have very low IL but depeg events can cause real losses
+❌ Not tracking your entry price ratio — you cannot calculate IL without knowing where you started`
+      }
+    ],
+    quiz: [
+      {
+        q: "Why is impermanent loss called 'impermanent'?",
+        options: ["Because it only happens temporarily during volatile markets", "Because if prices return to your entry ratio the loss disappears — it only becomes permanent when you withdraw", "Because the protocol reimburses you after 30 days", "Because it only affects small positions"],
+        correct: 1,
+        explanation: "IL is impermanent because the AMM rebalancing is reversible. If the price ratio between the two tokens returns to exactly where it was when you deposited, your position value equals what you would have had by just holding. The loss only locks in permanently when you withdraw at a different ratio than you entered."
+      },
+      {
+        q: "SOL triples in price while USDC stays at $1. You are an LP in a SOL/USDC pool. What happened to your position?",
+        options: ["You tripled your money because SOL tripled", "You have more SOL and less USDC than when you started", "The AMM rebalanced — you now hold less SOL and more USDC than when you started, worth less than if you had just held", "Nothing — AMMs protect against price changes"],
+        correct: 2,
+        explanation: "When SOL tripled, arbitrageurs bought SOL from your pool until the pool ratio reflected the new price. You sold SOL on the way up through the rebalancing mechanism. You now hold less of the appreciating asset (SOL) and more of the stable asset (USDC). This is IL — you underperformed a simple hold by approximately 13.4%."
+      },
+      {
+        q: "Which pair would have the LOWEST impermanent loss risk?",
+        options: ["SOL/BONK — high volatility meme pair", "BTC/ETH — both are major assets but can diverge", "USDC/USDT — both pegged to $1", "SOL/DOGE — cross-chain volatile pair"],
+        correct: 2,
+        explanation: "USDC and USDT are both pegged to $1. Their price ratio almost never changes. IL requires price divergence between the two assets — if both assets always trade at the same price, IL is essentially zero. Stablecoin pairs are the safest from an IL perspective."
+      },
+      {
+        q: "You enter an LP position with $10,000. The pool earns 120% APR in fees over a year. But the token pair experienced a 4x price divergence causing 20% IL. What is your approximate net return?",
+        options: ["120% — the fees cover everything", "100% — you subtract the IL from the fees", "20% IL means you lost money regardless of fees", "Cannot be calculated"],
+        correct: 1,
+        explanation: "Net return = Fee APR minus IL rate. 120% fee APR minus 20% IL = approximately 100% net return. You still made excellent money but significantly less than the headline APR suggested. Always run this calculation before entering any LP position."
+      }
+    ],
+    cluckVerdict: "IL is not a bug. It is the cost of being a market maker. Know the cost before you accept the job. Run the numbers every single time."
+  }
+  ,
+  {
+    id: 4,
+    title: "LP Fees & Earnings",
+    icon: "💰",
+    tagline: "The upside of being an LP. How fees work, what they are worth, and when they win.",
+    cluckHook: "Everyone talks about impermanent loss. Almost nobody talks about how fees can make it completely irrelevant. This is the other side of the equation. Pay attention.",
+    sections: [
+      {
+        heading: "How LP Fees Work",
+        body: `Every swap through a liquidity pool pays a fee. That fee is distributed to liquidity providers proportionally based on their share of the pool.
+
+THE MECHANICS:
+• Trader executes a $1,000 swap in a 0.25% fee pool
+• Fee generated = $2.50
+• That $2.50 is added to the pool reserves
+• Every LP's position value increases by their proportional share of $2.50
+
+YOUR SHARE OF FEES:
+If you own 1% of the pool and the pool generates $10,000 in fees today, you earned $100.
+If you own 0.1% of the pool, you earned $10.
+
+Fee income = Your LP % × Total pool fees generated
+
+The more volume a pool generates, the more fees LPs collect. This is why volume is more important than TVL when evaluating an LP opportunity.`
+      },
+      {
+        heading: "Fee Tiers Across Protocols",
+        body: `Every protocol offers different fee tiers for different types of pairs. Choosing the right fee tier matters.
+
+RAYDIUM:
+• Standard AMM pools: 0.25% fixed
+• CLMM concentrated pools: 0.01% / 0.05% / 0.25% / 1%
+• Use 0.01% for stable pairs, 0.25% for standard, 1% for exotic/volatile
+
+ORCA WHIRLPOOLS:
+• 0.01% / 0.05% / 0.3% / 1%
+• Similar logic — stable pairs use low tiers, volatile pairs use high tiers
+
+METEORA:
+• DAMM: Dynamic fees that adjust automatically to market volatility
+• DLMM: Variable fees set per bin — higher fee bins capture more during volatility
+• Dynamic fees are one of Meteora's strongest features for LPs
+
+UNISWAP V3 (Ethereum):
+• 0.05% / 0.3% / 1%
+• The original tiered fee system that others copied
+
+CHOOSING THE RIGHT TIER:
+Stable pairs (USDC/USDT): 0.01-0.05% — low fee, high volume
+Blue chip pairs (SOL/USDC): 0.05-0.25% — balanced
+Volatile/exotic pairs: 0.5-1% — compensates for higher IL risk`
+      },
+      {
+        heading: "The Key Metric — Volume/TVL Ratio",
+        body: `Fee APR is not what the protocol shows you. It is what you calculate yourself.
+
+THE FORMULA:
+Fee APR = (Daily Fees / TVL) × 365 × 100
+
+EXAMPLE:
+Pool TVL: $500,000
+Daily fees generated: $1,500
+Fee APR = ($1,500 / $500,000) × 365 × 100 = 109.5% APR
+
+This is the number that matters. Not the headline APR that includes token emissions.
+
+WHAT TO LOOK FOR:
+• Daily fees / TVL > 0.1% is excellent
+• Daily fees / TVL of 0.03-0.1% is decent
+• Daily fees / TVL below 0.01% is probably not worth the IL risk
+
+IMPORTANT: Check 7-day and 30-day averages. A single high-volume day can make a pool look incredible on DexScreener. Consistency matters more than spikes.
+
+WHERE TO FIND THIS DATA:
+• DexScreener — shows 24H fees and volume
+• Raydium analytics dashboard
+• Orca pool analytics
+• Meteora analytics — shows fee APR directly`
+      },
+      {
+        heading: "When Fees Beat IL",
+        body: `This is the core decision every LP must make. Do fees outweigh the IL risk for this specific pair?
+
+FEES BEAT IL WHEN:
+• Volume is consistently high relative to TVL — high turnover pool
+• The pair is correlated — prices move together minimizing IL
+• You are in a stablecoin pair — near-zero IL means almost all fees are profit
+• Meteora dynamic fees spike during volatility — fees increase exactly when IL risk increases
+
+FEES LOSE TO IL WHEN:
+• One token experiences a major price move — IL accelerates faster than fee income
+• Volume dries up during low activity periods — no fees, but IL remains
+• You are in a very concentrated range that frequently goes out of range — earning nothing while price moves away
+
+THE SWEET SPOT:
+High volume, correlated pair, appropriate fee tier. Stablecoin pools with high volume are the most consistent performers. SOL/USDC in a tight range during high activity periods can generate exceptional returns.
+
+CLUCK'S REALITY CHECK: Most retail LPs chase high APR numbers without doing the volume/TVL math. They end up in low-volume pools with high IL and wonder why they underperformed holding.`
+      },
+      {
+        heading: "Common Mistakes",
+        body: `❌ Trusting headline APR that includes token emission rewards — those emissions dilute holders and are not sustainable
+❌ Not checking if fee APR is calculated from real fees or subsidized rewards
+❌ Entering a pool during a volume spike and assuming that volume is permanent
+❌ Ignoring fee tier selection — wrong fee tier means competing LPs at the right tier capture most of the volume
+❌ Not compounding fees — reinvesting fee income back into the pool dramatically improves long-term returns
+❌ Comparing fee APR across different pool types without accounting for IL differences`
+      }
+    ],
+    quiz: [
+      {
+        q: "A pool has $200,000 TVL and generates $400 in fees today. What is the approximate annualized fee APR?",
+        options: ["0.2%", "7.3%", "73%", "730%"],
+        correct: 2,
+        explanation: "Fee APR = (Daily Fees / TVL) × 365 × 100. ($400 / $200,000) × 365 × 100 = 73% APR. This is an excellent fee APR — it means the pool turns over 73% of its TVL in fees annually. Always calculate this yourself rather than trusting protocol dashboards."
+      },
+      {
+        q: "You are choosing between two pools for a volatile token pair. Pool A has 0.25% fees. Pool B has 1% fees. Why might Pool B be the better choice?",
+        options: ["Pool B is always better because higher fees mean more income", "Higher fee tiers attract volume for volatile pairs — traders accept higher fees because the IL risk for LPs is greater and needs to be compensated", "Pool A is better because lower fees attract more traders", "Fee tier does not matter — only TVL matters"],
+        correct: 1,
+        explanation: "Fee tiers exist for a reason. Volatile pairs need higher fees to compensate LPs for the greater IL risk. Traders willing to swap a volatile token will accept a 1% fee. LPs providing liquidity to that volatile pair deserve higher compensation. Matching the fee tier to the pair type is critical for maximizing fee income while managing IL."
+      },
+      {
+        q: "What does the Volume/TVL ratio tell you?",
+        options: ["How much the token price has changed", "How efficiently the pool's capital is generating fees — higher means more fee income per dollar deployed", "How many liquidity providers are in the pool", "Whether the pool is safe to enter"],
+        correct: 1,
+        explanation: "Volume/TVL ratio measures capital efficiency. A pool with $100K TVL generating $50K daily volume (0.5 ratio) is far more productive than a pool with $1M TVL generating $10K daily volume (0.01 ratio). The first pool generates much more fee income per dollar of liquidity deployed. Always check this ratio before entering a pool."
+      },
+      {
+        q: "Which scenario most likely results in fees beating impermanent loss?",
+        options: ["A meme coin pair with 500% APR driven mostly by token emission rewards", "A USDC/USDT stablecoin pool with consistent high trading volume", "A new token launch pool with 10x price potential", "Any pool with TVL over $1 million"],
+        correct: 1,
+        explanation: "USDC/USDT has near-zero IL because both tokens are always worth $1. Every dollar of fees earned is almost pure profit. High-volume stablecoin pools with real fee income (not emission rewards) are among the most consistently profitable LP positions in DeFi. The combination of minimal IL and genuine fee income is powerful."
+      }
+    ],
+    cluckVerdict: "Fees are your income. IL is your expense. Run the business properly — know both numbers before you deploy a single dollar."
+  }
+  ,
+  {
+    id: 5,
+    title: "Concentrated Liquidity",
+    icon: "🎯",
+    tagline: "More fees, less capital, more work. Welcome to the advanced class.",
+    cluckHook: "Full range liquidity is training wheels. Concentrated liquidity is where serious LPs operate. More fees, less capital, more work. If that trade-off sounds good to you — sit down. If not — go back to Lesson 1.",
+    sections: [
+      {
+        heading: "The Problem With Full Range Liquidity",
+        body: `In a traditional AMM like Uniswap v2 or Raydium standard pools, your liquidity is spread across every possible price from zero to infinity.
+
+THE PROBLEM:
+Tokens almost never trade at extreme prices. If SOL is at $150 today, essentially zero volume happens at $1 or $10,000. But your capital is deployed across all those prices — earning nothing.
+
+THE MATH:
+In a full-range pool for SOL/USDC, approximately 95% of your capital sits idle at price points that never see trading activity. Only 5% of your capital is actually working — earning fees from the actual trading range.
+
+You are deploying $10,000 but only $500 of it earns anything. That is terrible capital efficiency.
+
+This is exactly the problem concentrated liquidity was designed to solve.`
+      },
+      {
+        heading: "How Concentrated Liquidity Works",
+        body: `Concentrated liquidity lets you focus your entire capital within a specific price range. Only that range earns fees — but it earns them at dramatically higher efficiency.
+
+THE CONCEPT:
+Instead of spreading $10,000 across all prices, you deploy it between $140 and $160 for SOL trading at $150.
+
+When price is within your range:
+• Your capital provides deep liquidity
+• You earn a much larger share of fees from volume in that range
+• Same fee share as a full-range LP with 10-100x more capital
+
+When price moves outside your range:
+• Your position earns zero fees
+• You hold 100% of one token
+• Position behaves like a limit order
+
+CAPITAL EFFICIENCY EXAMPLE:
+Full range LP with $100,000 — earns same fees as concentrated LP with $5,000 in the right range.
+Concentrated LP deploys 20x less capital for the same fee income. Or deploys the same capital for 20x more fee income.`
+      },
+      {
+        heading: "Ticks and Bins — How Ranges Are Defined",
+        body: `Different protocols implement concentrated liquidity differently. Understanding the mechanics helps you set ranges effectively.
+
+TICK-BASED (Uniswap v3, Raydium CLMM, Orca Whirlpools):
+• Price range divided into discrete ticks
+• Each tick represents a 0.01% price increment
+• You set a lower tick and upper tick to define your range
+• Liquidity is uniform across your entire range
+• Clean and predictable — easy to understand your exposure
+
+BIN-BASED (Meteora DLMM):
+• Price range divided into discrete bins
+• Only the active bin (current price) earns fees
+• Bins immediately around the active bin are queue to earn
+• More granular control over fee capture
+• Can set different fee amounts per bin
+• More complex but more powerful for active managers
+
+CHOOSING YOUR APPROACH:
+• New to concentrated LP: Start with tick-based (Raydium CLMM or Orca)
+• Want more control: Meteora DLMM with bin-based positioning
+• Passive management: Wider ranges on tick-based systems
+• Active management: Narrow bins on DLMM`
+      },
+      {
+        heading: "Choosing Your Range",
+        body: `Range selection is the most important decision in concentrated LP. Too narrow and you go out of range constantly. Too wide and you lose the capital efficiency advantage.
+
+CONSERVATIVE (Wide Range):
+• Set range at 50-200% around current price
+• Rarely goes out of range
+• Lower fee APR — capital spread across wide range
+• Good for beginners and passive managers
+• Works well for volatile assets you want to LP
+
+MODERATE (Standard Range):
+• Set range at 20-50% around current price
+• Reasonable balance of APR and time in range
+• Most common approach for active LPs
+• Requires checking and rebalancing monthly
+
+AGGRESSIVE (Narrow Range):
+• Set range at 5-10% around current price
+• Highest fee APR when active
+• Goes out of range frequently
+• Requires daily monitoring and rebalancing
+• Only for disciplined active managers
+
+THE VOLATILITY RULE:
+Match your range width to the asset's volatility. A stablecoin can use a 0.1% range. SOL needs at least 20-30%. A meme coin needs 50%+ or avoid concentrated LP entirely.`
+      },
+      {
+        heading: "Common Mistakes",
+        body: `❌ Setting a range and forgetting about it — concentrated positions require monitoring
+❌ Using narrow ranges on volatile assets — you will spend more on rebalancing fees than you earn
+❌ Not understanding that out-of-range positions earn zero fees — your capital is idle and exposed
+❌ Ignoring the rebalancing cost — every time you reset a range you pay swap fees and gas
+❌ Choosing the wrong fee tier for your range — narrow range + low fee tier = you earn very little per trade
+❌ Not tracking your actual performance vs simply holding — concentrated LP can underperform a hold if managed poorly`
+      }
+    ],
+    quiz: [
+      {
+        q: "Why is full-range liquidity considered capital inefficient?",
+        options: ["Because the fees are too low", "Because most capital sits at extreme prices that never see trading activity — only a small fraction earns fees from actual volume", "Because it requires too much monitoring", "Because full-range pools charge higher fees"],
+        correct: 1,
+        explanation: "In a full-range pool, your capital is spread from price zero to infinity. But trading activity concentrates in a narrow range around the current price. The vast majority of your deployed capital sits at prices that are never traded — earning nothing. Concentrated liquidity solves this by letting you focus capital where the actual trading happens."
+      },
+      {
+        q: "Your SOL/USDC concentrated LP position goes out of range. What happens?",
+        options: ["The position is automatically liquidated", "You earn reduced fees proportional to how far out of range price moved", "Your position earns zero fees and you hold 100% of one token until price returns to your range", "Nothing changes — concentrated positions always earn fees"],
+        correct: 2,
+        explanation: "When price exits your range, your position stops earning fees entirely. You also end up holding 100% of one token — if price moved up through your range you hold all USDC, if it moved down you hold all SOL. The position behaves like a limit order that has been fully executed. You must reset your range to start earning fees again."
+      },
+      {
+        q: "What is the main difference between tick-based (Raydium CLMM, Orca) and bin-based (Meteora DLMM) concentrated liquidity?",
+        options: ["Tick-based earns more fees than bin-based", "Bin-based systems divide the range into discrete price buckets where only the active bin earns fees — tick-based applies liquidity uniformly across the entire range", "There is no meaningful difference", "Bin-based requires more capital"],
+        correct: 1,
+        explanation: "Tick-based systems apply your liquidity uniformly across your chosen price range. Bin-based systems like Meteora DLMM divide the range into discrete bins where only the active bin (current price) earns fees. Bin-based gives more granular control and can concentrate fee capture even further, but requires more active management."
+      },
+      {
+        q: "For a new LP using concentrated liquidity for the first time with SOL/USDC, what range approach makes the most sense?",
+        options: ["Aggressive narrow range (5-10%) for maximum APR", "Conservative wide range (50-200%) to stay in range while learning the mechanics", "Full range — same as traditional AMM", "Random range based on gut feeling"],
+        correct: 1,
+        explanation: "A conservative wide range for beginners makes sense for several reasons: SOL is volatile and a narrow range will go out of range constantly, the learning curve for rebalancing is steep, and a wide range still outperforms full-range in fee efficiency. Master the mechanics with a wide range before moving to aggressive concentrated positions."
+      }
+    ],
+    cluckVerdict: "Concentrated liquidity is not for everyone. But if you understand it and manage it properly it is the most powerful tool available to retail LPs. You now understand it. Whether you manage it properly is up to you."
+  }
 ];
+
+// ── IL CALCULATOR ──
+function ILCalculator() {
+  const [entryPrice, setEntryPrice] = useState(100);
+  const [currentPrice, setCurrentPrice] = useState(200);
+
+  const priceRatio = currentPrice / entryPrice;
+  const il = (2 * Math.sqrt(priceRatio) / (1 + priceRatio) - 1) * 100;
+  const holdValue = 500 + 500 * priceRatio;
+  const lpValue = 2 * Math.sqrt(priceRatio) * 1000 / (1 + priceRatio) * (1 + priceRatio) / 2 * 2;
+  const ilDollar = holdValue - 1000 * Math.sqrt(priceRatio) * 2 / (1 + priceRatio);
+
+  return (
+    <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:12,padding:16,marginTop:16,marginBottom:8}}>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#10B981",letterSpacing:2,marginBottom:4}}>🧮 INTERACTIVE — IL CALCULATOR</div>
+      <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",margin:"0 0 14px",lineHeight:1.6}}>Enter your entry price and current price for one token to see your exact impermanent loss.</p>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+        {[
+          {label:"ENTRY PRICE ($)", val:entryPrice, set:setEntryPrice, min:1, max:10000, step:1},
+          {label:"CURRENT PRICE ($)", val:currentPrice, set:setCurrentPrice, min:1, max:100000, step:1},
+        ].map((f,i)=>(
+          <div key={i}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginBottom:4}}>{f.label}</div>
+            <input type="number" value={f.val} onChange={e=>f.set(Math.max(1,Number(e.target.value)))}
+              style={{width:"100%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:8,padding:"8px 10px",color:"#F9FAFB",fontFamily:"monospace",fontSize:14,boxSizing:"border-box",outline:"none"}}/>
+          </div>
+        ))}
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
+        {[
+          {label:"PRICE CHANGE", value:`${priceRatio.toFixed(2)}x`, color:"#9CA3AF"},
+          {label:"IL %", value:`${Math.abs(il).toFixed(2)}%`, color: Math.abs(il) > 10 ? "#EF4444" : Math.abs(il) > 5 ? "#F59E0B" : "#10B981"},
+          {label:"IL IN $", value:`$${Math.abs(ilDollar).toFixed(2)}`, color:"#EF4444"},
+        ].map((r,i)=>(
+          <div key={i} style={{background:"rgba(0,0,0,0.3)",borderRadius:8,padding:"10px 8px",textAlign:"center"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#6B7280",letterSpacing:1,marginBottom:4}}>{r.label}</div>
+            <div style={{fontFamily:"monospace",fontSize:16,color:r.color,fontWeight:700}}>{r.value}</div>
+          </div>
+        ))}
+      </div>
+      <p style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:"#6B7280",margin:0,lineHeight:1.6}}>
+        Based on $1,000 deposit ($500 each token). Hold value: ${holdValue.toFixed(2)} vs LP value: ${(holdValue - Math.abs(ilDollar)).toFixed(2)}
+      </p>
+    </div>
+  );
+}
+
+// ── FEE VS IL CALCULATOR ──
+function FeeILCalculator() {
+  const [feeAPR, setFeeAPR] = useState(80);
+  const [priceChange, setPriceChange] = useState(2);
+
+  const ilPct = Math.abs((2 * Math.sqrt(priceChange) / (1 + priceChange) - 1) * 100);
+  const netReturn = feeAPR - ilPct;
+
+  return (
+    <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:12,padding:16,marginTop:16,marginBottom:8}}>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#10B981",letterSpacing:2,marginBottom:4}}>🧮 INTERACTIVE — FEE vs IL CALCULATOR</div>
+      <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",margin:"0 0 14px",lineHeight:1.6}}>Enter the pool's fee APR and expected price change to see your real net return.</p>
+
+      <div style={{marginBottom:12}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>FEE APR</span>
+          <span style={{fontFamily:"monospace",fontSize:13,color:"#FCD34D",fontWeight:700}}>{feeAPR}%</span>
+        </div>
+        <input type="range" min="0" max="500" step="5" value={feeAPR} onChange={e=>setFeeAPR(Number(e.target.value))} style={{width:"100%",accentColor:"#10B981"}}/>
+      </div>
+
+      <div style={{marginBottom:14}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>PRICE CHANGE (x)</span>
+          <span style={{fontFamily:"monospace",fontSize:13,color:"#FCD34D",fontWeight:700}}>{priceChange}x</span>
+        </div>
+        <input type="range" min="1" max="10" step="0.25" value={priceChange} onChange={e=>setPriceChange(Number(e.target.value))} style={{width:"100%",accentColor:"#10B981"}}/>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+        {[
+          {label:"FEE APR", value:`${feeAPR}%`, color:"#10B981"},
+          {label:"IL RATE", value:`${ilPct.toFixed(1)}%`, color:"#EF4444"},
+          {label:"NET RETURN", value:`${netReturn.toFixed(1)}%`, color: netReturn > 0 ? "#FCD34D" : "#EF4444"},
+        ].map((r,i)=>(
+          <div key={i} style={{background:"rgba(0,0,0,0.3)",borderRadius:8,padding:"10px 8px",textAlign:"center"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#6B7280",letterSpacing:1,marginBottom:4}}>{r.label}</div>
+            <div style={{fontFamily:"monospace",fontSize:18,color:r.color,fontWeight:700}}>{r.value}</div>
+          </div>
+        ))}
+      </div>
+      {netReturn < 0 && (
+        <div style={{marginTop:10,background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,padding:"8px 12px"}}>
+          <p style={{margin:0,fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#EF4444",lineHeight:1.6}}>⚠️ IL exceeds fee income. You would be better off just holding these tokens.</p>
+        </div>
+      )}
+      {netReturn > 0 && netReturn < 20 && (
+        <div style={{marginTop:10,background:"rgba(245,158,11,0.1)",border:"1px solid rgba(245,158,11,0.3)",borderRadius:8,padding:"8px 12px"}}>
+          <p style={{margin:0,fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#F59E0B",lineHeight:1.6}}>⚠️ Marginal return. Make sure you are accounting for rebalancing costs and gas fees.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── CAPITAL EFFICIENCY CALCULATOR ──
+function CapitalEfficiencyCalc() {
+  const [capital, setCapital] = useState(10000);
+  const [rangeWidth, setRangeWidth] = useState(20);
+  const [poolFeeAPR, setPoolFeeAPR] = useState(50);
+
+  // Full range efficiency ~2-5% of capital actively earning
+  const fullRangeActive = capital * 0.03;
+  // Concentrated: efficiency inversely proportional to range width
+  const concentratedMultiplier = Math.min(100 / rangeWidth * 2, 50);
+  const concentratedActive = Math.min(capital, capital * concentratedMultiplier / 100 * 10);
+  const concentratedFeeAPR = poolFeeAPR * concentratedMultiplier;
+  const fullRangeFeeAPR = poolFeeAPR * 0.03;
+
+  return (
+    <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:12,padding:16,marginTop:16,marginBottom:8}}>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#10B981",letterSpacing:2,marginBottom:4}}>🧮 INTERACTIVE — CAPITAL EFFICIENCY CALCULATOR</div>
+      <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",margin:"0 0 14px",lineHeight:1.6}}>See how concentrated liquidity amplifies your fee earnings compared to full range.</p>
+
+      <div style={{marginBottom:12}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>CAPITAL DEPLOYED</span>
+          <span style={{fontFamily:"monospace",fontSize:13,color:"#FCD34D",fontWeight:700}}>${capital.toLocaleString()}</span>
+        </div>
+        <input type="range" min="1000" max="100000" step="1000" value={capital} onChange={e=>setCapital(Number(e.target.value))} style={{width:"100%",accentColor:"#10B981"}}/>
+      </div>
+
+      <div style={{marginBottom:12}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>RANGE WIDTH (% around current price)</span>
+          <span style={{fontFamily:"monospace",fontSize:13,color:"#FCD34D",fontWeight:700}}>±{rangeWidth}%</span>
+        </div>
+        <input type="range" min="5" max="100" step="5" value={rangeWidth} onChange={e=>setRangeWidth(Number(e.target.value))} style={{width:"100%",accentColor:"#10B981"}}/>
+      </div>
+
+      <div style={{marginBottom:14}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>POOL BASE FEE APR (FULL RANGE)</span>
+          <span style={{fontFamily:"monospace",fontSize:13,color:"#FCD34D",fontWeight:700}}>{poolFeeAPR}%</span>
+        </div>
+        <input type="range" min="10" max="200" step="10" value={poolFeeAPR} onChange={e=>setPoolFeeAPR(Number(e.target.value))} style={{width:"100%",accentColor:"#10B981"}}/>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+        {[
+          {label:"FULL RANGE", apr:`~${fullRangeFeeAPR.toFixed(0)}%`, annual:`$${(capital * fullRangeFeeAPR / 100).toFixed(0)}`, color:"#6B7280", bg:"rgba(255,255,255,0.04)"},
+          {label:"CONCENTRATED", apr:`~${Math.min(concentratedFeeAPR, 9999).toFixed(0)}%`, annual:`$${Math.min(capital * concentratedFeeAPR / 100, 9999999).toFixed(0)}`, color:"#10B981", bg:"rgba(16,185,129,0.08)"},
+        ].map((r,i)=>(
+          <div key={i} style={{background:r.bg,border:`1px solid ${r.color}40`,borderRadius:10,padding:12,textAlign:"center"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,color:r.color,letterSpacing:1,marginBottom:6}}>{r.label}</div>
+            <div style={{fontFamily:"monospace",fontSize:24,color:r.color,fontWeight:700,marginBottom:2}}>{r.apr}</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",marginBottom:4}}>ESTIMATED APR</div>
+            <div style={{fontFamily:"monospace",fontSize:14,color:"#FCD34D"}}>{r.annual}/yr</div>
+          </div>
+        ))}
+      </div>
+      <p style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#4B5563",margin:"10px 0 0",lineHeight:1.6,textAlign:"center"}}>
+        Estimates only. Assumes price stays within range. Actual results vary based on volume and market conditions.
+      </p>
+    </div>
+  );
+}
 
 // ── AMM CALCULATOR ──
 function AMMCalculator() {
@@ -4168,6 +4724,15 @@ function LPLessonView({ lesson, onBack, onComplete }) {
         </div>
       ))}
 
+      {/* Interactive: IL Calculator — Lesson 3 */}
+      {lesson.id === 3 && (<ILCalculator />)}
+
+      {/* Interactive: Fee vs IL Calculator — Lesson 4 */}
+      {lesson.id === 4 && (<FeeILCalculator />)}
+
+      {/* Interactive: Capital Efficiency — Lesson 5 */}
+      {lesson.id === 5 && (<CapitalEfficiencyCalc />)}
+
       {/* Interactive: AMM Calculator — Lesson 2 */}
       {lesson.id === 2 && (
         <AMMCalculator />
@@ -4298,10 +4863,7 @@ function LPLab() {
 
         {/* Coming soon lessons */}
         {[
-          {n:3, title:"Impermanent Loss", icon:"📉", tag:"The #1 risk every LP must understand"},
           {n:2, title:"", icon:"", tag:""},
-          {n:4, title:"LP Fees & Earnings", icon:"💰", tag:"How you actually make money"},
-          {n:5, title:"Concentrated Liquidity", icon:"🎯", tag:"More fees, less capital"},
           {n:6, title:"Price Bins & Ticks", icon:"📊", tag:"Meteora DLMM & Orca Whirlpools"},
           {n:7, title:"Single-Sided Deposits", icon:"↕️", tag:"DCA mechanics and launch pools"},
           {n:8, title:"Active vs Passive LP", icon:"⚖️", tag:"When to monitor, when to relax"},
