@@ -3320,9 +3320,10 @@ function Landing({onStart,onChallenge,onIncubator,completed}){
       }}>
         🔥 TRADE CLKN ON BAGS.FM
       </a>
-      <a href={JUPITER_TRADE_LINK} target="_blank" rel="noreferrer" style={{display:"block",width:"100%",background:"rgba(74,222,128,0.12)",border:"1px solid rgba(74,222,128,0.3)",borderRadius:10,padding:"12px",fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#4ADE80",letterSpacing:3,textDecoration:"none",textAlign:"center",marginTop:8,boxSizing:"border-box"}}>
-        ⚡ BUY ON JUPITER
-      </a>
+      <JupiterSwapButton
+        label="⚡ BUY ON JUPITER"
+        style={{display:"block",width:"100%",background:"rgba(74,222,128,0.12)",border:"1px solid rgba(74,222,128,0.3)",borderRadius:10,padding:"12px",fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:700,color:"#4ADE80",letterSpacing:3,textAlign:"center",marginTop:8,boxSizing:"border-box",cursor:"pointer"}}
+      />
     </div>
   );
 }
