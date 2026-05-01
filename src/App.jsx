@@ -7,7 +7,6 @@ const JUPITER_TRADE_LINK = "https://jup.ag/tokens/DW6DF2mjtyx67vcNmMhFm9XdxAwREu
 
 // ── JUPITER WIDGET ──
 const JUPITER_REFERRAL = "A4fSbCMAya9rLWY4incNYaVfhYA9mpCownbFEW3dUZAg";
-const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
 
 function JupiterSwapButton({ label, style }) {
   const [open, setOpen] = useState(false);
@@ -17,7 +16,7 @@ function JupiterSwapButton({ label, style }) {
       window.Jupiter.init({
         displayMode: "modal",
         formProps: {
-          initialOutputMint: CLKN_MINT,
+          initialOutputMint: "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS",
           swapMode: "ExactInOrOut",
         },
         referralAccount: JUPITER_REFERRAL,
