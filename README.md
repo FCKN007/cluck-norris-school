@@ -52,15 +52,17 @@ Three learning paths for every level:
 
 ## 🎮 Features
 
-- 🤖 **Ask Cluck Norris (AI)** — Claude AI embedded as Cluck Norris. Available in every lesson, after every answer, and throughout the Library. 10 free questions per day.
-- 🪙 **CLKN Token Unlock** — Hit your daily limit? Send CLKN to unlock 20 more questions. Verified on-chain via Helius. No wallet connect needed — the exact decimal amount is your key.
-- 📚 **The Library** — Deep-dive liquidity content, 50-term searchable glossary, curated DeFi resource links
-- 🎙️ **Flock Talk** — Media room showcasing podcast appearances, crypto calls, and community features
-- 📊 **Live Token Data** — Real-time CLKN pool data, holder count, lifetime fees, and live swap quotes
-- 🎒 **Bags Info** — Live Bags.fm token launch feed with prices, market caps, and direct trade links
+- 🤖 **Ask Cluck Norris (AI)** — Claude AI embedded in every lesson, every wrong answer, and throughout the Library. 10 free questions per day. Send CLKN to unlock 20 more — verified on-chain automatically. No wallet connect needed.
+- ⚗️ **LP Lab** — Protocol-agnostic liquidity training. 5 lessons live (12 total planned) covering AMMs, impermanent loss, LP fees, concentrated liquidity and more. Interactive calculators and quizzes every lesson. Works on Meteora, Raydium, Orca, Uniswap — anywhere you LP.
+- 📖 **Library Deep Dives** — 10 topic deep dives across 3 categories: Survival (wallet security, trading psychology, tax basics), Research (token research, reading Solscan, finding alpha), Concepts (stablecoins, bridges, NFTs, DAOs).
+- 📚 **The Library** — Searchable 50-term DeFi glossary, deep-dive liquidity content, curated resource links.
+- ⚡ **Jupiter Swap** — Full Jupiter DEX aggregator embedded directly in the app. Swap any token without leaving the schoolyard. CLKN pre-selected. Wallet connect handled entirely by Jupiter. 0.1% referral fee supports the ecosystem.
+- 🎙️ **Flock Talk** — Media room showcasing podcast appearances, crypto calls, and community features.
+- 📊 **Live Token Data** — Real-time CLKN pool data, holder count, lifetime fees, and live swap quotes.
+- 🎒 **Bags Info** — Live Bags.fm token launch feed with prices, market caps, and direct trade links.
 - 🏆 **Trophy System** — Pass the Ultimate Challenge or graduate all 12 lessons to submit your wallet for CLKN airdrops and giveaways. Verified on-chain via Helius. Logged to Google Sheets.
-- 💾 **Progress Saving** — Lesson progress saved automatically via localStorage
-- No wallet required. No signup. No extra credit.
+- 💾 **Progress Saving** — Lesson progress saved automatically via localStorage.
+- No wallet required for education. No signup. No extra credit.
 
 ---
 
@@ -70,6 +72,8 @@ Three learning paths for every level:
 - **Backend:** Node.js + Express
 - **Deployed:** Railway at clucknorris.app
 - **AI:** Anthropic Claude (Haiku) via API
+- **Swap:** Jupiter Plugin v1
+- **Analytics:** Google Analytics
 - **License:** MIT Open Source
 - **Built for:** Bags.fm Hackathon
 
@@ -80,11 +84,12 @@ Three learning paths for every level:
 | API | Usage |
 |-----|-------|
 | Bags.fm API | Pool data, trade quotes, lifetime fees, token launch feed, partner ref |
-| Jupiter | Live swap quotes with real slippage, circulating supply endpoint |
+| Jupiter | Embedded swap widget, live swap quotes, circulating supply endpoint |
 | Helius | Live holder count, transaction verification, wallet balance lookups |
 | DexScreener | Market data, price, volume, 24H change |
 | Anthropic | Claude AI powering Ask Cluck Norris |
 | Google Sheets | Trophy and graduation wallet tracking dashboard |
+| Google Analytics | Visitor tracking and analytics |
 
 ---
 
@@ -95,6 +100,7 @@ Three learning paths for every level:
 - **Contract:** `DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS`
 - **Trade:** [bags.fm](https://bags.fm/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS?ref=firechicken007) | [Jupiter](https://jup.ag/tokens/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS)
 - **Partner Ref:** `firechicken007` — 25% platform fee share
+- **Jupiter Referral:** `A4fSbCMAya9rLWY4incNYaVfhYA9mpCownbFEW3dUZAg` — 0.1% swap fee
 - **DEX:** Meteora DAMM V2
 - **Pool:** `64WXkHM4zyWUkYy32TfUeBV5wDAfdcUGDxe5ntM4xaTd`
 - **Holders:** 327+
@@ -106,7 +112,7 @@ Three learning paths for every level:
 
 Turn crypto education into a game: Learn fast. Avoid rugs. Survive the market.
 
-Born from the FireChicken (FCKN) community on Bags.fm — the same flock, now with real utility, AI-powered education, and on-chain token-gated access. First token in the Bags.fm ecosystem with embedded AI and CLKN-gated features.
+Born from the FireChicken (FCKN) community on Bags.fm — the same flock, now with real utility, AI-powered education, on-chain token-gated access, and an embedded DEX. First token in the Bags.fm ecosystem with embedded AI, CLKN-gated features, and a full Jupiter swap integration.
 
 ---
 
