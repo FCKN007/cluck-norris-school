@@ -4,6 +4,41 @@ const SOL_MINT = "So11111111111111111111111111111111111111112";
 const LAMPORTS_PER_SOL = 1_000_000_000;
 const CLKN_TRADE_LINK = "https://bags.fm/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS?ref=firechicken007";
 const JUPITER_TRADE_LINK = "https://jup.ag/tokens/DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
+
+// ── JUPITER WIDGET ──
+const JUPITER_REFERRAL = "A4fSbCMAya9rLWY4incNYaVfhYA9mpCownbFEW3dUZAg";
+const CLKN_MINT = "DW6DF2mjtyx67vcNmMhFm9XdxAwREurorghZcS3CBAGS";
+
+function JupiterSwapButton({ label, style }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (open && window.Jupiter) {
+      window.Jupiter.init({
+        displayMode: "modal",
+        formProps: {
+          initialOutputMint: CLKN_MINT,
+          swapMode: "ExactInOrOut",
+        },
+        referralAccount: JUPITER_REFERRAL,
+        referralFee: 10, // 0.1% in basis points * 100
+        defaultExplorer: "Solscan",
+      });
+      window.Jupiter.resume();
+      setOpen(false);
+    }
+  }, [open]);
+
+  return (
+    <button
+      onClick={() => setOpen(true)}
+      style={style}
+    >
+      {label}
+    </button>
+  );
+}
+
 const TWITTER_LINK = "https://x.com/firechicken007";
 const TELEGRAM_LINK = "https://t.me/FireChicken007";
 const PARTNER_LINK = "https://bags.fm/?ref=firechicken007";
@@ -3160,9 +3195,10 @@ function CLKNWidget() {
       <a href={CLKN_TRADE_LINK} target="_blank" rel="noreferrer" style={{display:"block",width:"100%",background:"linear-gradient(135deg,#D97706,#EF4444)",border:"none",borderRadius:10,padding:"14px",fontFamily:"'Oswald',sans-serif",fontSize:15,fontWeight:700,color:"#fff",letterSpacing:3,textDecoration:"none",textAlign:"center",boxShadow:"0 0 28px rgba(217,119,6,0.5)",marginBottom:8}}>
         🔥 TRADE CLKN ON BAGS.FM
       </a>
-      <a href={JUPITER_TRADE_LINK} target="_blank" rel="noreferrer" style={{display:"block",width:"100%",background:"rgba(74,222,128,0.12)",border:"1px solid rgba(74,222,128,0.3)",borderRadius:10,padding:"13px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#4ADE80",letterSpacing:3,textDecoration:"none",textAlign:"center",marginBottom:10,boxSizing:"border-box"}}>
-        ⚡ BUY ON JUPITER
-      </a>
+      <JupiterSwapButton
+        label="⚡ BUY ON JUPITER"
+        style={{display:"block",width:"100%",background:"rgba(74,222,128,0.12)",border:"1px solid rgba(74,222,128,0.3)",borderRadius:10,padding:"13px",fontFamily:"'Oswald',sans-serif",fontSize:14,fontWeight:700,color:"#4ADE80",letterSpacing:3,textAlign:"center",marginBottom:10,boxSizing:"border-box",cursor:"pointer"}}
+      />
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 4px"}}>
         <span style={{fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#4B5563",letterSpacing:1}}>
           {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : ""}
