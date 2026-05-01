@@ -4141,10 +4141,10 @@ CLUCK'S REALITY CHECK: Most retail LPs chase high APR numbers without doing the 
         explanation: "Fee APR = (Daily Fees / TVL) × 365 × 100. ($400 / $200,000) × 365 × 100 = 73% APR. This is an excellent fee APR — it means the pool turns over 73% of its TVL in fees annually. Always calculate this yourself rather than trusting protocol dashboards."
       },
       {
-        q: "You are choosing between two pools for a volatile token pair. Pool A has 0.25% fees. Pool B has 1% fees. Why might Pool B be the better choice?",
-        options: ["Pool B is always better because higher fees mean more income", "Higher fee tiers attract volume for volatile pairs — traders accept higher fees because the IL risk for LPs is greater and needs to be compensated", "Pool A is better because lower fees attract more traders", "Fee tier does not matter — only TVL matters"],
+        q: "Why do protocols offer multiple fee tiers for the same token pair?",
+        options: ["Higher fee tiers always earn more so LPs should always choose them", "Different tiers serve different use cases — lower fees suit high-volume stable pairs, higher fees compensate LPs for IL risk on volatile pairs where less volume is expected", "To confuse liquidity providers into picking the wrong pool", "Fee tiers are set by the protocol and LPs have no choice"],
         correct: 1,
-        explanation: "Fee tiers exist for a reason. Volatile pairs need higher fees to compensate LPs for the greater IL risk. Traders willing to swap a volatile token will accept a 1% fee. LPs providing liquidity to that volatile pair deserve higher compensation. Matching the fee tier to the pair type is critical for maximizing fee income while managing IL."
+        explanation: "Fee tiers exist because different pairs have different risk profiles. Stable pairs like USDC/USDT attract huge volume at 0.01% — traders want best execution and aggregators like Jupiter always route to the cheapest pool. Volatile pairs have less volume and higher IL risk — LPs need higher fee compensation. A 1% pool for a stable pair would sit empty because aggregators route around it."
       },
       {
         q: "What does the Volume/TVL ratio tell you?",
