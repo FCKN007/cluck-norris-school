@@ -3765,7 +3765,7 @@ The people depositing tokens into pools are called Liquidity Providers — LPs. 
     quiz: [
       {
         q: "What is slippage?",
-        options: ["The fee paid to the DEX", "The difference between expected price and actual execution price", "The time it takes for a transaction to confirm", "The spread between buy and sell price"],
+        options: ["The fee paid to the DEX", "Price gap between expected and actual execution", "The time for a transaction to confirm", "The spread between buy and sell price"],
         correct: 1,
         explanation: "Slippage is the difference between the price you saw when you submitted a trade and the price you actually got when it executed. It's caused by low liquidity and other trades happening at the same time."
       },
@@ -3777,7 +3777,7 @@ The people depositing tokens into pools are called Liquidity Providers — LPs. 
       },
       {
         q: "Who provides liquidity in DeFi pools?",
-        options: ["Only the token creators", "Centralized exchanges", "Anyone — regular users who deposit their tokens and earn fees", "Only large institutions and market makers"],
+        options: ["Only the token creators", "Centralized exchanges", "Anyone who deposits tokens earns fees", "Only large institutions"],
         correct: 2,
         explanation: "In DeFi, anyone can be a liquidity provider. You deposit two tokens into a pool, earn a share of every trading fee generated, and can withdraw at any time. This is one of the most powerful concepts in all of DeFi."
       },
@@ -3915,7 +3915,7 @@ FINDING THE RIGHT TOLERANCE:
     quiz: [
       {
         q: "In the AMM formula x*y=k, what does k represent?",
-        options: ["The current token price", "A constant that never changes regardless of trades", "The total dollar value of the pool", "The number of liquidity providers"],
+        options: ["The current token price", "A constant that never changes", "Total dollar value of the pool", "Number of liquidity providers"],
         correct: 1,
         explanation: "k is the constant product — the result of multiplying the two token reserves together. Every trade changes x and y but the product must remain k. This is what forces the price to move as trades happen."
       },
@@ -4040,7 +4040,7 @@ CLUCK'S FRAMEWORK: Never enter an LP position without running this calculation. 
     quiz: [
       {
         q: "Why is impermanent loss called 'impermanent'?",
-        options: ["Because it only happens temporarily during volatile markets", "Because if prices return to your entry ratio the loss disappears — it only becomes permanent when you withdraw", "Because the protocol reimburses you after 30 days", "Because it only affects small positions"],
+        options: ["It only happens during volatile markets", "Loss disappears if prices return to entry — permanent only when you withdraw", "The protocol reimburses you after 30 days", "It only affects small positions"],
         correct: 1,
         explanation: "IL is impermanent because the AMM rebalancing is reversible. If the price ratio between the two tokens returns to exactly where it was when you deposited, your position value equals what you would have had by just holding. The loss only locks in permanently when you withdraw at a different ratio than you entered."
       },
@@ -4365,6 +4365,159 @@ Match your range width to the asset's volatility. A stablecoin can use a 0.1% ra
       }
     ],
     cluckVerdict: "Concentrated liquidity is not for everyone. But if you understand it and manage it properly it is the most powerful tool available to retail LPs. You now understand it. Whether you manage it properly is up to you."
+  }
+  ,
+  {
+    id: 6,
+    title: "Price Bins & Ticks",
+    icon: "📊",
+    tagline: "The mechanics underneath concentrated liquidity. Know what is actually happening inside your range.",
+    cluckHook: "Most LPs set a range and have no idea what is actually happening inside it. Ticks and bins are the mechanics underneath concentrated liquidity. Understanding them separates the serious LPs from the ones who just got lucky once.",
+    sections: [
+      {
+        heading: "What Are Ticks?",
+        body: `Ticks are the discrete price points that divide price space in tick-based systems like Uniswap v3, Raydium CLMM, and Orca Whirlpools.
+
+Each tick represents a 0.01% price increment — specifically, each tick multiplies the price by 1.0001.
+
+Tick 0 = price 1.0000
+Tick 100 = approximately 1% above tick 0
+Tick 1000 = approximately 10.5% above tick 0
+
+TICK SPACING per fee tier:
+• 0.01% fee — tick spacing 1 (finest granularity)
+• 0.05% fee — tick spacing 10
+• 0.25% fee — tick spacing 50
+• 1% fee — tick spacing 200
+
+Lower fee tiers allow finer price ranges. When you set a range, you define a lower and upper tick. Your liquidity distributes uniformly across every tick in between — all earning fees proportionally when price passes through them.`
+      },
+      {
+        heading: "What Are Bins?",
+        body: `Bins are Meteora DLMM's approach to concentrated liquidity. Instead of uniform liquidity across a range, bins divide price space into discrete buckets where ONLY the active bin earns fees.
+
+HOW BINS WORK:
+• Price range divided into bins of equal width (set by bin step)
+• Only the bin containing the current price earns fees
+• All other bins earn nothing until price moves into them
+• Smaller bin step = more precise positioning but exits faster
+• Larger bin step = stays active longer per bin
+
+Example bin steps:
+• Bin step 1 = 0.1% per bin (very tight)
+• Bin step 10 = 1% per bin (moderate)
+• Bin step 100 = 10% per bin (wide)
+
+Because only the active bin earns, all trading volume at the current price flows to a single concentrated point — making fee capture more efficient than tick-based systems when managed correctly.`
+      },
+      {
+        heading: "Ticks vs Bins — Direct Comparison",
+        body: `TICK-BASED (Raydium CLMM, Orca, Uniswap v3):
+• Liquidity distributed uniformly across entire range
+• All ticks earn fees proportionally
+• Price moving within your range changes earnings gradually
+• More forgiving for volatile assets
+• Simpler to understand and manage
+
+BIN-BASED (Meteora DLMM):
+• Only active bin earns — maximum concentration
+• Exiting active bin immediately stops fee earnings
+• More precise fee capture when price is stable
+• Dynamic fees adjust to market volatility
+• More complex but more powerful for active managers
+
+WHEN TO USE EACH:
+Stable or slow-moving pairs: DLMM bins for maximum precision
+Volatile assets, wider ranges: Tick-based — more forgiving
+New to concentrated LP: Tick-based — easier to start
+Daily active management: DLMM — higher potential with discipline`
+      },
+      {
+        heading: "Setting Ranges Like a Pro",
+        body: `Most LPs set ranges based on gut feeling. Professionals use data.
+
+STEP 1 — CHECK HISTORICAL VOLATILITY:
+Look at 30-day price history. What is the typical daily range? Match your range to your management frequency:
+• Daily check: ±5-10%
+• Weekly check: ±15-25%
+• Monthly check: ±40-60%
+
+STEP 2 — USE PRICE STRUCTURE:
+Near support? Set range wider below. Near resistance? Wider above. Use structure intentionally.
+
+STEP 3 — CALCULATE BREAKEVEN:
+Rebalancing cost / (Daily fee earnings) = Days needed in range to break even.
+
+READING THE UI:
+• Raydium CLMM: Highlighted band on price chart. Green = in range.
+• Orca: Deposit ratio indicator showing token split at current price.
+• Meteora DLMM: Individual bins shown, active bin highlighted. Three distribution shapes:
+  - Spot: Equal liquidity per bin
+  - Curve: More near current price for tighter fee capture
+  - Bid-Ask: More at edges, acts like limit orders`
+      },
+      {
+        heading: "Common Mistakes",
+        body: `❌ Setting ranges without checking historical volatility
+❌ Using DLMM bins for volatile assets — constant out-of-range with zero fees
+❌ Ignoring DLMM distribution shape — default is not always optimal
+❌ Rebalancing after every small price move — killed by transaction costs
+❌ Forgetting that out-of-range = no hedge, just no fees and price exposure
+❌ Comparing DLMM and tick-based APR directly — different mechanics
+❌ Setting asymmetric ranges without a reason — know why you are weighting one side`
+      }
+    ],
+    quiz: [
+      {
+        q: "In a tick-based system, what does each tick represent?",
+        options: ["A fixed dollar price like $100 or $150", "A 0.01% price increment — price multiplied by 1.0001", "The number of LPs in the range", "A 24-hour time period"],
+        correct: 1,
+        explanation: "Each tick is a logarithmic step of 0.01% (multiplier 1.0001). This keeps tick spacing consistent in percentage terms across all price levels — useful whether a token trades at $0.01 or $100,000."
+      },
+      {
+        q: "In Meteora DLMM, how many bins are earning fees at any given moment?",
+        options: ["All bins in the range", "Bins within 10% of current price", "Only the single active bin at current price", "Fees split equally across all bins"],
+        correct: 2,
+        explanation: "Only the active bin earns fees in DLMM. This is the core difference from tick-based systems. All fee income concentrates at one precise price point — powerful when price is stable, zero earnings the moment price moves to the next bin."
+      },
+      {
+        q: "A 0.25% fee pool has tick spacing 50. A 0.01% fee pool has tick spacing 1. What does this mean?",
+        options: ["0.25% always earns more", "0.25% forces wider minimum ranges — positions cannot be narrower than 50 ticks. 0.01% allows much finer positioning", "Tick spacing has no effect on range width", "Low fee tiers cannot be used for volatile tokens"],
+        correct: 1,
+        explanation: "Tick spacing defines minimum range granularity. With spacing 50, your bounds must be multiples of 50 — you cannot set very tight ranges. This is why stable pairs use 0.01% fee tiers — they need tight ranges requiring fine tick spacing."
+      },
+      {
+        q: "Price has been in your DLMM active bin for 3 hours. Volume spikes and price moves 3 bins above you. What happens to your fees?",
+        options: ["Fees triple because of the volume spike", "Fees continue proportionally", "Fees stop immediately — you are out of range", "Fees accumulate and pay out when price returns"],
+        correct: 2,
+        explanation: "The moment price exits your active DLMM bin, fee earnings stop completely. Those 3 bins above you are earning from the volume spike — not you. DLMM is binary: in the active bin = earning, out of range = zero."
+      },
+      {
+        q: "What does the CURVE distribution shape in Meteora DLMM do?",
+        options: ["Spreads liquidity evenly across all bins", "Concentrates more liquidity near current price for higher fee capture when price stays close", "Places liquidity only at range extremes", "Auto-rebalances when price moves"],
+        correct: 1,
+        explanation: "Curve concentrates more capital in bins closest to current price. Optimal when you expect price to stay near center — you capture more fees per dollar at the most active price point. Trade-off: outer bins have less liquidity."
+      },
+      {
+        q: "For a USDC/USDT pair that rarely moves more than 0.1%, which is likely better — Orca Whirlpools or Meteora DLMM?",
+        options: ["Orca — tick-based is always better for stables", "Meteora DLMM — active bin captures 100% of fees at the stable price with minimal out-of-range risk", "They perform identically", "Neither — stablecoins should use full-range AMMs"],
+        correct: 1,
+        explanation: "DLMM excels for stable pairs. With USDC/USDT barely moving, your active bin stays active — earning maximum concentration with minimal rebalancing. Tick-based systems spread liquidity across a range even when price barely moves."
+      },
+      {
+        q: "Rebalancing costs $0.01 on Solana vs $50 on Ethereum. How does this change LP strategy?",
+        options: ["Same strategies work on both chains", "Solana enables tight ranges with frequent rebalancing. Ethereum forces wide ranges and rare rebalancing or fees destroy returns", "Always use full range on Ethereum", "Transaction costs are irrelevant vs fee income"],
+        correct: 1,
+        explanation: "On Solana at $0.01 you can rebalance daily — negligible cost. On Ethereum at $50 you need to earn more than $50/day just to break even on rebalancing. This forces wider ranges and less frequent management. Solana's low fees are a real competitive advantage for active LP."
+      },
+      {
+        q: "A 0.01% fee pool with tick spacing 1 vs a 0.25% pool with tick spacing 50 — why is direct APR comparison misleading?",
+        options: ["Higher fee tiers always have better spacing", "Fine tick spacing lets you concentrate capital more tightly — potentially earning more total fees than a wider pool despite the lower fee percentage", "All fee tiers have the same tick spacing on Solana", "Tick spacing only matters for DLMM"],
+        correct: 1,
+        explanation: "Tick spacing affects how tightly you can deploy capital. Fine spacing lets you position extremely close to current price — potentially outearning a higher fee pool where minimum range forces wider deployment. Fee tier percentage is only one variable."
+      }
+    ],
+    cluckVerdict: "The interface makes it look simple. The math underneath is not. Now you know both. Set ranges with data, understand what is happening inside them, and manage the cost of rebalancing. That is how serious LPs operate."
   }
 ];
 
@@ -5044,7 +5197,6 @@ function LPLab() {
 
         {/* Coming soon lessons */}
         {[
-          {n:2, title:"", icon:"", tag:""},
           {n:7, title:"Single-Sided Deposits", icon:"↕️", tag:"DCA mechanics and launch pools"},
           {n:8, title:"Active vs Passive LP", icon:"⚖️", tag:"When to monitor, when to relax"},
           {n:9, title:"LP Risk Management", icon:"🛡️", tag:"Know your risk or the market will teach you"},
