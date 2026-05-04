@@ -3936,6 +3936,12 @@ FINDING THE RIGHT TOLERANCE:
         options: ["They are paid by the protocol to maintain prices", "When AMM price differs from market price, they profit by trading the difference — which brings the prices back together", "They vote on price adjustments through governance", "AMM prices are always accurate — no arbitrage needed"],
         correct: 1,
         explanation: "When an AMM's price drifts from the real market price, arbitrageurs buy the cheaper asset in the AMM and sell it elsewhere (or vice versa) until the prices converge. They profit from the difference, and their activity is what keeps AMM prices aligned with the broader market."
+      },
+      {
+        q: "You want to swap $500 of SOL for CLKN. The pool has $50,000 TVL. Your friend wants to swap $50,000 of SOL in the same pool. Who experiences more price impact and why?",
+        options: ["You do — smaller trades always have more impact", "Your friend does — their trade represents 100% of the pool TVL, moving the price dramatically while yours represents only 1%", "Both experience the same impact — AMMs treat all trades equally", "Neither — AMMs guarantee fixed prices for all trade sizes"],
+        correct: 1,
+        explanation: "Price impact scales with trade size relative to pool size. Your $500 trade is 1% of the $50,000 pool — minimal impact. Your friend's $50,000 trade equals the entire pool TVL — the x*y=k formula means they would drain so much of one token that the price moves dramatically against them. This is why large traders split trades or use pools with higher liquidity."
       }
     ],
     cluckVerdict: "x times y equals k. Four characters. The foundation of hundreds of billions of dollars of DeFi volume. Now you know what actually happens when you hit swap."
@@ -4055,6 +4061,18 @@ CLUCK'S FRAMEWORK: Never enter an LP position without running this calculation. 
         options: ["120% — the fees cover everything", "100% — you subtract the IL from the fees", "20% IL means you lost money regardless of fees", "Cannot be calculated"],
         correct: 1,
         explanation: "Net return = Fee APR minus IL rate. 120% fee APR minus 20% IL = approximately 100% net return. You still made excellent money but significantly less than the headline APR suggested. Always run this calculation before entering any LP position."
+      },
+      {
+        q: "You provided liquidity to a SOL/USDC pool 6 months ago. SOL has since moved from $100 to $180 then back to $100. You are considering withdrawing. What is your IL situation?",
+        options: ["You have significant IL from the price swings", "You have zero IL — price returned to your entry point so the loss has disappeared", "You have 5.7% IL because SOL moved 1.8x at its peak", "IL is permanent once it occurs regardless of price returning"],
+        correct: 1,
+        explanation: "This is why IL is called impermanent. The loss only materializes when you withdraw at a different price ratio than you entered. If SOL returns exactly to your entry price of $100, the pool ratio is identical to when you deposited — no IL. The 5.7% loss existed temporarily at the $180 peak but reversed as price fell back. Timing your withdrawal matters."
+      },
+      {
+        q: "Which LP pair would you expect to have the HIGHEST impermanent loss over a 6-month period?",
+        options: ["USDC/USDT — two stablecoins both pegged to $1", "SOL/jitoSOL — jitoSOL tracks SOL price closely as a liquid staking token", "SOL/BONK — a major asset paired with a volatile meme coin", "BTC/ETH — two correlated major assets"],
+        correct: 2,
+        explanation: "SOL/BONK has the highest IL risk because the two assets are essentially uncorrelated. BONK can 10x or lose 90% of its value independently of SOL's price movement. That divergence is exactly what creates IL. USDC/USDT and SOL/jitoSOL are highly correlated pairs — prices move together minimizing IL. BTC/ETH are correlated but can diverge — moderate IL risk."
       }
     ],
     cluckVerdict: "IL is not a bug. It is the cost of being a market maker. Know the cost before you accept the job. Run the numbers every single time."
@@ -4326,11 +4344,135 @@ Match your range width to the asset's volatility. A stablecoin can use a 0.1% ra
         options: ["Aggressive narrow range (5-10%) for maximum APR", "Conservative wide range (50-200%) to stay in range while learning the mechanics", "Full range — same as traditional AMM", "Random range based on gut feeling"],
         correct: 1,
         explanation: "A conservative wide range for beginners makes sense for several reasons: SOL is volatile and a narrow range will go out of range constantly, the learning curve for rebalancing is steep, and a wide range still outperforms full-range in fee efficiency. Master the mechanics with a wide range before moving to aggressive concentrated positions."
+      },
+      {
+        q: "You set a concentrated LP position for SOL/USDC with a range of $140-$160. SOL pumps to $185. What happens to your position and what should you consider doing?",
+        options: ["Your position earns extra fees because price moved above your range", "Your position is out of range — earning zero fees and holding 100% USDC. You need to decide whether to reset your range around the new price or wait for SOL to return", "Your position automatically rebalances to follow the price", "You should immediately withdraw — out of range positions lose value rapidly"],
+        correct: 1,
+        explanation: "When price exits your upper range you end up holding 100% USDC — you effectively sold all your SOL on the way up through the rebalancing mechanism. Your position earns zero fees. You have two choices: reset your range around $185 to start earning again (but you have no SOL to provide — you need to buy some first), or wait hoping SOL returns to your range. Neither option is free — this is the active management cost of concentrated liquidity."
+      },
+      {
+        q: "What is the main advantage of Meteora's DLMM bin system compared to traditional tick-based concentrated liquidity?",
+        options: ["DLMM always earns more fees than tick-based systems", "Bins allow more granular fee control and the active bin captures 100% of fees at the current price — making fee capture more precise than uniform liquidity across a tick range", "DLMM requires less monitoring than tick-based systems", "DLMM has lower IL than tick-based concentrated liquidity"],
+        correct: 1,
+        explanation: "In tick-based systems, liquidity is spread uniformly across your entire range — all ticks earn proportionally. In DLMM, liquidity is concentrated in discrete bins where only the active bin (current price) earns fees. This means fee capture is extremely precise — all your liquidity in the active bin is working. The tradeoff is more complexity and the need to understand bin positioning. When managed well, DLMM can be more capital efficient than tick-based systems."
+      },
+      {
+        q: "A trader is comparing two LP strategies for the same SOL/USDC pool: Strategy A deploys $5,000 in a ±10% concentrated range. Strategy B deploys $100,000 in full range. Under normal market conditions with SOL trading within the ±10% range, which strategy earns more fees?",
+        options: ["Strategy B — more capital always means more fees", "Strategy A — the concentrated position provides equivalent or greater depth in the active range earning comparable fees with 20x less capital", "They earn exactly the same fees", "Cannot be determined without knowing daily volume"],
+        correct: 1,
+        explanation: "This is the core power of concentrated liquidity. $5,000 concentrated in a ±10% range can provide the same liquidity depth as $100,000 in full range within that band. The AMM routing algorithm sees equivalent depth — so the $5,000 position captures the same share of fees as the $100,000 position when price is within range. The concentrated LP earns 20x better capital efficiency. This is why serious LPs use concentrated liquidity."
       }
     ],
     cluckVerdict: "Concentrated liquidity is not for everyone. But if you understand it and manage it properly it is the most powerful tool available to retail LPs. You now understand it. Whether you manage it properly is up to you."
   }
 ];
+
+// ── BIN RANGE VISUALIZER ──
+function BinVisualizer() {
+  const [currentPrice, setCurrentPrice] = useState(100);
+  const [rangeWidth, setRangeWidth] = useState(20);
+  const [binStep, setBinStep] = useState(10);
+  const [mode, setMode] = useState("dlmm"); // dlmm or tick
+
+  const lowerPrice = currentPrice * (1 - rangeWidth / 100);
+  const upperPrice = currentPrice * (1 + rangeWidth / 100);
+  const totalBins = Math.floor((rangeWidth * 2) / (binStep / 10));
+  const activeBinPct = mode === "dlmm" ? (binStep / 10 / (rangeWidth * 2)) * 100 : 100;
+
+  // Generate bins for display
+  const displayBins = Math.min(totalBins, 20);
+  const binWidth = (rangeWidth * 2) / displayBins;
+  const bins = Array.from({length: displayBins}, (_, i) => {
+    const binLow = lowerPrice + (i * binWidth * currentPrice / 100);
+    const binHigh = binLow + (binWidth * currentPrice / 100);
+    const isActive = binLow <= currentPrice && currentPrice <= binHigh;
+    const distFromActive = Math.abs(i - Math.floor(displayBins / 2));
+    return { binLow, binHigh, isActive, distFromActive };
+  });
+
+  return (
+    <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:12,padding:16,marginTop:16,marginBottom:8}}>
+      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#10B981",letterSpacing:2,marginBottom:4}}>🧮 INTERACTIVE — BIN & TICK RANGE VISUALIZER</div>
+      <p style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:"#9CA3AF",margin:"0 0 14px",lineHeight:1.6}}>See how bins and ticks work at different range widths and price levels.</p>
+
+      {/* Mode toggle */}
+      <div style={{display:"flex",gap:8,marginBottom:12}}>
+        {[{id:"dlmm",label:"METEORA DLMM (BINS)"},{id:"tick",label:"RAYDIUM/ORCA (TICKS)"}].map(m=>(
+          <button key={m.id} onClick={()=>setMode(m.id)} style={{flex:1,background:mode===m.id?"rgba(16,185,129,0.2)":"rgba(255,255,255,0.04)",border:`1px solid ${mode===m.id?"#10B981":"rgba(255,255,255,0.1)"}`,borderRadius:8,padding:"8px",fontFamily:"'Oswald',sans-serif",fontSize:9,color:mode===m.id?"#10B981":"#6B7280",cursor:"pointer",letterSpacing:1}}>
+            {m.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Controls */}
+      <div style={{marginBottom:10}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>RANGE WIDTH (each side)</span>
+          <span style={{fontFamily:"monospace",fontSize:12,color:"#FCD34D"}}>±{rangeWidth}%</span>
+        </div>
+        <input type="range" min="5" max="50" step="5" value={rangeWidth} onChange={e=>setRangeWidth(Number(e.target.value))} style={{width:"100%",accentColor:"#10B981"}}/>
+      </div>
+
+      {mode === "dlmm" && (
+        <div style={{marginBottom:14}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1}}>BIN STEP</span>
+            <span style={{fontFamily:"monospace",fontSize:12,color:"#FCD34D"}}>{binStep} ({(binStep/10).toFixed(1)}% per bin)</span>
+          </div>
+          <input type="range" min="1" max="100" step="1" value={binStep} onChange={e=>setBinStep(Number(e.target.value))} style={{width:"100%",accentColor:"#10B981"}}/>
+        </div>
+      )}
+
+      {/* Bin visualization */}
+      <div style={{marginBottom:12}}>
+        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:9,color:"#6B7280",letterSpacing:1,marginBottom:8,textAlign:"center"}}>
+          {mode==="dlmm" ? "BINS (only 🟢 ACTIVE bin earns fees)" : "TICKS (all 🟢 IN-RANGE ticks earn fees)"}
+        </div>
+        <div style={{display:"flex",gap:2,alignItems:"flex-end",height:60,justifyContent:"center"}}>
+          {bins.map((bin,i)=>{
+            const isActive = bin.isActive;
+            const inRange = true;
+            const height = mode==="dlmm"
+              ? isActive ? 60 : Math.max(10, 60 - bin.distFromActive * 8)
+              : 45;
+            const color = mode==="dlmm"
+              ? isActive ? "#10B981" : bin.distFromActive < 2 ? "#065F46" : "#1F2937"
+              : "#10B981";
+            return (
+              <div key={i} style={{flex:1,background:color,borderRadius:"3px 3px 0 0",height:`${height}px`,minWidth:4,position:"relative",transition:"height 0.2s"}}>
+                {isActive && (
+                  <div style={{position:"absolute",top:-16,left:"50%",transform:"translateX(-50%)",fontFamily:"'Oswald',sans-serif",fontSize:8,color:"#10B981",whiteSpace:"nowrap"}}>
+                    {mode==="dlmm"?"ACTIVE":"CURRENT"}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
+          <span style={{fontFamily:"monospace",fontSize:9,color:"#6B7280"}}>${lowerPrice.toFixed(1)}</span>
+          <span style={{fontFamily:"monospace",fontSize:10,color:"#FCD34D",fontWeight:700}}>${currentPrice}</span>
+          <span style={{fontFamily:"monospace",fontSize:9,color:"#6B7280"}}>${upperPrice.toFixed(1)}</span>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+        {[
+          {label:"TOTAL BINS/TICKS", value: mode==="dlmm" ? `~${Math.max(1,totalBins)}` : `~${Math.floor(rangeWidth*2/0.01)}`, color:"#9CA3AF"},
+          {label:"EARNING NOW", value: mode==="dlmm" ? "1 BIN" : "ALL IN RANGE", color:"#10B981"},
+          {label:"FEE EFFICIENCY", value: mode==="dlmm" ? "MAXIMUM" : "DISTRIBUTED", color:"#FCD34D"},
+        ].map((r,i)=>(
+          <div key={i} style={{background:"rgba(0,0,0,0.3)",borderRadius:8,padding:"8px",textAlign:"center"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:7,color:"#6B7280",letterSpacing:1,marginBottom:4}}>{r.label}</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:11,color:r.color,fontWeight:700}}>{r.value}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // ── IL CALCULATOR ──
 function ILCalculator() {
@@ -4766,6 +4908,9 @@ function LPLessonView({ lesson, onBack, onComplete }) {
       {/* Interactive: Fee vs IL Calculator — Lesson 4 */}
       {lesson.id === 4 && (<FeeILCalculator />)}
 
+      {/* Interactive: Bin Range Visualizer — Lesson 6 */}
+      {lesson.id === 6 && (<BinVisualizer />)}
+
       {/* Interactive: Capital Efficiency — Lesson 5 */}
       {lesson.id === 5 && (<CapitalEfficiencyCalc />)}
 
@@ -4900,7 +5045,6 @@ function LPLab() {
         {/* Coming soon lessons */}
         {[
           {n:2, title:"", icon:"", tag:""},
-          {n:6, title:"Price Bins & Ticks", icon:"📊", tag:"Meteora DLMM & Orca Whirlpools"},
           {n:7, title:"Single-Sided Deposits", icon:"↕️", tag:"DCA mechanics and launch pools"},
           {n:8, title:"Active vs Passive LP", icon:"⚖️", tag:"When to monitor, when to relax"},
           {n:9, title:"LP Risk Management", icon:"🛡️", tag:"Know your risk or the market will teach you"},
